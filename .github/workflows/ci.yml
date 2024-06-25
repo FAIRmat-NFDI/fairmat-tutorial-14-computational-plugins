@@ -1,0 +1,37 @@
+name: Deploy docs
+on:
+  push:
+    branches:
+      - main
+permissions:
+  contents: write
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: 3.x
+      - run: echo "cache_id=$(date --utc '+%V')" >> $GITHUB_ENV 
+      - uses: actions/cache@v3
+        with:
+          key: mkdocs-material-${{ env.cache_id }}
+          path: .cache
+          restore-keys: |
+            mkdocs-material-
+            mkdocs-bibtex-
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+      - name: Install Node.js dependencies
+        run: npm install js-yaml
+      - name: Installing mkdocs-material
+        run: pip install mkdocs-material 
+      - name: Installing mkdocs-bibtex
+        run: pip install mkdocs-bibtex
+      - name: Installing python-markdown-math from repository
+        run: pip install https://github.com/mitya57/python-markdown-math/archive/master.zip
+      - name: Deploying GH page for mkdocs
+        run: mkdocs gh-deploy --force
