@@ -2,12 +2,12 @@
 
 In NOMAD, all the simulation metadata is defined under the `Simulation` section. You can find its Python schema defined in the [`nomad-simulations`](https://github.com/nomad-coe/nomad-simulations/) repository. The entry point for the schema is in the [general.py](https://github.com/nomad-coe/nomad-simulations/blob/develop/src/nomad_simulations/schema_packages/general.py) module. This section will appear under the `data` section for each NOMAD [*entry*](https://nomad-lab.eu/prod/v1/staging/docs/reference/glossary.html#entry). There is a [specialized documentation page](https://nomad-coe.github.io/nomad-simulations/) in the `nomad-simulations` repository.
 
-The `Simulation` section inherits from a more abstract concept called `BaseSimulation`, which at the same time inherits from a concept called `Activity`. 
+The `Simulation` section inherits from a more abstract class or concept called `BaseSimulation`, which at the same time inherits from another class, `Activity`. 
 
 ??? question "Inheritance and composition"
-    During this part, we will identify **is a** relationships with inheritance of one class into another (e.g., a `Simulation` _is an_ `Activity`) and **has a** with composition of one class under another (e.g., a `Simulation` **has a** `ModelSystem` defined under it and on which the simulation is performed). Strictly speaking, this equivalency is not entirely true, as we loosen it in some cases. But for the purpose of learning the complicated rules of inheritance and composition, we will conceptually maintain this equivalency during this Tutorial.
+    During this part, we will identify the **is a** concept with inheritance of one class into another (e.g., a `Simulation` _is an_ `Activity`) and the **has a** concept with composition of one class under another (e.g., a `Simulation` **has a** `ModelSystem` defined under it and on which the simulation is performed). Strictly speaking, this equivalency is not entirely true, as we loosen it in some cases. But for the purpose of learning the complicated rules of inheritance and composition, we will conceptually maintain this equivalency during this Tutorial.
 
-In NOMAD, a set of [base sections](https://nomad-lab.eu/prod/v1/staging/docs/howto/customization/base_sections.html) derived from the [Basic Formal Ontology (BFO)](https://basic-formal-ontology.org/) are defined. This inheritance allows us to define `Simulation` at the same level of other activities in Materials Science, e.g., `Experiment`, `Measurement`, `Analysis`. We do this in order to achieve a common metadata structure with the experimental and analysis fields in Materials Science. The relationship tree from the most abstract classes until `Simulation` is thus:
+In NOMAD, a set of [base sections](https://nomad-lab.eu/prod/v1/staging/docs/howto/customization/base_sections.html) derived from the [Basic Formal Ontology (BFO)](https://basic-formal-ontology.org/) are defined. The previous inheritance allows us to define `Simulation` at the same level of other activities in Materials Science, e.g., `Experiment`, `Measurement`, `Analysis`. We do this in order to achieve a common metadata structure with the experimental community. The relationship tree from the most abstract classes until `Simulation` is thus:
 
 <div class="click-zoom">
     <label>
@@ -16,19 +16,19 @@ In NOMAD, a set of [base sections](https://nomad-lab.eu/prod/v1/staging/docs/how
     </label>
 </div>
 
-Note that the white-headed arrow here indicates _inheritance_ / _is a_ relationship. `BaseSimulation` contains the general information about the `Program` used (see [Program](#program)), as well as general times of the simulation, e.g., the datetime at which it started (`datetime`) and ended (`datetime_end`). `Simulation` contains further information about the specific input and output sections ([see below](#sub-sections-in-simulation)).
+Note that the white-headed arrow here indicates _inheritance_ / _is a_ relationship. `BaseSimulation` contains the general information about the `Program` used (see [Program](#program)), as well as general times of the simulation, e.g., the datetime at which it started (`datetime` is defined in `Activity` and inherit for `BaseSimulation`) and ended (`datetime_end`). `Simulation` contains further information about the specific input and output sections ([see below](#sub-sections-in-simulation)).
 
 ??? question "Notation for the section attributes in the UML diagram"
     We included the information of each attributes / quantities after its definition. The notation is:
 
-        <name-of-quantity>: <type-of-quantity>, <units-of-quantity>
+        <name-of-quantity>: <type-of-quantity>, <(optional) units-of-quantity>
 
     Thus, `cpu1_start: np.float64, s` means that there is a quantity named `'cpu1_start'` of type `numpy.float64` and whose units are `'s'` (seconds).
     We also include the existance of sub-sections by bolding the name, i.e.:
 
         <name-of-sub-section>: <sub-section-definition>
 
-    E.g., there is a sub-section under `Simulation` named `'model_method'` whose section defintion can be found in the `ModelMethod` section. We will represent this sub-section containment in more complex UML diagrams in the future using the containment arrow (see below for [an example using `Program`](#program)).
+    E.g., there is a sub-section under `Simulation` named `'model_method'` whose section defintion can be found in the `ModelMethod` section. We will represent this sub-section containment in more complex UML diagrams in the future using the containment arrow (see below for the specific ase of [`Program`](#program)).
 
 We use double inheritance from `EntryData` in order to populate the `data` section in the NOMAD archive. All of the base sections discussed here are subject to the [public normalize function](normalize.md) in NOMAD. The private function `set_system_branch_depth()` is related with the [ModelSystem base section](model_system/model_system.md).
 
@@ -36,10 +36,10 @@ We use double inheritance from `EntryData` in order to populate the `data` secti
 
 The `Simulation` section is composed of 4 main sub-sections:
 
-1. `Program` {#program}: contains all the program metadata, e.g., `name` of the program, `version`, etc.
-2. `ModelSystem` {#modelsystem}: contains all the system metadata about geometrical positions of atoms, their states, simulation cells, symmetry information, etc.
-3. `ModelMethod` {#modelmethod}: contains all the methodological metadata, and it is divided in two main aspects: the mathematical model or approximation used in the simulation (e.g., `DFT`, `GW`, `ForceFields`, etc.) and the numerical settings used to compute the properties (e.g., meshes, self-consistent parameters, basis sets settings, etc.).
-4. `Outputs` {#outputs}: contains all the output properties, as well as references to the `ModelSystem` used to obtain such properties.
+1. [`Program`](#program): contains all the program metadata, e.g., `name` of the program, `version`, etc.
+2. [`ModelSystem`](#modelsystem): contains all the system metadata about geometrical positions of atoms, their states, simulation cells, symmetry information, etc.
+3. [`ModelMethod`](#modelmethod): contains all the methodological metadata, and it is divided in two main aspects: the mathematical model or approximation used in the simulation (e.g., `DFT`, `GW`, `ForceFields`, etc.) and the numerical settings used to compute the properties (e.g., meshes, self-consistent parameters, basis sets settings, etc.).
+4. [`Outputs`](#outputs): contains all the output properties obtained by the `Simulation`.
 
 !!! note "Self-consistent steps, SinglePoint entries, and more complex workflows."
     The minimal unit for storing data in the NOMAD archive is an [*entry*](https://nomad-lab.eu/prod/v1/staging/docs/reference/glossary.html#entry). In the context of simulation data, an entry may contain data from a calculation on an individual system configuration (e.g., a single-point DFT calculation) using **only** the above-mentioned sections of the `Simulation` section. Information from self-consistent iterations to converge properties for this configuration are also contained within these sections.
@@ -113,6 +113,8 @@ class SUPERCODEParser:
 
 ## `ModelMethod` {#modelmethod}
 
+The `ModelMethod` section is an input section which contains all the information about the mathematical model used to perform the simulation. In NOMAD, we can extend the support of certain methods by inheriting from `ModelMethod` and extend the schema for the new methodology. `ModelMethod` also contains a specialized sub-section called [`NumericalSettings`](#numericalsettings). The detailed relationship tree is:
+
 <div class="click-zoom">
     <label>
         <input type="checkbox">
@@ -120,4 +122,24 @@ class SUPERCODEParser:
     </label>
 </div>
 
+`ModelMethod` is thus a sub-section under `Simulation`. It inherits from an abstract class `BaseModelMethod`, as well as containing a sub-section called `contributions` of the same class. The underlying idea of `ModelMethod` is to parse the input parameters of the mathematical model, typically a Hamiltonian. The total model can be split into individual terms or `contributions`. Each of the electronic-structure methodologies inherits from `ModelMethodElectronic` that contains a boolean `is_spin_polarized` which indicates if the `Simulation` is spin polarized or not. The different levels of abstractions are useful when dealing with commonalities amongst the methods. 
+
+### `NumericalSettings` {#numericalsettings}
+
+The `NumericalSettings` section is an abstract section used to define the numerical parameters used during the simulation, e.g., the plane-wave basis cutoff used, the k-mesh, etc. These parameters can be defined into specialized classes which inherit from `NumericalSettings` (similar to what happens with all the electronic-structure methodologies and `ModelMethod`). The detailed relationship tree is:
+
+<div class="click-zoom">
+    <label>
+        <input type="checkbox">
+        <img src="../assets/part2-nomad-simulations/model_method_with_numerical_settings.png" alt="NumericalSettings quantities and functions UML diagram." width="80%" title="Click to zoom in">
+    </label>
+</div>
+
 ## `Outputs` {#outputs}
+
+<div class="click-zoom">
+    <label>
+        <input type="checkbox">
+        <img src="../assets/part2-nomad-simulations/outputs.png" alt="Outputs quantities and functions UML diagram." width="80%" title="Click to zoom in">
+    </label>
+</div>
