@@ -1,4 +1,4 @@
-# Creating parser plugins from scratch
+# Creating Parser Plugins from Scratch
 
 Likely one of NOMAD's most recognized and beloved features is _drag-and-drop parsing_.
 We understand that annotating data, keeping track of all steps involved, is most often a time-consuming, painful process.
@@ -11,7 +11,7 @@ The key advantages of the NOMAD schema are summed up in **FAIR**mat's core value
 
 - **F**indable: a wide selection of the extracted data is indexed in a database, powering a the search with highly customizable queries and modular search parameters.
 - **A**ccessible: the same database specifies clear API and GUI protocols on how retrieve the _full_ data extracted.
-- **I**nteroperable: with have a diverse team of experts who interface with various matierlas science communities, looking into harmonizing data representations and insights among them. Following the NOMAD standard also opens up access to analysis apps coming from these communities.
+- **I**nteroperable: with have a diverse team of experts who interface with various materials science communities, looking into harmonizing data representations and insights among them. Following the NOMAD standard also opens up the (meta)data to the NOMAD apps eco-system.
 - **R**eproducible: data is not standalone, but has a history, a vision, a workflow behind it. Our schema aims to capture the full context necessary for understanding and even regenerating via metadata.
 
 ## Modular Design and Plugins
@@ -43,7 +43,7 @@ The plugin setup actually follows a more common Python standard from the `import
 It enables `pip` installing select functionalities from a module, instead of the whole.
 Entry points also provide the module developer how these functionalities ought to be exposed to the environment, e.g. their name and own configuration.
 
-Conceptually, there are 5 key players that you should keep track off:
+Conceptually, there are five key players that you should keep track off:
 
 - the **target functionality** is the entity that we want to _expose_ to the NOMAD base installation. In our case, this will amount to our parser class, which typically is a child class of `MatchingParser`. It may use `configurations` parameters passed along via the nomad settings.
 - the **entry point** (instance of `EntryPoint`) is responsible for _registering_ the target functionality. It therefore also retains metadata like its name, a description and most importantly, the file matching directives. It is typically located in the `__init__.py` of the relevant functionality folder (see folder structure).
@@ -98,6 +98,20 @@ Let us cover the remaining tools, so we can move on to the real science.
 
 ### MappingParser
 
+We conceptualize format conversion as restructuring a _hierarchical data tree_.
+For those more familiar with graph theory, this is a _directed acyclic graph_.
+
+Since we always consider two formats, we should think of restructuring as a kind of mapping from source to target branches.
+This mapping is, abstractly enough, itself a hierarchical tree, where the leafs denote the source-to-target conversion.
+We construct our mapping tree from branches, called `Mappers`, that starting from the root, can be iteratively nested.
+The leaf nodes, meanwhile, can be of either two types:
+
+- `Map`: the default mapping from as source leaf/branch to a target leaf/branch. Both of these are expressed as Paths according to the [jmespath specifications]().
+Hint: paths may be relative wrt a parent. The format is  to (a) start the path with the connector, i.e. dot (.); and (b) denote the parent's Path separately.
+
+- `Evaluate`: the more active counterpart of `Map`. It inserts a function (its name given as a string) between the mapping. It passes along a list of source paths -denoted just as in `Map`- as the respective positional arguments, i.e. `*args`.
+
+### Parsing XML or HDF5
 
 ### Workflows and Super-structures
 
@@ -106,29 +120,13 @@ Now that we have covered the SCF and standard outputs, we have to plant these
 ## From Text to Hierarchies
 
 Contrary to XML or HDF5, text files do not come with a machine-readable structure.
-Therefor, it is on the parser developer to impose one, as stated in step 2.
-This is a very common parsing strategy at large
+Therefore, step 2 (targeting data fields) requires an intermediate step to fall back on _key matching_.
+The source format is converted to a temporary tree format stored just in RAM by matching lines via regular expressions.
+The keys are assigned by various `text_parser.py/Quantity`s, which are themselves grouped together in a `text_parser.py/TextParser.quantities: list[Quantity]`.
+The nesting of layers is done by referring back to `TextParser` via `Quantity.sub_parser: TextParser`.
 
-1. capturing first the relevant text via frameworks like regular expression.
-2. then semantically annotating, i.e. labelling, them.
-3. finally placing them into the schema.
-
-Note that this last step effectively enriches the semantics further into a standardized framework.
-It also makes the (meta)data accessible to the NOMAD apps eco-system.
-
-In the past, step 3 (schema mapping) was quite troublesome, due to
-
-1. the mapping involving data mangling as well.
-2. a dense and often obtuse semantically enriched structure stemming from step 2.
-
-As we saw before, point 1 is now addressed via the xxxx framework and the schema normalizers so that mapping becomes trivial.
-Navigating point 2 is up to the community maintaining the parser, but we can provide some best practices.
-The tree structure can be specified via an entry `TextParser` that can be self-referential via a _two-layer approach_, where `TextParser.quantities: list[Quantity]` and then `Quantity.sub_parser: TextParser`.
-`text_parser.py/Quantity` here is a class for regex matching and should not be conflated with `xxxx.Quantity` for defining the schema.
-
-### Main Approach for SCF
-
-The main approach for handling this mapping is to **describe the text file structure as faithfully as possible**.
+The main concern is how to leverage the additional freedom of a third format.
+Our foremost advice is to consider this tree an enriched representation of the source file and thus **follow the text file structure as faithfully as possible**.
 In its simplest form, this means
 
 1. following the order in which the data appears.
