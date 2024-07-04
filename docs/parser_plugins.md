@@ -187,9 +187,9 @@ Each path segment in the target/NOMAD schema (reference node -> next node) has t
 File formats may namely differ at any point in their level of semantic distinction.
 We encounter three possibilities:
 
-- the path segments in the source and target match perfectly. This case is straightforward and covered by the JMESPath features listed above.
-- the source has multiple path segments, where the target only has one. This is also completely covered by `path`.
-- the target has multiple path segments, where the source only has one. At target node, fall back on the trivial relative path `.` until the path segments line up again. %% verify with Alvin
+- length source path segment = length target path segment: this case is straightforward and covered by the JMESPath features listed above.
+- length source path segment > length target path segment = 1: this is also completely covered by `path`.
+- length source path segment = 1 < length target path segment: at every non-matching target node, fall back on the trivial relative path `.` until the path segments line up again. %% verify with Alvin
 
 %% What if a connector node may be entirely absent, e.g. as with workflows?
 
