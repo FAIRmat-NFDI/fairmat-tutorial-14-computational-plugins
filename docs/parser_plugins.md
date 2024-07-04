@@ -14,20 +14,6 @@ Just a couple of notes on the `cruft` setup:
 - Parsers require both a `parsers` and a `schema_packages` folder. The reason for the second folder will soon become apparent.
 - Each file parser gets its own `.py` file under `parsers`. `myparser.py` just acts as a blueprint, but should not be edited or exposed directly.
 
-### Managing Entry Points
-
-The plugin setup follows the common [entry-points](https://setuptools.pypa.io/en/latest/userguide/entry_point.html) Python standard from `importlib.metadata`.
-It works in tandem with `pip` install to allow for a more elegant and controlled way of exposing and loading (specific functionalities in) modules.
-Entry points also provide the module developer how these functionalities ought to be exposed to the environment, e.g. their name and own configuration.
-
-Conceptually, there are five key players to keep track off:
-
-- the **target functionality** is the entity that we want to _expose_ to the NOMAD base installation. In our case, this will amount to our parser class, which typically is a child class of `MatchingParser`. It may use `configurations` parameters passed along via the nomad settings.
-- the **entry point** (instance of `EntryPoint`) is responsible for _registering_ the target functionality. It therefore also retains metadata like its name, a description and most importantly, the file matching directives. It is typically located in the `__init__.py` of the relevant functionality folder (see folder structure).
-    - the **entry point group** bundles several entry points together. By default, NOMAD scans all plugins under the group name `project.entry-points.'nomad.plugin'`.
-- the **module setup file** _exposes_ the entry point (and its group) under the format of `<module_name>.<functionality_folder_name>:<entry_point_name>`. This is the name by which you should call this entry point. In NOMAD we use the `pyproject.toml` setup file under the module's root folder.
-- the **NOMAD configuration file** called `nomad.yaml` allows further control over which entry points to _include_ or _exclude_, as well as their _configuration parameters_.
-
 Given a typical folder lay-out for a parser project, the players are located in
 ...
 
@@ -39,47 +25,35 @@ For more detail on the specifics of each step, check out our [documentation](htt
 
 As parsing involves the mapping between two well-defined formats, one could expect it to be trivial.
 In practice, however, parser developers have to manage discrepancies in semantics, shape, data type or units.
-This has lead to five distinct categories of responsibility for the developer to manage:
+This has lead to five distinct categories of responsibility for the developer to manage.
+Here, they are ordered to match the parser's execution:
 
-1. select the relevant files and read them into Python.
-2. target and extract relevant data fields within the source file format on a per-file basis.
-3. match the data of interest with their counterparts in the target/NOMAD schema.
-4. reshape and mangle the data to match the target/NOMAD `Quantity`s' specification. This may include computing derived properties not present in the original source files.
-5. build up a Python `archive` object using the classes provided by the target/NOMAD schema.
+1. **file selection** - navigate the upload's folder structure and select the relevant files.
+2. **source extraction** - read the files into Python. This step may already include some level of data field filtering.
+3. **source to target** - map the data of interest with their counterparts in the target/NOMAD schema. This is where the bulk of the filtering happens.
+4. **data mangling** - manipulate the data to match the target/NOMAD `Quantity`s' specification, e.g. dimensionality, shape. This may include computing derived properties not present in the original source files.
+5. **archive construction** - build up a Python `EntryArchive` object using the classes provided by the target/NOMAD schema. NOMAD will automatically write it commit it to the database as an `archive.json`
 
-In the past, we encountered cases where the delineation between these responsibilities were blurred, resulting in widely different parser designs.
-Especially when dealing with the larger, more feature-rich parsers, these designs could become quite complex.
+Blurring these responsibilities leads to a wild-growth in parser design, leading to added complexity, especially with larger, more feature-rich parsers.
+NOMAD therefore offers powerful _tools_ and documentation on _best practices_ to help the parser developer manage each distinct responsibility.
+The exact solutions are, in the same order:
 
-During refactoring, we therefore addressed these responsibilities on a more individual basis.
-This lead to more clearly defined _interfaces_ and powerful _tools_ for the developer.
-These are further complimented by _best practices_ and _design protocols_.
+1. `MatchingParser` - This class passes the file contents on to the parser class, which extends it via inheritance. Since it interfaces with the NOMAD base directly, it will read most of the settings automatically in from there. Options may be tweaked via the entry-steps mechanism. 
+2. `XMLParser` and co. / `TextParser` - There are several _reader classes_ for loading common source formats into Python data types. Examples include the `XMLParser` and `HDF5Parser`. We will demonstrate `XMLParser` in [[Parsing Hierarchical Tree Formats]]. Plain text files, meanwhile, involve an additional _matching step_ via the `TextParser`. More on this in [[From Text to Hierarchies]].
+3. `MappingAnnotationModel` - This is arguably the most involved part for the parser developer, as this is where the external data gets further semantically enriched and standardized. It requires doamin expertise to understand the relationship between the data fields in the source file and the [NOMAD-Simulations schema](nomad_simulations.md). If step 2 went well, this step only involves _annotating_ the target schema via `MappingAnnotationModel`. More on this in [[Parsing Hierarchical Tree Formats]].
+4. [NOMAD-Simulations schema](nomad_simulations.md) / `MappingAnnotationModel` - The `MSection`s and `utils.py` in the schema provide _normalizers_ and _helper functions_ to alleviate most of the data mangling. For small amendments*, use `MappingAnnotationModel.operator`. For larger ones, consider extending the [NOMAD-Simulations schema](nomad_simulations.md) as covered in [Extending NOMAD-Simulations](schema_plugins.md).
+5. `MetainfoParser` - this _converter_ bridges the annotated schema from step 3 with the reader classes in step 2. `MetainfoParser.data_object` contains the final `ArchiveSection` that is stored under `archive.data`.
 
-More specifically, point 1 (file selection) is now handled by the `MatchingParser` class, from which the parser class inherits. It coordinates with the NOMAD base to scan the uploaded folder tree and select the relevant files.
+In the next section, we will briefly illustrate how `MatchingParser`, `XMLParser`, and `MetainfoParser` interconnect, as well as flesh out some setup details.
 
-Point 4 (data mangling) is covered by the NOMAD schema, as you saw in the part [NOMAD-Simulations schema](nomad_simulations.md).
-Not only does this allow for a more consistent handling of the data, it also cleanly partitions the work between parser and schema developers.
-In principle, a parser should at most perform trivial manipulations, such as slicing an array or multiplying two extracted values.
-More on the exact "how" later.
+### Putting it all together
 
-Lastly, we will cover tools for point 5 (building the `archive`) and 2 (targeting data fields) in the next subsections.
-Point 5, in particular, previously required the reconstruction of the already defined target/NOMAD schema.
-That comes across as doing double work: running over the schema once to define it, and a second time to initialize it.
-The main hurdle to automation here was the variable structure of the source data:
-a well-defined hierarchical format does not ensure that individual file structures remains constant.
-Some leaf nodes or branches may simply not be present.
-
-With all of these points covered, developing a parser now comes down to just implementing point 3 (matching source with target).
-This is the stage where data actually becomes semantically enriched and standardized.
-At present, this is a profoundly human task, where domain expertise is most needed.
-Therefore, this scientific curation task is now most emphasized in parser development.
-
-Let us cover the remaining tools, so we can move on to the real science.
+%% briefly show the actual XML parser itself.
 
 ### Parsing Hierarchical Tree Formats
 
 We conceptualize format conversion as restructuring a _hierarchical data tree_, formally known as a _directed acyclic graph_.
 The restructuring may then be defined in terms of lining up source with target nodes.
-Formats that leverage a tree structure, e.g. XML, HDF5, JSON, and most importantly the NOMAD schema, already provide these nodes.
 The only missing component then are the mappings themselves.
 
 Since we have full control over our own schema, we will annotate the mappings there.
@@ -185,3 +159,17 @@ This is just a convenient short-hand.
 Accessing the data works just as with any other nested structure.
 
 Following this logic, you will end up with a continuation of a vertically connected tree.
+
+## Extra: Managing Entry Points
+
+The plugin setup follows the common [entry-points](https://setuptools.pypa.io/en/latest/userguide/entry_point.html) Python standard from `importlib.metadata`.
+It works in tandem with `pip` install to allow for a more elegant and controlled way of exposing and loading (specific functionalities in) modules.
+Entry points also provide the module developer how these functionalities ought to be exposed to the environment, e.g. their name and own configuration.
+
+Conceptually, there are five key players to keep track off:
+
+- the **target functionality** is the entity that we want to _expose_ to the NOMAD base installation. In our case, this will amount to our parser class, which typically is a child class of `MatchingParser`. It may use `configurations` parameters passed along via the nomad settings.
+- the **entry point** (instance of `EntryPoint`) is responsible for _registering_ the target functionality. It therefore also retains metadata like its name, a description and most importantly, the file matching directives. It is typically located in the `__init__.py` of the relevant functionality folder (see folder structure).
+    - the **entry point group** bundles several entry points together. By default, NOMAD scans all plugins under the group name `project.entry-points.'nomad.plugin'`.
+- the **module setup file** _exposes_ the entry point (and its group) under the format of `<module_name>.<functionality_folder_name>:<entry_point_name>`. This is the name by which you should call this entry point. In NOMAD we use the `pyproject.toml` setup file under the module's root folder.
+- the **NOMAD configuration file** called `nomad.yaml` allows further control over which entry points to _include_ or _exclude_, as well as their _configuration parameters_.
