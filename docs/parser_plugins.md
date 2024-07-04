@@ -117,17 +117,29 @@ there are codes where the structure or information contents shift widely.
 This is especially prevalent when new formats are introduced over a large time span.
 For the naming of the tag itself, we suggest to adhere to the file extension. 
 
-`MappingAnnotationModel` itself accepts one of to arguments keys:
+`MappingAnnotationModel` itself accepts one of two argument keys:
 
 - `path`: specifies the node sequence leading up to the source node of interest. It leverages the [JMESPath DSL](https://jmespath.org/) for this, though other languages may be incorporated here in the future.
 - `operator`: the more active counterpart to `path`. Inserts a function (name in string format) between the source and target nodes. Source data are passed along in an array of `path`s matching the positional arguments, similar to Python `*args`.
 
 Paths do not have to be _absolute_, i.e. starting from the root node, and may be written _relative_ to the previous target/NOMAD parent node.
+The relative notation is highly encouraged for performance reasons.
 This is denoted in JMESPath by starting with the connector symbol (`.`).
-JMESPath also provides rich filtering features to select nodes by name.
+JMESPath also provides rich filtering features 
+
+- to select nodes by key name (starting with `@`). This is useful when presented with multiple named nodes at the same level.
+- to select nodes / values by index for extracting anonymous nodes at the same level / tensors.
+- to cycle between multiple branching scenarios via an `if-else` (`||`) logic.  %% TODO: double-check symbol
 
 The overall strategy is thus to annotate `path` mappings starting from `Simulation` and running over each `SubSection` up until you reach the corresponding `Quantity`.
-%% What if the node depth differs?
+This is straightforward when both tree structures match perfectly node-by-node.
+When the source has more nodes than the target/NOMAD schema, the intermediate nodes can all be written down in a single `path`.
+Conversely, when the source has less nodes than the target/NOMAD schema, you can always fall back on the trivial relative path `.`. %% verify with Alvin
+The most important part is for the target/NOMAD path to be fully traceable:
+any disconnections in a branch will cut it off from evaluation.
+Note that the different path length scenarios should each time be evaluated by branch.
+File formats can namely differ at any point in their level of semantic distinction. 
+
 %% Example code
 
 Operators, meanwhile, are the main tool for the parser developer to perform some data manipulation.
