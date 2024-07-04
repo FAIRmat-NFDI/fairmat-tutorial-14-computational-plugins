@@ -131,14 +131,17 @@ JMESPath also provides rich filtering features
 - to select nodes / values by index for extracting anonymous nodes at the same level / tensors.
 - to cycle between multiple branching scenarios via an `if-else` (`||`) logic.  %% TODO: double-check symbol
 
-The overall strategy is thus to annotate `path` mappings starting from `Simulation` and running over each `SubSection` up until you reach the corresponding `Quantity`.
-This is straightforward when both tree structures match perfectly node-by-node.
-When the source has more nodes than the target/NOMAD schema, the intermediate nodes can all be written down in a single `path`.
-Conversely, when the source has less nodes than the target/NOMAD schema, you can always fall back on the trivial relative path `.`. %% verify with Alvin
+The overall strategy is thus to annotate `path` mappings starting from `Simulation` and run over each `SubSection` up until reaching the corresponding `Quantity`.
 The most important part is for the target/NOMAD path to be fully traceable:
-any disconnections in a branch will cut it off from evaluation.
-Note that the different path length scenarios should each time be evaluated by branch.
-File formats can namely differ at any point in their level of semantic distinction. 
+any disconnections in a `path` will cut it out of the `archive`.
+
+Each `path` segment in the target/NOMAD schema (reference node -> next node) has to be compared individually with its source counterpart.
+File formats may namely differ at any point in their level of semantic distinction.
+We encounter three possibilities:
+
+- the path segments in the source and target match perfectly. This case is straightforward and covered by the JMESPath features listed above.
+- the source has multiple path segments, where the target only has one. This is also completely covered by `path`.
+- the target has multiple path segments, where the source only has one. At target node, fall back on the trivial relative path `.` until the path segments line up again. %% verify with Alvin
 
 %% Example code
 
