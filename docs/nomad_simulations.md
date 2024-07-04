@@ -317,9 +317,127 @@ The `AtomsState` section is a sub-section of `AtomicCell` containing information
 
 ## `Outputs` {#outputs}
 
+The `Outputs` section is an output section which contains all the information about the computed properties by the simulation, as well as references to the specific `ModelMethod` and `ModelSystem` used to compute such output properties. These properties are under `Outputs` in a long list of sub-sections, and they inherit from an abstract class called `PhysicalProperty`. This class contains the `value` of the property as well as other quantities. The sub-section `variables` allows to write a physical property in term of a varying parameter, and it also allows to calculate the shape of `value` in a dynamic way. This means that, the same physical property (e.g., `ElectronicBandGap`) could have different shapes depending on the problem being parsed (e.g., a single scalar number or a set of varying scalars with respect to a variable, like `Temperature`).
+
+The `Outputs` section can be further specialized into `SCFOutputs` in case the properties are calculated in a series of self-consistent steps. The steps are stored under a sub-section called `scf_steps`, while the last step and other non-self-consistently calculated properties are stored directly under `SCFOutputs`. The reference to the `SelfConsistency` section (see [NumericalSettings](#numericalsettings)) allows us to automatically determine if a self-consistently calculated property is converged or not.
+
+The detailed relationship tree is:
+
 <div class="click-zoom">
     <label>
         <input type="checkbox">
         <img src="../assets/part2-nomad-simulations/outputs.png" alt="Outputs quantities and functions UML diagram." width="80%" title="Click to zoom in">
     </label>
 </div>
+
+
+!!! abstract "Assignement 2.7"
+    Instantiate a section `SCFOutputs`. We are going to store a self-consistently calculated `FermiLevel`, whose steps where `[1, 1.5, 2, 2.1, 2.101]` in eV. Also add the references to the section `ModelMethod` done in Assignement 2.3 and the section `ModelSystem` done in Assignement 2.6. For the self-consistently calculated `FermiLevel` section, add the reference to the section `SelfConsistency` done in Assignement 2.4.
+
+    Check if the `FermiLevel` is self-consistently converged or not by using a class method from `SCFOutputs`. What happens if the `SelfConsistency.threshold_change` is now `1e-24`?
+
+??? success "Solution 2.7"
+    We can import and create an instance of `SCFOutputs` and append it to simulation:
+    ```python
+    from nomad_simulations.schema_packages.outputs import SCFOutputs
+    scf_outputs = SCFOutputs()
+    simulation.outputs.append(scf_outputs)
+    ```
+
+    We can add the references to the other `ModelMethod` and `ModelSystem` sections by doing:
+    ```python
+    scf_outputs.model_method_ref = simulation.model_method[0]
+    scf_outputs.model_system_ref = simulation.model_system[0]
+    ```
+
+    Now, we need to create the `scf_steps` sub-sections with the information of the `FermiLevel` steps and their values. For that,
+    ```python
+    from nomad_simulations.schema_packages.outputs import Outputs
+    from nomad_simulations.schema_packages.properties import FermiLevel
+    for value in [1, 1.5, 2, 2.1, 2.101]:
+        fermi_level = FermiLevel()
+        fermi_level.value = value * ureg.eV
+        scf_outputs.scf_steps.append(Outputs(fermi_levels=[fermi_level]))
+    ```
+    Note that:
+
+    1. The properties like `fermi_levels` are repeated sub-sections under `Outputs`, so we need to assign a list.
+    2. The `scf_steps` sub-sections are `Outputs`, hence we need to import the class and append it to that attribute.
+
+    We also need to add the last step directly under `scf_outputs` and add the reference to the `SelfConsistency` section:
+    ```python
+    scf_outputs.fermi_levels.append(FermiLevel(value=2.100001 * ureg.eV, self_consistency_ref=simulation.model_method[0].numerical_settings[0]))
+    ```
+
+    In order to check if the `FermiLevel` is converged or not, we can use the class method `resolve_is_scf_converged()`. This method has various inputs that are explained in the method itself. Here we will simply use the function like:
+    ```python
+    scf_outputs.resolve_is_scf_converged(property_name='fermi_levels', i_property=0, physical_property=scf_outputs.fermi_levels[0], logger=logger)
+    ```
+    which indeed returns
+    ```sh
+    True
+    ```
+    So the `FermiLevel` is converged.
+
+    Now, if we set:
+    ```python
+    scf.threshold_change = 1e-24
+    ```
+    And re-run the `resolve_is_scf_converged()` method, we can see that the `FermiLevel` is not self-consistenly converged:
+    ```sh
+    False
+    ```
+
+    The reason for this is that, in joules, the last two self-consistent steps (where the Fermi level is 2.1 and 2.101 eV) have a difference which can be also computed with class methods:
+    ```python
+    scf_values = scf_outputs.get_last_scf_steps_value(scf_last_steps=scf_outputs.scf_steps[-2:], property_name='fermi_levels', i_property=0, scf_parameters=scf, logger=logger)
+    abs(scf_values[0] - scf_values[1])
+    ```
+    which returns:
+    ```sh
+    1.6021766340002688e-22
+    ```
+    Then, a `threshold_change` of `1e-24` is smaller than the difference, so that the `FermiLevel` is not converged.
+
+
+
+
+!!! abstract "Assignement 2.8"
+    We are going to store two `ElectronicBandGap` sub-sections under the section `SCFOutputs` generated in the Assignement 2.7:
+
+    * An `ElectronicBandGap` whose value is 2 eV.
+    * An `ElectronicBandGap` varying with `Temperature`, whose values are `[1, 1.5, 2]` in eV for the `[100, 150, 200]` temperatures in Kelvin.
+
+    In the second situation of an electronic band-gap which varies with the `Temperature`, what happens if you directly assign `value` **before** defining the `Temperature` variables sub-section?
+
+
+??? success "Solution 2.8"
+    We can import the property `ElectronicBandGap` and assign directly the first case of an electronic band-gap which is 2 eV:
+    ```python
+    from nomad_simulations.schema_packages.properties import ElectronicBandGap
+    band_gap = ElectronicBandGap()
+    band_gap.value = 2 * ureg.eV
+    scf_outputs.electronic_band_gaps.append(band_gap)
+    ```
+
+    We can do the same for the temperature-dependent band-gap if importing the `Temperature` variable class:
+    ```python
+    from nomad_simulations.schema_packages.variables import Temperature
+    band_gap_T = ElectronicBandGap(variables=[Temperature(points=[100, 150, 200] * ureg.kelvin)])
+    band_gap_T.value = [1, 1.5, 2] * ureg.eV
+    scf_outputs.electronic_band_gaps.append(band_gap_T)
+    ```
+
+    Here, we have assigned first `variables` before the `value` of the property. However, if we want to assign first the `value`:
+    ```python
+    band_gap_T = ElectronicBandGap()
+    band_gap_T.value = [1, 1.5, 2] * ureg.eV
+    ```
+    we will get a `ValueError` due to the fact that `variables` is not set and the shape of `value` is not empty:
+    ```sh
+    ValueError: The shape of the stored `value` [3] does not match the full shape [] extracted from the variables `n_points` and the `shape` defined in `PhysicalProperty`.
+    ```
+
+    This means that the `variables` sub-sections **must** be set before setting the `value` of a physical property in order for validations to work.
+
+    
