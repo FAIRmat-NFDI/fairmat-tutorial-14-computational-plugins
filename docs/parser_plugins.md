@@ -4,22 +4,53 @@ One of NOMAD's most recognized features is drag-and-drop parsing. The NOMAD pars
 
 ### Getting Started
 
-To create your own parser plugin, visit our GitHub template and click the “Use this template” button.
+To create your own parser plugin, visit our [plugin template](https://github.com/FAIRmat-NFDI/nomad-plugin-template) and click the “Use this template” button.
 Follow the [How to get started with plugins](https://nomad-lab.eu/prod/v1/staging/docs/howto/plugins/plugins.html) documentation for detailed setup instructions.
 The template will appear bare-bones at the start.
 Following the instructions in the `README.md`  and the `cruft` setup will allow you to tune the project to your needs.
-Just a couple of notes on the `cruft` setup:
 
-- NOMAD uses the Apache 2.0 license. Please select the same license for maximal legal compatibility.
-- Parsers require both a `parsers` and a `schema_packages` folder. The reason for the second folder will soon become apparent.
-- Each file parser gets its own `.py` file under `parsers`. `myparser.py` just acts as a blueprint, but should not be edited or exposed directly.
+By the end, your repository should look like the example below.
+Make sure to include both a `parsers` and a `schema_packages` folder.
+Each file parser under `parsers` gets its own `.py` file.
+For schemas, one file typically suffices, unless you want to heavily extend them (see [Extending NOMAD-Simulations](schema_plugins.md)).
+Note that `myparser.py` and `mypackage.py` just act as a blueprints.
+They should not be edited or exposed directly.
 
-Given a typical folder lay-out for a parser project, the players are located in
-...
+The `README.md` should remain a copy of the template, in case anyone wants to fork the project.
+Instead, place plugin descriptions in the entry points or GitHub repository metadata.
+More elaborate explanations should go under `docs`.
+You can deploy them on GitHub or locally via `mkdocs`.
+Lastly, NOMAD uses the Apache 2.0 license (option 4 in the `cruft` setup).
+Please select the same license for maximal legal compatibility.
 
-note on file matching
+```bash
+├── nomad-plugin-parser
+│   ├── src
+|   │   ├── nomad_plugin_parser
+|   |   │   ├── parsers
+|   |   │   │   ├── myparser.py  "(target functionality)"
+|   |   │   │   ├── __init__.py  "(entry point)"
+|   |   │   ├── schema_packages
+|   |   │   │   ├── mypackage.py
+|   |   │   │   ├── __init__.py
+│   ├── docs
+│   ├── tests
+│   ├── pyproject.toml           "(module setup file)"
+│   ├── LICENSE.txt
+│   ├── README.md
+-------------------------------------------------------------
+├── nomad.yaml                   "(NOMAD configuration file)"
+```
 
-For more detail on the specifics of each step, check out our [documentation](https://nomad-lab.eu/prod/v1/staging/docs/howto/plugins/plugins.html).
+This examples also highlights the files containing _entry point_ information between parentheses.
+They are explained in greater detail in section [[Extra: Managing Entry Points]].
+For now, it suffices to understand them as the official mechanism for `pip` installing modules.
+The dependence runs bottom up, i.e. the `module setup file` refers to `entry point` that refers to `target functionality`.
+
+The final entry point piece (`NOMAD configuration file`) resides in `nomad.yaml` and refers back to the `module setup file`.
+Normally, you don't have to touch anything there for NOMAD to pick up on your parser.
+It does allows you to control the loading of plugins and their options.
+Closing the "dependence" cycle, `myparser.py` has to read in these options.
 
 ## Fundamentals of Parsing
 
@@ -41,14 +72,14 @@ The exact solutions are, in the same order:
 1. `MatchingParser` - This class passes the file contents on to the parser class, which extends it via inheritance. Since it interfaces with the NOMAD base directly, it will read most of the settings automatically in from there. Options may be tweaked via the entry-steps mechanism. 
 2. `XMLParser` and co. / `TextParser` - There are several _reader classes_ for loading common source formats into Python data types. Examples include the `XMLParser` and `HDF5Parser`. We will demonstrate `XMLParser` in [[Parsing Hierarchical Tree Formats]]. Plain text files, meanwhile, involve an additional _matching step_ via the `TextParser`. More on this in [[From Text to Hierarchies]].
 3. `MappingAnnotationModel` - This is arguably the most involved part for the parser developer, as this is where the external data gets further semantically enriched and standardized. It requires doamin expertise to understand the relationship between the data fields in the source file and the [NOMAD-Simulations schema](nomad_simulations.md). If step 2 went well, this step only involves _annotating_ the target schema via `MappingAnnotationModel`. More on this in [[Parsing Hierarchical Tree Formats]].
-4. [NOMAD-Simulations schema](nomad_simulations.md) / `MappingAnnotationModel` - The `MSection`s and `utils.py` in the schema provide _normalizers_ and _helper functions_ to alleviate most of the data mangling. For small amendments*, use `MappingAnnotationModel.operator`. For larger ones, consider extending the [NOMAD-Simulations schema](nomad_simulations.md) as covered in [Extending NOMAD-Simulations](schema_plugins.md).
+4. [NOMAD-Simulations schema](nomad_simulations.md) / `MappingAnnotationModel` - The `MSection`s and `utils.py` in the schema provide _normalizers_ and _helper functions_ to alleviate most of the data mangling. For small amendments*, use `MappingAnnotationModel.operator`. For larger ones, consider extending the schema as covered in [Extending NOMAD-Simulations](schema_plugins.md).
 5. `MetainfoParser` - this _converter_ bridges the annotated schema from step 3 with the reader classes in step 2. `MetainfoParser.data_object` contains the final `ArchiveSection` that is stored under `archive.data`.
 
 In the next section, we will briefly illustrate how `MatchingParser`, `XMLParser`, and `MetainfoParser` interconnect, as well as flesh out some setup details.
 
 ## Assembling a Parser Class
 
-Let us use the VASP parser for the XML output as an example.
+Let us investigate the VASP parser for the XML output as an example.
 The parser code would be placed in `src/nomad_parser_vasp/parsers/xml_parser.py` and looks like:
 
 ```python
