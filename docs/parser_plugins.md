@@ -2,9 +2,9 @@
 
 One of NOMAD's most recognized features is drag-and-drop parsing. The NOMAD parsers, which automate the conversion of raw simulation files into the standardized NOMAD format, significantly offload the burden of data annotation from researchers, reducing their data management responsibilities while also improving the accessibility of their data.
 
-### Getting started
+### Getting Started
 
-To create your own parser plugin, visit our GitHub template and use the “Use this template” button.
+To create your own parser plugin, visit our GitHub template and click the “Use this template” button.
 Follow the [How to get started with plugins](https://nomad-lab.eu/prod/v1/staging/docs/howto/plugins/plugins.html) documentation for detailed setup instructions.
 The template will appear bare-bones at the start.
 Following the instructions in the `README.md`  and the `cruft` setup will allow you to tune the project to your needs.
@@ -21,7 +21,7 @@ note on file matching
 
 For more detail on the specifics of each step, check out our [documentation](https://nomad-lab.eu/prod/v1/staging/docs/howto/plugins/plugins.html).
 
-## From Hierarchies to Schema
+## Fundamentals of Parsing
 
 As parsing involves the mapping between two well-defined formats, one could expect it to be trivial.
 In practice, however, parser developers have to manage discrepancies in semantics, shape, data type or units.
@@ -34,7 +34,7 @@ Here, they are ordered to match the parser's execution:
 4. **data mangling** - manipulate the data to match the target/NOMAD `Quantity`s' specification, e.g. dimensionality, shape. This may include computing derived properties not present in the original source files.
 5. **archive construction** - build up a Python `EntryArchive` object using the classes provided by the target/NOMAD schema. NOMAD will automatically write it commit it to the database as an `archive.json`
 
-Blurring these responsibilities leads to a wild-growth in parser design, leading to added complexity, especially with larger, more feature-rich parsers.
+Blurring these responsibilities leads to a wild-growth in parser design and added complexity, especially in larger, more feature-rich parsers.
 NOMAD therefore offers powerful _tools_ and documentation on _best practices_ to help the parser developer manage each distinct responsibility.
 The exact solutions are, in the same order:
 
@@ -46,11 +46,53 @@ The exact solutions are, in the same order:
 
 In the next section, we will briefly illustrate how `MatchingParser`, `XMLParser`, and `MetainfoParser` interconnect, as well as flesh out some setup details.
 
-### Putting it all together
+## Assembling a Parser Class
 
-%% briefly show the actual XML parser itself.
+Let us use the VASP parser for the XML output as an example.
+The parser code would be placed in `src/nomad_parser_vasp/parsers/xml_parser.py` and looks like:
 
-### Parsing Hierarchical Tree Formats
+```python
+from structlog.stdlib import BoundLogger
+from nomad.datamodel.datamodel import EntryArchive
+from nomad.config import config
+from nomad.parsing import MatchingParser
+from nomad.parsing.file_parser.mapping_parser import MetainfoParser, XMLParser
+
+configuration = config.get_plugin_entry_point(
+    'nomad_parser_vasp.parsers:xml_entry_point'
+)
+
+class VasprunXMLParser(MatchingParser):
+    def parse(
+        self, mainfile: str, archive: EntryArchive, logger: BoundLogger,
+        child_archives: dict[str, EntryArchive] = None,
+    ) -> None:
+        logger.info('VasprunXMLParser.parse', parameter=configuration.parameter)
+        data_parser = MetainfoParser(annotation_key='xml', data_object=Simulation())
+        XMLParser(filepath=mainfile).convert(data_parser)
+        archive.data = data_parser.data_object
+```
+
+This is all of the code!
+Leveraging `MappingAnnotationModel` clearly makes parsers more concise.
+Breaking down the parser class, `VasprunXMLParser`, it inherits most functionality from `MatchingParser`, including `parse`.
+The `parse` interface is rigid -represents a contract between the NOMAD base and the parser- and is worth studying a bit:
+
+- `mainfile`: NOMAD scans the upload folder for files representative of the code. Based on the hits, it will then delegate these files to their parser. The filename or header patterns are set in xxxx and xxxx.
+- `archive`: this is a (typically empty) storage object for an entry. It will later be serialized into an `archive.json` file by NOMAD for permanent storage.
+- `logger`: each entry will have a log associated with it. These communicate info or warnings about the process, but also debugging info and (critical) errors for tracing bugs. Include the latter when contacting us regarding any processing issues.
+
+%% Don't know much about `child_archives`...
+
+Next, going over the contents in `parse`, line-by-line:
+
+ - The logger is set up to report any bugs stemming from this code as `VasprunXMLParser.parse`. Note how you can further customize reporting via the entry point. The details here go beyond this tutorial's scope.
+ - The `MetainfoParser` is linked to the annotated schema. A single schema may contain multiple annotations corresponding to various file formats, e.g. `xml`, `hdf5`, `txt` for VASP. Since we are dealing with computational data, we provide the `Simulation` object as the root of our target.
+ - `XMLParser` performs the actual reading of `mainfile`, as well as mapping to the target schema. The schema object itself is overwritten, while `convert` just returns `None`. %% Is normalization automatically triggered here?
+ - Finally, the processed data in the `Simulation` object is stored in the `data` section. You are not permitted to change the storage destination. At best, you may repeat these steps to connect legacy parsers to `run`.  %% TODO: what about results?
+
+
+### From Hierarchies to Schema
 
 We conceptualize format conversion as restructuring a _hierarchical data tree_, formally known as a _directed acyclic graph_.
 The restructuring may then be defined in terms of lining up source with target nodes.
