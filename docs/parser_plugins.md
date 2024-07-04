@@ -11,7 +11,7 @@ The key advantages of the NOMAD schema are summed up in **FAIR**mat's core value
 
 - **F**indable: a wide selection of the extracted data is indexed in a database, powering a the search with highly customizable queries and modular search parameters.
 - **A**ccessible: the same database specifies clear API and GUI protocols on how retrieve the _full_ data extracted.
-- **I**nteroperable: with have a diverse team of experts who interface with various materials science communities, looking into harmonizing data representations and insights among them. Following the NOMAD standard also opens up the (meta)data to the NOMAD apps eco-system.
+- **I**nteroperable: we have a diverse team of experts who interface with various materials science communities, looking into harmonizing data representations and insights among them. Following the NOMAD standard also opens up the (meta)data to the NOMAD apps eco-system.
 - **R**eproducible: data is not standalone, but has a history, a vision, a workflow behind it. Our schema aims to capture the full context necessary for understanding and even regenerating via metadata.
 
 ## Modular Design and Plugins
@@ -70,31 +70,33 @@ This has lead to five distinct categories of responsibility for the developer to
 4. reshape and mangle the data to match the target/NOMAD `Quantity`s' specification. This may include computing derived properties not present in the original source files.
 5. build up a Python `archive` object using the classes provided by the target/NOMAD schema.
 
-In the past, we encountered cases where teh delineation between these responsibilities blurred, resulting in widely different parser designs.
+In the past, we encountered cases where the delineation between these responsibilities blurred, resulting in widely different parser designs.
 Especially when dealing with the larger, more feature-rich parsers, these designs could become quite complex.
 
 During refactoring, we therefore addressed these responsibilities on a more individual basis.
-This lead us to providing the parser developer with clear interfaces to powerful tools, as well as best practices and design protocols.
+This lead to a clear defined _interfaces_ and powerful _tools_ for the developer.
+These are further complimented by _best practices_ and _design protocols_.
 
-More specifically, step 1 (file selection) is now handled by the `MatchingParser` class, from which the parser class inherits. It interfaces with NOMAD to scan the uploaded folder tree and select the relevant files.
+More specifically, point 1 (file selection) is now handled by the `MatchingParser` class, from which the parser class inherits. It coordinates with the NOMAD base to scan the uploaded folder tree and select the relevant files.
 
-Step 4 (data mangling) is covered by the NOMAD schema, as you saw in the previous part.
+Point 4 (data mangling) is covered by the NOMAD schema, as you saw in the previous part.
 Not only does this allow for a more consistent handling of the data, it also cleanly partitions the work between parser and schema developers. %% announce Schema Extension?
 In principle, a parser should at most perform trivial manipulations, such as slicing an array or multiplying two extracted values.
 More on the exact "how" later.
 
-Lastly, we will cover tools for step 5 (building the `archive`) and 2 (targeting data fields) in the next subsections.
-Step 5, particularly, was a developing nuisance, as it required the reconstruction of the already defined target/NOMAD schema.
+Lastly, we will cover tools for point 5 (building the `archive`) and 2 (targeting data fields) in the next subsections.
+Point 5, in particularl, was a developing nuisance, as it required the reconstruction of the already defined target/NOMAD schema.
 That comes across as doing double work: running over the schema once to define it, and a second time to initialize it.
-The main hurdle to automation here was variable nature in which source data would be present.
+The main hurdle to automation here was the variable structure of the source data:
+a well-defined hierarchical format does not ensure that individual file structures remains constant.
+Some leaf nodes or branches may simply not be present.
 
-Effectively, developing a parser now comes down to calling these tools where appropriate and focusing on step 3 (matching source with target).
-Note that this is where data actually becomes semantically enriched and standardized.
-This is a profoundly human task (barring any further leaps of LLMs), where domain expertise is needed.
+With all of these points covered, developing a parser now comes down to just implementing point 3 (matching source with target).
+This is the stage where data actually becomes semantically enriched and standardized.
+This is a profoundly human task (barring any further leaps in LLM capabilities), where domain expertise is most needed.
 It is thus this scientific curation task that is now most emphasized in parser development, rather than the coding aspects.
 
 Let us cover the remaining tools, so we can move on to the real science.
-
 
 ### MappingParser
 
@@ -111,7 +113,7 @@ Hint: paths may be relative wrt a parent. The format is  to (a) start the path w
 
 - `Evaluate`: the more active counterpart of `Map`. It inserts a function (its name given as a string) between the mapping. It passes along a list of source paths -denoted just as in `Map`- as the respective positional arguments, i.e. `*args`.
 
-### Parsing XML or HDF5
+### Parsing Hierarchical Tree Formats
 
 ### Workflows and Super-structures
 
@@ -143,7 +145,7 @@ Let us demonstrate the second point with FHI-aims output, which is typically par
 $
 ```
 
-Here we indicate repitition as `...` and print the regex end-of-line symbol (`$`) for legibility.
+Here we indicate repetition as `...` and print the regex end-of-line symbol (`$`) for legibility.
 This block would be captured as
 
 ```python
