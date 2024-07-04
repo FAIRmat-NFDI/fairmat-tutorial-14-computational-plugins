@@ -2,7 +2,7 @@
 
 Likely one of NOMAD's most recognized and beloved features is _drag-and-drop parsing_.
 We understand that annotating data, keeping track of all steps involved, is most often a time-consuming, painful process.
-Still, good _research data management_ is central to good scientific reporting.
+Still, effective _research data management_ is central to good scientific reporting.
 The NOMAD parsers significantly offload a lot of this burden from the scientist, freeing up their time to keep pushing boundaries.
 Parsers _automate the conversion_ of a file format common to a specific piece of software or a community into the NOMAD format.
 The schema for computational techniques was introduced in the previous section.
@@ -11,14 +11,14 @@ The key advantages of the NOMAD schema are summed up in **FAIR**mat's core value
 
 - **F**indable: a wide selection of the extracted data is indexed in a database, powering a the search with highly customizable queries and modular search parameters.
 - **A**ccessible: the same database specifies clear API and GUI protocols on how retrieve the _full_ data extracted.
-- **I**nteroperable: we have a diverse team of experts who interface with various materials science communities, looking into harmonizing data representations and insights among them. Following the NOMAD standard also opens up the (meta)data to the NOMAD apps eco-system.
+- **I**nteroperable: we have a diverse team of experts who interface with various materials science communities, looking into harmonizing data representations and insights among them. Following the NOMAD standard also opens up the (meta)data to the NOMAD apps ecosystem.
 - **R**eproducible: data is not standalone, but has a history, a vision, a workflow behind it. Our schema aims to capture the full context necessary for understanding and even regenerating via metadata.
 
 ## Modular Design and Plugins
 
-Historically, our parsers have come always come together as a neat bundle.
+Historically, the NOMAD parsers have always come packaged in a neat bundle.
 As interest in research data management has become more widespread and recognized across scientific disciplines, NOMAD has adapted along with those interests.
-Nowadays, you can find besides the [central NOMAD cloud service](), also standalone NOMAD Oasis deployments geared towards the needs of individual institutes or research groups.
+Nowadays, you can find besides the [central NOMAD cloud service](https://nomad-lab.eu/nomad-lab/), standalone NOMAD Oasis deployments geared towards the needs of individual institutes or research groups.
 
 As such, NOMAD is shifting to a _plugin model_, where each deployment administrator can customize their setup.
 This permits a light-weight base installation and effective data processing pipelines.
@@ -29,21 +29,22 @@ In the rest of this page, we are going to take you on a birds-eye overview of ho
 
 ### Getting started
 
-Getting hands-on with a plugin is just as easy visiting our [GitHub template]() and _using one in your own codespace_.
-The template will appear almost empty at the start, but following the instructions `README.md`  and during the `cruft` setup will allow you to tune the project to your needs.
-Just a couple of notes on the latter:
+Getting hands-on with a plugin is as easy as visiting our [GitHub template](https://github.com/FAIRmat-NFDI/nomad-plugin-template) and click the "Use this template" button.
+The template will appear bare-bones at the start.
+Following the instructions in the `README.md`  and the `cruft` setup will allow you to tune the project to your needs.
+Just a couple of notes on the `cruft` setup:
 
-- NOMAD uses the Apache 2.0 license. Unless your organization prohibits this, please select the same license for maximal legal compatibility.
+- NOMAD uses the Apache 2.0 license. Please select the same license for maximal legal compatibility.
 - Parsers require both a `parsers` and a `schema_packages` folder. The reason for the second folder will soon become apparent.
-- We use generically named files like `parsers/myparser.py` as blueprints by copying them to new, more clearly named files. Each file format, its own Python file.
+- Each file parser gets its own `.py` file under `parsers`. `myparser.py` just acts as a blueprint, but should not be edited or exposed directly.
 
 ### Managing Entry Points
 
-The plugin setup actually follows a more common Python standard from the `importlib.metadata`, namely [entry-points](https://setuptools.pypa.io/en/latest/userguide/entry_point.html).
-It enables `pip` installing select functionalities from a module, instead of the whole.
+The plugin setup follows a more common Python standard of [entry-points](https://setuptools.pypa.io/en/latest/userguide/entry_point.html) provided by `importlib.metadata`.
+It works in tandem with `pip` install to allow for a more elegant and controlled way of exposing and loading (specific functionalities in) modules.
 Entry points also provide the module developer how these functionalities ought to be exposed to the environment, e.g. their name and own configuration.
 
-Conceptually, there are five key players that you should keep track off:
+Conceptually, there are five key players to keep track off:
 
 - the **target functionality** is the entity that we want to _expose_ to the NOMAD base installation. In our case, this will amount to our parser class, which typically is a child class of `MatchingParser`. It may use `configurations` parameters passed along via the nomad settings.
 - the **entry point** (instance of `EntryPoint`) is responsible for _registering_ the target functionality. It therefore also retains metadata like its name, a description and most importantly, the file matching directives. It is typically located in the `__init__.py` of the relevant functionality folder (see folder structure).
@@ -56,7 +57,7 @@ Given a typical folder lay-out for a parser project, the players are located in
 
 note on file matching
 
-For more detail on the specifics of each step, check out our [documentation]().
+For more detail on the specifics of each step, check out our [documentation](https://nomad-lab.eu/prod/v1/staging/docs/howto/plugins/plugins.html).
 
 ## From Hierarchies to Schema
 
@@ -70,11 +71,11 @@ This has lead to five distinct categories of responsibility for the developer to
 4. reshape and mangle the data to match the target/NOMAD `Quantity`s' specification. This may include computing derived properties not present in the original source files.
 5. build up a Python `archive` object using the classes provided by the target/NOMAD schema.
 
-In the past, we encountered cases where the delineation between these responsibilities blurred, resulting in widely different parser designs.
+In the past, we encountered cases where the delineation between these responsibilities were blurred, resulting in widely different parser designs.
 Especially when dealing with the larger, more feature-rich parsers, these designs could become quite complex.
 
 During refactoring, we therefore addressed these responsibilities on a more individual basis.
-This lead to a clear defined _interfaces_ and powerful _tools_ for the developer.
+This lead to more clearly defined _interfaces_ and powerful _tools_ for the developer.
 These are further complimented by _best practices_ and _design protocols_.
 
 More specifically, point 1 (file selection) is now handled by the `MatchingParser` class, from which the parser class inherits. It coordinates with the NOMAD base to scan the uploaded folder tree and select the relevant files.
@@ -85,7 +86,7 @@ In principle, a parser should at most perform trivial manipulations, such as sli
 More on the exact "how" later.
 
 Lastly, we will cover tools for point 5 (building the `archive`) and 2 (targeting data fields) in the next subsections.
-Point 5, in particular, was a developing nuisance, as it required the reconstruction of the already defined target/NOMAD schema.
+Point 5, in particular, previously required the reconstruction of the already defined target/NOMAD schema.
 That comes across as doing double work: running over the schema once to define it, and a second time to initialize it.
 The main hurdle to automation here was the variable structure of the source data:
 a well-defined hierarchical format does not ensure that individual file structures remains constant.
@@ -93,8 +94,8 @@ Some leaf nodes or branches may simply not be present.
 
 With all of these points covered, developing a parser now comes down to just implementing point 3 (matching source with target).
 This is the stage where data actually becomes semantically enriched and standardized.
-This is a profoundly human task (barring any further leaps in LLM capabilities), where domain expertise is most needed.
-It is thus this scientific curation task that is now most emphasized in parser development, rather than the coding aspects.
+At present, this is a profoundly human task, where domain expertise is most needed.
+Therefore, this scientific curation task is now most emphasized in parser development.
 
 Let us cover the remaining tools, so we can move on to the real science.
 
@@ -155,9 +156,9 @@ More on this topic in the part [Extending NOMAD-Simulations](schema_plugins.md).
 
 ## From Text to Hierarchies
 
-Contrary to XML or HDF5, text files do not come with a machine-readable structure.
+Contrary to XML or HDF5, plain text files do have a machine-readable structure out-of-the-box.
 Therefore, step 2 (targeting data fields) requires an intermediate step to fall back on _key matching_.
-The source format is converted to a temporary tree format stored just in RAM by matching lines via regular expressions.
+The source format is converted to a temporary tree format stored by matching lines via regular expressions.
 The keys are assigned by various `text_parser.py/Quantity`s, which are themselves grouped together in a `text_parser.py/TextParser.quantities: list[Quantity]`.
 The nesting of layers is done by referring back to `TextParser` via `Quantity.sub_parser: TextParser`.
 
@@ -191,9 +192,9 @@ To promote semantic extraction, we provide labelled patterns for common flags, e
 You can add a match group to a pattern via `capture(quantity)`.
 
 For blocks, the matching group should lie between the header and footer.
-Most times, devs prefer to approach the matching group content in a block as generic, non-descript text to focus on the stand-out characteristics of the block itself.
+Most times, developers prefer to approach the matching group content in a block as generic, nondescript text to focus on the stand-out characteristics of the block itself.
 You can use the `FHIAimsOutParser.re_non_greedy` flag here.
-Be careful: it should be superceded by a final regex pattern, else the matching continues up to the end-of-file.
+Be careful: it should be superseded by a final regex pattern; otherwise the matching continues till the end-of-file.
 In our example, the block finishes with a blank line, denoted by the `FHIAimsOutParser.re_blank_line` flag. 
 
 A similar approach applies to processing individual tabular lines.
@@ -202,9 +203,9 @@ Ensure that you toggle the `xxxx.Quantity.repeats` option to `True` or any non-z
 The actual parsing of the data then happens at a deeper layer.
 It is therefore not uncommon to encounter block parsing of up to three layers deep.
 
-Sometimes, it is easier to map the data by their column index.
+It can be easier to map the data by their column index depending on their shape.
 Here, you can again use `xxxx.Quantity.repeats` in the `sub_parser`, this time as a `dict` mapping the indices to their respective labels.
 This is just a convenient short-hand.
 Accessing the data works just as with any other nested structure.
 
-Following this logic through, you will end up with a continuation of a vertically connected tree.
+Following this logic, you will end up with a continuation of a vertically connected tree.
