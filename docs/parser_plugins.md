@@ -88,6 +88,7 @@ from nomad.datamodel.datamodel import EntryArchive
 from nomad.config import config
 from nomad.parsing import MatchingParser
 from nomad.parsing.file_parser.mapping_parser import MetainfoParser, XMLParser
+from nomad_parser_vasp.schema_packages.vasp_schema import Simulation
 
 configuration = config.get_plugin_entry_point(
     'nomad_parser_vasp.parsers:xml_entry_point'
@@ -123,7 +124,7 @@ Next, going over the contents in `parse`, line-by-line:
  - Finally, the processed data in the `Simulation` object is stored in the `data` section. You are not permitted to change the storage destination. At best, you may repeat these steps to connect legacy parsers to `run`.  %% TODO: what about results?
 
 
-### From Hierarchies to Schema
+## From Hierarchies to Schema
 
 We conceptualize format conversion as restructuring a _hierarchical data tree_, formally known as a _directed acyclic graph_.
 The restructuring may then be defined in terms of lining up source with target nodes.
@@ -133,18 +134,43 @@ Since we have full control over our own schema, we will annotate the mappings th
 The only relevant nodes are `ArchiveSection` attributes like `Quantity` (i.e. leaf nodes) or `SubSection` (i.e. branching nodes).
 Adding annotations then is as simple as extending a dictionary: `<section_name>.<attribute_name>.m_annotations[<tag_name>] = MappingAnnotationModel(...)`.
 
-The `<tag_name>` key allows for distinguishing between several kinds of mappings.
-This comes in handy when a code or community supports different formats for the same data.
-Rather than importing and annotating the schema several times over, you can keep it in one place (under `schema_packages`).
-It also makes apparent at a glance, in how far different formats overlap:
-there are codes where the structure or information contents shift widely.
-This is especially prevalent when new formats are introduced over a large time span.
-For the naming of the tag itself, we suggest to adhere to the file extension. 
+The overall strategy is thus to annotate `path` mappings starting from `Simulation` and run over each `SubSection` up until reaching the corresponding `Quantity`.
+The most important part is for the target/NOMAD path to be fully traceable:
+any disconnections in a `path` will cut it out of the `archive`.
+
+For VASP, the `src/nomad_parser_vasp/schema_packages/` file will thus look something like the following.
+Note how you can trace continuous a path down to `simulation.program.name`.
+The mixing of multiple extension annotations (`xml` and `hdf5`), also shows at a glance how much both formats compare.
+
+%% TODO: extend example + add hdf5
+
+```python
+from nomad_simulations.schema_packages.general import Simulation, Program
+
+Simulation.m_def.m_annotations['xml'] = MappingAnnotationModel(path='modeling')
+
+Simulation.program.m_annotations['xml'] = MappingAnnotationModel(path='.generator')
+
+Program.name.m_annotations['xml'] = MappingAnnotationModel(path='.i[?"@name"="program"]')
+```
+
+Many more approaches are at play in this example.
+Their discussion is too technical for the main thread of this tutorial, however.
+If you are interested, check out the subsections below who's title starts with "Extra". 
+
+### Extra: exploring Mapping Annotations
 
 `MappingAnnotationModel` itself accepts one of two argument keys:
 
 - `path`: specifies the node sequence leading up to the source node of interest. It leverages the [JMESPath DSL](https://jmespath.org/) for this, though other languages may be incorporated here in the future.
 - `operator`: the more active counterpart to `path`. Inserts a function (name in string format) between the source and target nodes. Source data are passed along in an array of `path`s matching the positional arguments, similar to Python `*args`.
+
+Operators, are the main tool for the parser developer to perform some data manipulation.
+The preferred approach is to keep them simple, just as `@staticmethod` functions under the parser class.
+If they are short and one-of, they may even be defined as `lambda` functions.
+For anything with more complexity, we suggest extending the schema.
+
+### Extra: defining a Path
 
 Paths do not have to be _absolute_, i.e. starting from the root node, and may be written _relative_ to the previous target/NOMAD parent node.
 The relative notation is highly encouraged for performance reasons.
@@ -155,11 +181,9 @@ JMESPath also provides rich filtering features
 - to select nodes / values by index for extracting anonymous nodes at the same level / tensors.
 - to cycle between multiple branching scenarios via an `if-else` (`||`) logic.  %% TODO: double-check symbol
 
-The overall strategy is thus to annotate `path` mappings starting from `Simulation` and run over each `SubSection` up until reaching the corresponding `Quantity`.
-The most important part is for the target/NOMAD path to be fully traceable:
-any disconnections in a `path` will cut it out of the `archive`.
+### Extra: aligning Source and Target Segments
 
-Each `path` segment in the target/NOMAD schema (reference node -> next node) has to be compared individually with its source counterpart.
+Each path segment in the target/NOMAD schema (reference node -> next node) has to be compared individually with its source counterpart.
 File formats may namely differ at any point in their level of semantic distinction.
 We encounter three possibilities:
 
@@ -167,15 +191,7 @@ We encounter three possibilities:
 - the source has multiple path segments, where the target only has one. This is also completely covered by `path`.
 - the target has multiple path segments, where the source only has one. At target node, fall back on the trivial relative path `.` until the path segments line up again. %% verify with Alvin
 
-%% Example code
-
-Operators, meanwhile, are the main tool for the parser developer to perform some data manipulation.
-The preferred approach is to keep them simple, just as `@staticmethod` functions under the parser class.
-If they are short and one-of, they may even be defined as `lambda` functions.
-For anything with more complexity, we suggest extending the schema.
-More on this topic in the part [Extending NOMAD-Simulations](schema_plugins.md).
-
-%% What if a connector node may be entirely absent, e.g. as with workflows.
+%% What if a connector node may be entirely absent, e.g. as with workflows?
 
 ## From Text to Hierarchies
 
