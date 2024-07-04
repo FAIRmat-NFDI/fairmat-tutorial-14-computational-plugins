@@ -79,13 +79,13 @@ These are further complimented by _best practices_ and _design protocols_.
 
 More specifically, point 1 (file selection) is now handled by the `MatchingParser` class, from which the parser class inherits. It coordinates with the NOMAD base to scan the uploaded folder tree and select the relevant files.
 
-Point 4 (data mangling) is covered by the NOMAD schema, as you saw in the previous part.
-Not only does this allow for a more consistent handling of the data, it also cleanly partitions the work between parser and schema developers. %% announce Schema Extension?
+Point 4 (data mangling) is covered by the NOMAD schema, as you saw in the part [NOMAD-Simulations schema](nomad_simulations.md).
+Not only does this allow for a more consistent handling of the data, it also cleanly partitions the work between parser and schema developers.
 In principle, a parser should at most perform trivial manipulations, such as slicing an array or multiplying two extracted values.
 More on the exact "how" later.
 
 Lastly, we will cover tools for point 5 (building the `archive`) and 2 (targeting data fields) in the next subsections.
-Point 5, in particularl, was a developing nuisance, as it required the reconstruction of the already defined target/NOMAD schema.
+Point 5, in particular, was a developing nuisance, as it required the reconstruction of the already defined target/NOMAD schema.
 That comes across as doing double work: running over the schema once to define it, and a second time to initialize it.
 The main hurdle to automation here was the variable structure of the source data:
 a well-defined hierarchical format does not ensure that individual file structures remains constant.
@@ -98,26 +98,45 @@ It is thus this scientific curation task that is now most emphasized in parser d
 
 Let us cover the remaining tools, so we can move on to the real science.
 
-### MappingParser
-
-We conceptualize format conversion as restructuring a _hierarchical data tree_.
-For those more familiar with graph theory, this is a _directed acyclic graph_.
-
-Since we always consider two formats, we should think of restructuring as a kind of mapping from source to target branches.
-This mapping is, abstractly enough, itself a hierarchical tree, where the leafs denote the source-to-target conversion.
-We construct our mapping tree from branches, called `Mappers`, that starting from the root, can be iteratively nested.
-The leaf nodes, meanwhile, can be of either two types:
-
-- `Map`: the default mapping from as source leaf/branch to a target leaf/branch. Both of these are expressed as Paths according to the [jmespath specifications]().
-Hint: paths may be relative wrt a parent. The format is  to (a) start the path with the connector, i.e. dot (.); and (b) denote the parent's Path separately.
-
-- `Evaluate`: the more active counterpart of `Map`. It inserts a function (its name given as a string) between the mapping. It passes along a list of source paths -denoted just as in `Map`- as the respective positional arguments, i.e. `*args`.
-
 ### Parsing Hierarchical Tree Formats
 
-### Workflows and Super-structures
+We conceptualize format conversion as restructuring a _hierarchical data tree_, formally known as a _directed acyclic graph_.
+The restructuring may then be defined in terms of lining up source with target nodes.
+Formats that leverage a tree structure, e.g. XML, HDF5, JSON, and most importantly the NOMAD schema, already provide these nodes.
+The only missing component then are the mappings themselves.
 
-Now that we have covered the SCF and standard outputs, we have to plant these 
+Since we have full control over our own schema, we will annotate the mappings there.
+The only relevant nodes are `ArchiveSection` attributes like `Quantity` (i.e. leaf nodes) or `SubSection` (i.e. branching nodes).
+Adding annotations then is as simple as extending a dictionary: `<section_name>.<attribute_name>.m_annotations[<tag_name>] = MappingAnnotationModel(...)`.
+
+The `<tag_name>` key allows for distinguishing between several kinds of mappings.
+This comes in handy when a code or community supports different formats for the same data.
+Rather than importing and annotating the schema several times over, you can keep it in one place (under `schema_packages`).
+It also makes apparent at a glance, in how far different formats overlap:
+there are codes where the structure or information contents shift widely.
+This is especially prevalent when new formats are introduced over a large time span.
+For the naming of the tag itself, we suggest to adhere to the file extension. 
+
+`MappingAnnotationModel` itself accepts one of to arguments keys:
+
+- `path`: specifies the node sequence leading up to the source node of interest. It leverages the [JMESPath DSL](https://jmespath.org/) for this, though other languages may be incorporated here in the future.
+- `operator`: the more active counterpart to `path`. Inserts a function (name in string format) between the source and target nodes. Source data are passed along in an array of `path`s matching the positional arguments, similar to Python `*args`.
+
+Paths do not have to be _absolute_, i.e. starting from the root node, and may be written _relative_ to the previous target/NOMAD parent node.
+This is denoted in JMESPath by starting with the connector symbol (`.`).
+JMESPath also provides rich filtering features to select nodes by name.
+
+The overall strategy is thus to annotate `path` mappings starting from `Simulation` and running over each `SubSection` up until you reach the corresponding `Quantity`.
+%% What if the node depth differs?
+%% Example code
+
+Operators, meanwhile, are the main tool for the parser developer to perform some data manipulation.
+The preferred approach is to keep them simple, just as `@staticmethod` functions under the parser class.
+If they are short and one-of, they may even be defined as `lambda` functions.
+For anything with more complexity, we suggest extending the schema.
+More on this topic in the part [Extending NOMAD-Simulations](schema_plugins.md).
+
+%% What if a connector node may be entirely absent, e.g. as with workflows.
 
 ## From Text to Hierarchies
 
