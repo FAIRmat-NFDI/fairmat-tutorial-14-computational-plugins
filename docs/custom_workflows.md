@@ -372,7 +372,7 @@ Here are some general guidelines or suggestions for preparing your upload folder
 
 - Always organize your files in an **top-down structure**, i.e., the initial tasks should be upper in the directory tree, while the later tasks lower on it.
 - Avoid having to go up and down between folders if some properties are derived between these files. These situations are very complicated to predict a priori in an automatic way.
-- Avoid duplication of files in subfolders. If initially you do a simulation A from which a later simulation B is derived and you want to store B in a subfolder, there is no need to copy the A files inside the subfolder B.
 - Keep as much information as possible regarding relative file paths, tasks, etc, in the output of your simulations.
+- Avoid duplication of files in subfolders. If initially you do a simulation A from which a later simulation B is derived and you want to store B in a subfolder, there is no need to copy the A files inside the subfolder B.
 
 The folder structure used throughout this part is a good example of a clean upload which is friendly and easy to work with when defining NOMAD workflows.
