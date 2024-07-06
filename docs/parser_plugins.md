@@ -69,7 +69,7 @@ Blurring these responsibilities leads to a wild-growth in parser design and adde
 NOMAD therefore offers powerful _tools_ and documentation on _best practices_ to help the parser developer manage each distinct responsibility.
 The exact solutions are, in the same order:
 
-1. `MatchingParser` - This class passes the file contents on to the parser class, which extends it via inheritance. Since it interfaces with the NOMAD base directly, it will read most of the settings automatically in from there. Options may be tweaked via the entry-steps mechanism. 
+1. `MatchingParser` - This class passes selects the file to be parsed. Since it interfaces with the NOMAD base directly, it will read most of the settings automatically in from there.
 2. `XMLParser` and co. / `TextParser` - There are several _reader classes_ for loading common source formats into Python data types. Examples include the `XMLParser` and `HDF5Parser`. We will demonstrate `XMLParser` in [[Parsing Hierarchical Tree Formats]]. Plain text files, meanwhile, involve an additional _matching step_ via the `TextParser`. More on this in [[From Text to Hierarchies]].
 3. `MappingAnnotationModel` - This is arguably the most involved part for the parser developer, as this is where the external data gets further semantically enriched and standardized. It requires doamin expertise to understand the relationship between the data fields in the source file and the [NOMAD-Simulations schema](nomad_simulations.md). If step 2 went well, this step only involves _annotating_ the target schema via `MappingAnnotationModel`. More on this in [[Parsing Hierarchical Tree Formats]].
 4. [NOMAD-Simulations schema](nomad_simulations.md) / `MappingAnnotationModel` - The `MSection`s and `utils.py` in the schema provide _normalizers_ and _helper functions_ to alleviate most of the data mangling. For small amendments*, use `MappingAnnotationModel.operator`. For larger ones, consider extending the schema as covered in [Extending NOMAD-Simulations](schema_plugins.md).
@@ -79,8 +79,91 @@ In the next section, we will briefly illustrate how `MatchingParser`, `XMLParser
 
 ## Assembling a Parser Class
 
-Let us investigate the VASP parser for the XML output as an example.
-The parser code would be placed in `src/nomad_parser_vasp/parsers/xml_parser.py` and looks like:
+Throughout this subsection, will we illustrate the process of building out sa parser, tep-by-step.
+We will use the VASP XML output format, as an example.
+The parser code snippets provided below should go under `src/nomad_parser_vasp/parsers/`, in a file named similarly to `xml_parser.py`.
+
+### Hooking up a Parser
+
+As denoted in step 1, the parser first has to read in the file contents as passed through by the NOMAD base.
+The directives for selecting _mainfiles_, i.e. files representative of a code, as passed on via an interaction cascades from `nomad.yaml` > `ParserEntryPoint` > `MatchingParser`.
+
+#### Mainfile matching
+
+Since mainfiles are intrinsically connected to the scripts that parse them, the directives should be set via `ParserEntryPoint`.
+The same 
+There are three kinds of file aspects that can be targeted, all via regular expressions:
+
+- the filename itself (keyword `mainfile_name_re`).
+- the content header (keyword `mainfile_contents_re`, `mainfile_contents_dict`).
+- the file mime (keywords `mainfile_mime_re`).
+
+#### Mainfile interfacing
+
+`MatchingParser`, meanwhile, acts as the bridge with the parser in the cascade.
+Since all parsers should follow the same formal contract, they _inherit_ therefrom.
+The most rudimentary parser, thus looks as follows.
+
+```python
+from nomad.parsing import MatchingParser
+class VasprunXMLParser(MatchingParser):
+    pass
+```
+
+This parser will already run, but raises a `NotImplementedError`.
+Up next, we resolve this error by overwriting `parse`.
+
+### Getting the Data
+
+Where `MatchingParser` provides a path to the mainfiles, a separate parser is needed for actually reading the file contents.
+NOMAD already provides several parsers for popular, general-purpose formats like JSON, HDF5, and XML.
+Plain text is also supported, but a bit more involved.
+We cover it in section [From Text to Hierarchies](#from-text-to-hierarchies).
+
+Contrary to `MatchingParser`, none of these parsers directly interface with the NOMAD base.
+For example, they do not support the `parse` function.
+Therefore, our own parser has to call `XMLParser`.
+
+```python
+from structlog.stdlib import BoundLogger
+from nomad.datamodel.datamodel import EntryArchive
+from nomad.parsing.file_parser.mapping_parser import MetainfoParser, XMLParser
+from nomad_parser_vasp.schema_packages.vasp_schema import Simulation
+
+
+class VasprunXMLParser(MatchingParser):
+    def parse(
+        self, mainfile: str, archive: EntryArchive, logger: BoundLogger,
+        child_archives: dict[str, EntryArchive] = None,
+    ) -> None:
+        xml_reader = XMLParser(filepath=mainfile)
+        archive.data = ...
+```
+
+#### Extra: Communicating via Logs
+
+```python
+...
+from nomad.config import config
+
+configuration = config.get_plugin_entry_point(
+    'nomad_parser_vasp.parsers:xml_entry_point'
+)
+
+class VasprunXMLParser(MatchingParser):
+    def parse(
+        self, mainfile: str, archive: EntryArchive, logger: BoundLogger,
+        child_archives: dict[str, EntryArchive] = None,
+    ) -> None:
+
+    logger.info('VasprunXMLParser.parse', parameter=configuration.parameter)
+    ...
+```
+
+### Instantiating a Schema
+
+
+### Mapping a to Schema
 
 ```python
 from structlog.stdlib import BoundLogger
@@ -110,7 +193,6 @@ Leveraging `MappingAnnotationModel` clearly makes parsers more concise.
 Breaking down the parser class, `VasprunXMLParser`, it inherits most functionality from `MatchingParser`, including `parse`.
 The `parse` interface is rigid -represents a contract between the NOMAD base and the parser- and is worth studying a bit:
 
-- `mainfile`: NOMAD scans the upload folder for files representative of the code. Based on the hits, it will then delegate these files to their parser. The filename or header patterns are set in xxxx and xxxx.
 - `archive`: this is a (typically empty) storage object for an entry. It will later be serialized into an `archive.json` file by NOMAD for permanent storage.
 - `logger`: each entry will have a log associated with it. These communicate info or warnings about the process, but also debugging info and (critical) errors for tracing bugs. Include the latter when contacting us regarding any processing issues.
 
