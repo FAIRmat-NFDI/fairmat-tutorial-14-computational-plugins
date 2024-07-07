@@ -1,6 +1,14 @@
 # Creating Parser Plugins from Scratch
 
-One of NOMAD's most recognized features is drag-and-drop parsing. The NOMAD parsers, which automate the conversion of raw simulation files into the standardized NOMAD format, significantly offload the burden of data annotation from researchers, reducing their data management responsibilities while also improving the accessibility of their data.
+One of NOMAD's most recognized features is drag-and-drop parsing.
+The NOMAD parsers, which automate the conversion of raw simulation files into the standardized NOMAD format, significantly offload the burden of data annotation from researchers, reducing their data management responsibilities while also improving the accessibility of their data.
+
+Behind the scenes, parsing means looking through the upload folder and selecting relevant files.
+These files are then read in and their data extracted.
+Lastly, the semantics of the file format are clarified and specified as its data is mapped into the NOMAD schema.
+The data is now ready to interact with the NOMAD ecosystem and apps.
+
+![Parser Architecture](assets/parser_architecture.png)
 
 ### Getting Started
 
