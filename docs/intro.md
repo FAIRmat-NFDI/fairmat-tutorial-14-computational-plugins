@@ -1,5 +1,13 @@
 # Introduction to the NOMAD software and repository
 
+This tutorial is accessible to any level of programmer.
+It covers a wide scope subjects, so most of it is from a birds-eye view.
+Concepts are further supplemented with code snippets and exercises.
+"Info" boxes provide useful concepts that go off-topic from the main thread.
+For the more advanced programmers, technical sections covering edge cases can be found in "Extra". 
+
+-----------------------------------------------------------------------------
+
 The key advantages of the NOMAD schema are summed up in **FAIR**mat's core values:
 
 - **F**indable: a wide selection of the extracted data is indexed in a database, powering a the search with highly customizable queries and modular search parameters.

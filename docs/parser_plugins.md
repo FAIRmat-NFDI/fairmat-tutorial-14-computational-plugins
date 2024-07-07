@@ -309,8 +309,7 @@ Program.name.m_annotations['xml'] = MappingAnnotationModel(path='.i[?"@name"="pr
 ```
 
 Many more approaches are at play in this example.
-Their discussion is too technical for the main thread of this tutorial, however.
-If you are interested, check out the subsections below who's title starts with "Extra". 
+Check out the "Extra" sections below for a more in-depth explanation and edge cases.
 
 ### Extra: exploring Mapping Annotations
 
@@ -349,17 +348,36 @@ We encounter three possibilities:
 
 ## From Text to Hierarchies
 
-Therefore, step 2 requires an intermediate step to fall back on _key matching_.
-The source format is converted to a temporary tree format stored by matching lines via regular expressions.
-The keys are assigned by various `text_parser.py/Quantity`s, which are themselves grouped together in a `text_parser.py/TextParser.quantities: list[Quantity]`.
-The nesting of layers is done by referring back to `TextParser` via `Quantity.sub_parser: TextParser`.
+When dealing with plain text, step 2 proceeds in two stages: reading in the file contents and making the `str` data more actionable in Python.
+To this end, we construct an intermediate tree format where we will map into the schema from.
+
+The tactic here is _weave_ two classes, `TextParser` and `Quantity`, both from `text_parser.py`, in with each other.
+Always start with `TextParser` and use `Quantity.sub_parser` to go one level deeper.
+To obtain finally obtain the tree as a Python `dict`, apply `TextParser.to_dict()` to the root node.
+
+```python
+txt_reader = TextParser(                # root node
+    quantities = [                      # level 1
+        Quantity(...),
+        Quantity(...),
+        Quantity(
+            ...,
+            sub_parser = TextParser(
+                quantities = [          # level 2
+                    Quantity(...),
+                ]
+            )
+        ),
+    ]
+)
+```
 
 The main concern is how to leverage the additional freedom of a third format.
-Our foremost advice is to consider this tree an enriched representation of the source file and thus **follow the text file structure as faithfully as possible**.
-In its simplest form, this means
+Our foremost advice is to _follow the text file structure as faithfully as possible_.
+In its simplest form, this means:
 
-1. following the order in which the data appears.
-2. capturing text blocks with a single `text_parser.py/Quantity`. Then you can further process its data via a deeper layer.
+1. follow the order in which the data appears.
+2. systematically break down blocks of text via the weaving technique.
 
 Let us demonstrate the second point with FHI-aims output, which is typically partioned into blocks with headers and `|`-indented lines, e.g.
 
