@@ -319,7 +319,7 @@ Check out the "Extra" sections below for a more in-depth explanation and edge ca
 - `operator`: the more active counterpart to `path`. Inserts a function (name in string format) between the source and target nodes. Source data are passed along in an array of `path`s matching the positional arguments, similar to Python `*args`.
 
 Operators, are the main tool for the parser developer to perform some data manipulation.
-The preferred approach is to keep them simple, just as `@staticmethod` functions under the parser class.
+The preferred approach is to keep them simple, just as `@staticmethod` functions under the parser class.  <!-- TODO double-check -->
 If they are short and one-of, they may even be defined as `lambda` functions.
 For anything with more complexity, we suggest extending the schema.
 
@@ -332,7 +332,7 @@ JMESPath also provides rich filtering features
 
 - to select nodes by key name (starting with `@`). This is useful when presented with multiple named nodes at the same level.
 - to select nodes / values by index for extracting anonymous nodes at the same level / tensors.
-- to cycle between multiple branching scenarios via an `if-else` (`||`) logic.  %% TODO: double-check symbol
+- to cycle between multiple branching scenarios via an `if-else` (`||`) logic.  <!-- TODO: double-check symbol -->
 
 ### Extra: aligning Source and Target Segments
 
@@ -342,9 +342,9 @@ We encounter three possibilities:
 
 - length source path segment = length target path segment: this case is straightforward and covered by the JMESPath features listed above.
 - length source path segment > length target path segment = 1: this is also completely covered by `path`.
-- length source path segment = 1 < length target path segment: at every non-matching target node, fall back on the trivial relative path `.` until the path segments line up again. %% verify with Alvin
+- length source path segment = 1 < length target path segment: at every non-matching target node, fall back on the trivial relative path `.` until the path segments line up again. <!-- TODO verify with Alvin -->
 
-%% What if a connector node may be entirely absent, e.g. as with workflows?
+<!-- What if a connector node may be entirely absent, e.g. as with workflows? -->
 
 ## From Text to Hierarchies
 
@@ -372,53 +372,31 @@ txt_reader = TextParser(                # root node
 )
 ```
 
+Note that the regex patterns should always contain _match groups_, i.e. `()`, else no text is extracted.
+This is especially important for blocks, where the typical regex pattern has the form `r'<re_header>(?[\s\S]+)<re_footer>'` to match everything between the block header and footer.
+
+!!! info "Dissecting Tables"
+    The typical approach to processing text tables is to match the table (body), a standard line, and lastly, a standard column. <!-- TODO explore tools for when column semantics is tied to its index -->
+    Ensure that you toggle the `Quantity.repeats: Union[bool, int]` option to obtain a list of matches.
+    <!-- TODO how to extract as a matrix immediately (no dict keys) -- >
+
 The main concern is how to leverage the additional freedom of a third format.
-Our foremost advice is to _follow the text file structure as faithfully as possible_.
-In its simplest form, this means:
+Our foremost advice is to
 
-1. follow the order in which the data appears.
-2. systematically break down blocks of text via the weaving technique.
+1. follow the order in which the data normally appears.
+2. use as similar as possible node names as in the file. If none are present, fall back on the NOMAD schema names.
+3. systematically break down blocks of text via the weaving technique.
+4. use the same node names when multiple versions exist. Maximize the common nodes and overall keep the alternatives as close as possible together.
 
-Let us demonstrate the second point with FHI-aims output, which is typically partioned into blocks with headers and `|`-indented lines, e.g.
+Handling contingent values is more so reserved for step 3, mapping.
+An example would be reading file units:
 
-```txt
-  End self-consistency iteration #     1       :  max(cpu_time)    wall_clock(cpu1)$
-  | Time for this iteration                    :        1.440 s           1.454 s$
-  | Charge density update                      :        0.500 s           0.504 s$
-  | Density mixing & preconditioning           :        0.000 s           0.000 s$
-  ...
-$
-```
+<!-- TODO add dynamic units example -->
 
-Here we indicate repetition as `...` and print the regex end-of-line symbol (`$`) for legibility.
-This block would be captured as
-
-```python
-
-```
-
-Note that the data extracted should be indicated between parentheses `()`, i.e. be a matching group in Python regex.
-To promote semantic extraction, we provide labelled patterns for common flags, e.g. `FHIAimsOutParser.re_float`.
-You can add a match group to a pattern via `capture(quantity)`.
-
-For blocks, the matching group should lie between the header and footer.
-Most times, developers prefer to approach the matching group content in a block as generic, nondescript text to focus on the stand-out characteristics of the block itself.
-You can use the `FHIAimsOutParser.re_non_greedy` flag here.
-Be careful: it should be superseded by a final regex pattern; otherwise the matching continues till the end-of-file.
-In our example, the block finishes with a blank line, denoted by the `FHIAimsOutParser.re_blank_line` flag. 
-
-A similar approach applies to processing individual tabular lines.
-Focus first on identifying the line as whole, which always end on `FHIAimsOutParser.re_eol`.
-Ensure that you toggle the `xxxx.Quantity.repeats` option to `True` or any non-zero number, so you match all lines.
-The actual parsing of the data then happens at a deeper layer.
-It is therefore not uncommon to encounter block parsing of up to three layers deep.
-
-It can be easier to map the data by their column index depending on their shape.
-Here, you can again use `xxxx.Quantity.repeats` in the `sub_parser`, this time as a `dict` mapping the indices to their respective labels.
-This is just a convenient short-hand.
-Accessing the data works just as with any other nested structure.
-
-Following this logic, you will end up with a continuation of a vertically connected tree.
+!!! info "Semantic Patterns"
+    Modern text parsers come equipped with several common patterns to expedite the construction of complex patterns.
+    Examples include `re_float` covering decimals and scientific notation, separators like `re_blank_line` or `re_eol`, and `re_non_greedy` for matching whole chunks of text, as shown above.
+    The `capture(pattern)` function applies the match groups.   
 
 ## Extra: Managing Entry Points
 
