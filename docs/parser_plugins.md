@@ -43,7 +43,7 @@ Please select the same license for maximal legal compatibility.
 ```
 
 This examples also highlights the files containing _entry point_ information between parentheses.
-They are explained in greater detail in section [[Extra: Managing Entry Points]].
+They are explained in greater detail in section [Extra: Managing Entry Points](parser_plugins.md#extra-managing-entry-points).
 For now, it suffices to understand them as the official mechanism for `pip` installing modules.
 The dependence runs bottom up, i.e. the `module setup file` refers to `entry point` that refers to `target functionality`.
 
@@ -70,8 +70,8 @@ NOMAD therefore offers powerful _tools_ and documentation on _best practices_ to
 The exact solutions are, in the same order:
 
 1. `MatchingParser` - This class passes selects the file to be parsed. Since it interfaces with the NOMAD base directly, it will read most of the settings automatically in from there.
-2. `XMLParser` and co. / `TextParser` - There are several _reader classes_ for loading common source formats into Python data types. Examples include the `XMLParser` and `HDF5Parser`. We will demonstrate `XMLParser` in [[Parsing Hierarchical Tree Formats]]. Plain text files, meanwhile, involve an additional _matching step_ via the `TextParser`. More on this in [[From Text to Hierarchies]].
-3. `MappingAnnotationModel` - This is arguably the most involved part for the parser developer, as this is where the external data gets further semantically enriched and standardized. It requires doamin expertise to understand the relationship between the data fields in the source file and the [NOMAD-Simulations schema](nomad_simulations.md). If step 2 went well, this step only involves _annotating_ the target schema via `MappingAnnotationModel`. More on this in [[Parsing Hierarchical Tree Formats]].
+2. `XMLParser` and co. / `TextParser` - There are several _reader classes_ for loading common source formats into Python data types. Examples include the `XMLParser` and `HDF5Parser`. We will demonstrate `XMLParser` in [Parsing Hierarchical Tree Formats](parser_plugins.md#getting-the-data). Plain text files, meanwhile, involve an additional _matching step_ via the `TextParser`. More on this in [From Text to Hierarchies](parser_plugins.md#from-text-to-hierarchies).
+3. `MappingAnnotationModel` - This is arguably the most involved part for the parser developer, as this is where the external data gets further semantically enriched and standardized. It requires doamin expertise to understand the relationship between the data fields in the source file and the [NOMAD-Simulations schema](nomad_simulations.md). If step 2 went well, this step only involves _annotating_ the target schema via `MappingAnnotationModel`. More on this in [Mapping a to Schema](parser_plugins.md#mapping-a-to-schema).
 4. [NOMAD-Simulations schema](nomad_simulations.md) / `MappingAnnotationModel` - The `MSection`s and `utils.py` in the schema provide _normalizers_ and _helper functions_ to alleviate most of the data mangling. For small amendments*, use `MappingAnnotationModel.operator`. For larger ones, consider extending the schema as covered in [Extending NOMAD-Simulations](schema_plugins.md).
 5. `MetainfoParser` - this _converter_ bridges the annotated schema from step 3 with the reader classes in step 2. `MetainfoParser.data_object` contains the final `ArchiveSection` that is stored under `archive.data`.
 
@@ -134,7 +134,7 @@ There are three kinds of file aspects that can be targeted, all via _regular exp
     ```
     You can capture this via `mainfile_contents_re` in a regex like `r'<\?xml version="1\.0" encoding="ISO\-8859\-1"?>\n<modeling>`. <!-- TODO double-check>
 
-#### Mainfile interfacing
+#### Mainfile Interfacing
 
 Within the cascade, `MatchingParser`, acts as the connection point on the parser side.
 It plays less of a role in manipulating the directives, and more so in defining the _interface_ -a formalization of behavior- back to the parser.
