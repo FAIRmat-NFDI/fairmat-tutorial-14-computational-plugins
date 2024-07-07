@@ -242,7 +242,9 @@ class VasprunXMLParser(MatchingParser):
 
 ### Instantiating a Schema
 
+<!-- cookie cutter example -->
 
+<!-- contingent instantiation example -->
 
 ### Mapping a to Schema
 
@@ -406,8 +408,8 @@ Entry points also provide the module developer how these functionalities ought t
 
 Conceptually, there are five key players to keep track off:
 
-- the **target functionality** is the entity that we want to _expose_ to the NOMAD base installation. In our case, this will amount to our parser class, which typically is a child class of `MatchingParser`. It may use `configurations` parameters passed along via the nomad settings.
-- the **entry point** (instance of `EntryPoint`) is responsible for _registering_ the target functionality. It therefore also retains metadata like its name, a description and most importantly, the file matching directives. It is typically located in the `__init__.py` of the relevant functionality folder (see folder structure).
-    - the **entry point group** bundles several entry points together. By default, NOMAD scans all plugins under the group name `project.entry-points.'nomad.plugin'`.
-- the **module setup file** _exposes_ the entry point (and its group) under the format of `<module_name>.<functionality_folder_name>:<entry_point_name>`. This is the name by which you should call this entry point. In NOMAD we use the `pyproject.toml` setup file under the module's root folder.
-- the **NOMAD configuration file** called `nomad.yaml` allows further control over which entry points to _include_ or _exclude_, as well as their _configuration parameters_.
+- **target functionality**: the entity that we want to _expose_ to the NOMAD base installation. In our case, this will amount to our parser class, which typically is a child class of `MatchingParser`. It may use `configurations` parameters passed along via the nomad settings.
+- **entry point**: instance of `EntryPoint`, responsible for _registering_ the target functionality. It therefore also retains metadata like its name, a description and most importantly, the file matching directives. It is typically located in the `__init__.py` of the relevant functionality folder (see folder structure).
+    - **entry point group**: bundles several entry points together. By default, NOMAD scans all plugins under the group name `project.entry-points.'nomad.plugin'`.
+- **module setup file**: _exposes_ the entry point (and its group) under the format of `<module_name>.<functionality_folder_name>:<entry_point_name>`. This is the name by which you should call this entry point. In NOMAD we use the `pyproject.toml` setup file under the module's root folder.
+- **NOMAD configuration file**: called in `nomad.yaml`, controls which entry points are _included_ or _excluded_, as well as their _configuration parameters_.
