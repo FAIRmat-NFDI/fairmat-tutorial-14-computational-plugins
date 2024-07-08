@@ -31,23 +31,23 @@ You can deploy them on GitHub or locally via `mkdocs`.
 Lastly, NOMAD uses the Apache 2.0 license (option 4 in the `cruft` setup).
 Please select the same license for maximal legal compatibility.
 
-```bash
+```
 ├── nomad-plugin-parser
 │   ├── src
 |   │   ├── nomad_plugin_parser
 |   |   │   ├── parsers
-|   |   │   │   ├── myparser.py  "(target functionality)"
-|   |   │   │   ├── __init__.py  "(entry point)"
+|   |   │   │   ├── myparser.py    (target functionality)
+|   |   │   │   ├── __init__.py    (entry point)
 |   |   │   ├── schema_packages
 |   |   │   │   ├── mypackage.py
 |   |   │   │   ├── __init__.py
 │   ├── docs
 │   ├── tests
-│   ├── pyproject.toml           "(module setup file)"
+│   ├── pyproject.toml             (module setup file)
 │   ├── LICENSE.txt
 │   ├── README.md
 -------------------------------------------------------------
-├── nomad.yaml                   "(NOMAD configuration file)"
+├── nomad.yaml                     (NOMAD configuration file)
 ```
 
 This examples also highlights the files containing _entry point_ information between parentheses.
@@ -145,7 +145,7 @@ There are three kinds of file aspects that can be targeted, all via _regular exp
 #### Mainfile Interfacing
 
 Within the cascade, `MatchingParser`, acts as the connection point on the parser side.
-It plays less of a role in manipulating the directives, and more so in defining the _interface_ -a formalization of behavior- back to the parser.
+It plays less of a role in manipulating the directives, and more so in defining the _interface_ -a formalization of mutually agreed upon behavior- back to the parser.
 The two main specifications are instantiation and `parse`.
 Since `MatchingParser` already defines both, parsers may simply _inherit_ therefrom.
 The most rudimentary parser, thus looks as follows.
@@ -176,7 +176,7 @@ NOMAD already provides several parsers for popular, general-purpose formats like
 Plain text is also supported, but a bit more involved.
 We cover it in section [From Text to Hierarchies](#from-text-to-hierarchies).
 
-Contrary to `MatchingParser`, none of these parsers directly interface with the NOMAD base.
+Contrary to `MatchingParser`, none of these parsers interface directly with the NOMAD base.
 For example, they do not support the `parse` function.
 Therefore, our parser has to call `XMLParser`.
 The typical strategy here is to save the _reader object_ for later manipulation.
@@ -248,13 +248,255 @@ class VasprunXMLParser(MatchingParser):
     ...
 ```
 
-### Instantiating a Schema
+## From Parser back to NOMAD
 
-<!-- cookie cutter example -->
+We conceptualize format conversion as restructuring a _hierarchical data tree_, formally known as a _directed acyclic graph_.
+A tree structure always starts at a common node, the _root_, where it splits of into several branches.
+Each _node_ is a new potential splitting point.
+When a _branch_ ends and no further splitting occurs, we call the node a _leaf_.
+<!-- Bernadette suggested that not everyone may be familiar with the tree terminology. -->
 
-<!-- contingent instantiation example -->
+The restructuring may then be defined in terms of lining up source with target nodes.
+The only missing component then are the mappings themselves.
 
-### Mapping a to Schema
+### Via Instantiation
+
+There are two ways of populating the NOMAD schema.
+The most basic one, on which you can always fall back, consists in _reconstructing_ it from the root down to the leaf nodes.
+Given that the new NOMAD Simulations schema is quite shallow, this becomes more so a task in retrieving the section that best matches the semantics.
+The tree representation in the example below could be understood as
+
+```
+      Simulation
+      /       \
+ Program      ModelSystem
+  /   \           |
+name version  AtomicCell
+                  |
+               positions
+```
+
+In the parser code itself, the sections and quantities are both just classes.
+We thus construct a tree of their objects by _instantiating_ them one-by-one.
+
+```python
+...
+
+class VasprunXMLParser(MatchingParser):
+    def parse(
+        self,
+        mainfile: str,
+        archive: EntryArchive,
+        logger: BoundLogger,
+        child_archives: dict[str, EntryArchive] = None,
+    ) -> None:
+        xml_reader = XMLParser(mainfile=mainfile)
+
+        def xml_get(path: str):
+            return xml_reader.parse(path)._results[path]
+
+        archive.data = Simulation(
+            program=Program(
+                name='VASP',
+                version=xml_get("//generator/i[@name='version']")[0],
+            ),
+            model_system=ModelSystem(
+                cell=AtomicCell(
+                    positions=xml_get("structure[@name='finalpos']/./varray[@name='positions']/v")[0],
+                ),
+            ),
+        )
+```
+
+The final `archive.json` will look something like the following.
+Obviously, the exact values depend on the file parsed.
+
+```JSON
+{
+  "data": {
+    "m_def": "nomad_simulations.general.Simulation",
+    "program": {
+      "name": "VASP",
+      "version": "5.3.2"
+    },
+    "model_system": [
+      {
+        "datetime": "2024-07-08T13:25:23.509517+00:00",
+        "branch_depth": 0,
+        "cell": [
+          {
+            "m_def": "nomad_simulations.model_system.AtomicCell",
+            "name": "AtomicCell",
+            "positions": [
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.500001,
+                0.500001,
+                0.500001
+              ]
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "metadata": {
+    "entry_name": "vasprun.xml.relax",
+    "mainfile": "/home/nathan/Downloads/vasprun.xml.relax",
+    "text_search_contents": [
+      "VASP",
+      "[]",
+      "AtomicCell"
+    ],
+    "domain": "dft",
+    "n_quantities": 21,
+    "quantities": [
+      ...,
+      "results.properties"
+    ],
+    "sections": [
+      ...,
+      "nomad_simulations.model_system.ModelSystem"
+    ],
+    "section_defs": [
+      ...,
+      {
+        "id": "data.model_system.branch_depth#nomad_simulations.general.Simulation",
+        "definition": "nomad_simulations.model_system.ModelSystem.branch_depth",
+        "path_archive": "data.model_system.0.branch_depth",
+        "int_value": 0
+      }
+    ]
+  },
+  "results": {
+    "properties": {},
+    "eln": {
+      "sections": [
+        "ModelSystem"
+      ]
+    }
+  }
+}
+```
+
+!!! abstract "Assignment"
+    `AtomicCell` should also contain information about the lattice vectors -reciprocal lattice vectors are derived- and periodic boundary conditions.
+    Add these to the instantiation, knowing that the lattice vectors fall under `<structure><crystal><varray name="basis" >`.
+    The boundary conditions, meanwhile, are always periodic in VASP.
+
+!!! success "Solution"
+    ```
+    python
+    ...
+    cell=AtomicCell(
+        positions=xml_get("structure[@name='finalpos']/./varray[@name='positions']/v")[0],
+        lattice_vectors=xml_get("structure//varray[@name='basis']/v")[0],
+        periodic_boundary_conditions=[True] * 3,
+    )
+    ``` <!-- TODO double-check -->
+
+This example shows a declarative approach to object instantiation:
+any quantity / subsection listed under a section in the schema can be directly passed to the constructor.
+Or course, the existence of section may be contingent on one and another.
+
+If no `finalpos` are extracted -maybe due to a premature termination- neither should `model_system` be populated.
+In this case, it is better to set the section attribute after constructing the main skeleton.
+
+!!! note "Updating the getter"
+    `xml_get` should now be responsible of failure handling/signaling.
+    Depending on the type expected, we may use `None` or `[]`.
+    To prevent `IndexError` when extracting, we also pass the slice along as an argument.
+
+```python
+...
+
+class VasprunXMLParser(MatchingParser):
+    def parse(
+    ...
+    )
+        ...
+        def xml_get(path: str, slicer=slice(0, 1), fallback=None):
+            try:
+                return xml_reader.parse(path)._results[path][slicer]
+            except KeyError:
+                return fallback
+
+
+        archive.data = Simulation(...)
+
+        if (
+            positions := xml_get(
+                "structure[@name='finalpos']/./varray[@name='positions']/v",
+                slice(None),
+                fallback=np.array([]),
+            )
+        ).any():
+            archive.data.model_system.append(
+                ModelSystem(cell=[AtomicCell(positions=positions)])
+            )
+```
+
+Be mindful of the distinction between single/repeating sections, as they determine the interface, i.e. assignment/appending.
+NOMAD will raise errors like `Exception has occurred: TypeError - Subsection model_method repeats, but no list was given`.
+
+Another strategy is _success short-circuiting_, where code cycles through several trials until it encounters the first success.
+An real-world use case is how VASP uses different tags to distinguish density functionals at varying rungs on Jacob's Ladder (that require other routines), e.g. `LSDA`, `GGA`, `METAGGA`.
+PBE (`GGA` rung) is the defaults fall-back.
+
+Since all NOMAD sections are convertible to `dict`, one can generate a `get` chain trying out the least likely examples up until the default value (`PE` in this case).
+
+```python
+...
+
+class VasprunXMLParser(MatchingParser):
+    def parse(
+    ...
+    )
+        ...
+
+        archive.data = Simulation(
+            model_method=[
+                DFT(
+                    xc_functionals=[
+                        XCFunctional(
+                            libxc_name=self.convert_xc.get(
+                                xml_get(
+                                    "///separator[@name='electronic exchange-correlation']/i[@name='LSDA']"
+                                )[0],
+                                {},
+                            )
+                            .get(
+                                xml_get(
+                                    "///separator[@name='electronic exchange-correlation']/i[@name='METAGGA']"
+                                )[0],
+                                {},
+                            )
+                            .get(
+                                xml_get(
+                                    "///separator[@name='electronic exchange-correlation']/i[@name='GGA']"
+                                )[0],
+                                'PE',
+                            ),
+                        ),
+                    ],
+                ),
+            ],
+        )
+```
+
+Lastly, if at any point you require a derived property, you can `normalize()` the section and extract it.
+Just ensure to pass the necessary information through.
+
+### Via Mapping
+
+The second option is to have the instantiation run automatically.
+In that case, the mapping is added directly to our schema as an _annotation_.
+Leveraging this enhanced schema requires some new readers, like `mapping_parser.XMLParser` for the XML side and `MetainfoParser` for the schema side.
+The mapping is thus relegated to `schema_packages/vasp_package.py`, leaving `parsers/xml_parser.py` as:
 
 ```python
 from structlog.stdlib import BoundLogger
@@ -281,42 +523,28 @@ class VasprunXMLParser(MatchingParser):
 
 <!-- TODO Is normalization automatically triggered here? -->
 
-This is all of the code!
-Leveraging `MappingAnnotationModel` clearly makes parsers more concise.
-Breaking down the parser class, `VasprunXMLParser`, it inherits most functionality from `MatchingParser`, including `parse`.
-The `parse` interface is rigid -represents a contract between the NOMAD base and the parser- and is worth studying a bit:
+Look at the power of this technique: this is the full parser!
+We only need to provide the root object, i.e. `Simulation`, from which to start the instantiation procedure.
 
-The `MetainfoParser` is linked to the annotated schema. A single schema may contain multiple annotations corresponding to various file formats, e.g. `xml`, `hdf5`, `txt` for VASP. Since we are dealing with computational data, we provide the `Simulation` object as the root of our target.
+### Mapping Annotations on the Schema side
 
-## From Hierarchies to Schema
-
-We conceptualize format conversion as restructuring a _hierarchical data tree_, formally known as a _directed acyclic graph_.
-The restructuring may then be defined in terms of lining up source with target nodes.
-The only missing component then are the mappings themselves.
-
-Since we have full control over our own schema, we will annotate the mappings there.
-The only relevant nodes are `ArchiveSection` attributes like `Quantity` (i.e. leaf nodes) or `SubSection` (i.e. branching nodes).
-Adding annotations then is as simple as extending a dictionary: `<section_name>.<attribute_name>.m_annotations[<tag_name>] = MappingAnnotationModel(...)`.
+So how do the annotations to the schema look like?
+Firstly, only attributes of `ArchiveSection`, i.e. `Quantity` (i.e. leaf nodes) or `SubSection` (i.e. branching nodes), have to be annotated.
+Adding annotations is as simple as extending a dictionary: `<section_name>.<attribute_name>.m_annotations[<tag_name>] = MappingAnnotationModel(...)`.
 
 The overall strategy is thus to annotate `path` mappings starting from `Simulation` and run over each `SubSection` up until reaching the corresponding `Quantity`.
 The most important part is for the target/NOMAD path to be fully traceable:
 any disconnections in a `path` will cut it out of the `archive`.
 
-For VASP, the `src/nomad_parser_vasp/schema_packages/` file will thus look something like the following.
-Note how you can trace continuous a path down to `simulation.program.name`.
-The mixing of multiple extension annotations (`xml` and `hdf5`), also shows at a glance how much both formats compare.
-
-<!-- TODO: extend example + add hdf5? -->
-
 ```python
 from nomad_simulations.schema_packages.general import Simulation, Program
-
 Simulation.m_def.m_annotations['xml'] = MappingAnnotationModel(path='modeling')
-
 Simulation.program.m_annotations['xml'] = MappingAnnotationModel(path='.generator')
-
 Program.name.m_annotations['xml'] = MappingAnnotationModel(path='.i[?"@name"="program"]')
 ```
+
+Note how you can trace a continuous path down to `simulation.program.name`.
+<!-- The advantage of annotating all in one place with keys, is that multiple mappings, from e.g. `.xml`, `hdf5`, become comparable at a glance. -->
 
 Many more approaches are at play in this example.
 Check out the "Extra" sections below for a more in-depth explanation and edge cases.
