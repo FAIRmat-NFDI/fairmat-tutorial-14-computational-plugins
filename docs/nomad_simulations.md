@@ -12,7 +12,7 @@ A set of [base sections](https://nomad-lab.eu/prod/v1/staging/docs/howto/customi
 <div class="click-zoom">
     <label>
         <input type="checkbox">
-        <img src="../assets/part2-nomad-simulations/simulation_base_details_bckgr.png" alt="Simulation base section diagram." width="80%" title="Click to zoom in">
+        <img src="../assets/part2-nomad-simulations/simulation_base_details.png" alt="Simulation base section diagram." width="80%" title="Click to zoom in">
     </label>
 </div>
 
