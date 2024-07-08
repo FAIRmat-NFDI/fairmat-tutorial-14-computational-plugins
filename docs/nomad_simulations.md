@@ -230,7 +230,7 @@ The detailed relationship tree is:
     </label>
 </div>
 
-The abstract section `Entity` is defined in the [Basic Formal Ontology (BFO)](https://basic-formal-ontology.org/) as a continuant entity, and we use it to abstract our `ModelSystem` using the intermediate base section `System`. This base section, `System`, is also used by the experimental data models.
+The `Entity` abstract section is defined in the [Basic Formal Ontology (BFO)](https://basic-formal-ontology.org/) similar to `Activity`, and we use it to abstract our `ModelSystem`. In fact, `ModelSystem` is inheriting from an intermediate abstract section called `System`. This base section, `System`, is also used by the experimental data models to define the composition and structure of the measured materials.
 
 ??? note "GeometricSpace and simulated cells."
     The abstract section `GeometricSpace` is used to define more general real space quantities related with the system of reference used, areas, lengths, volumes, etc. However, this section and `Cell` are currently (version 0.0.2) under revision and will probably change in the near future.
