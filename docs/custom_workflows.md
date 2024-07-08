@@ -1,6 +1,6 @@
 # Part V: Interfacing complex simulation and analysis workflows with NOMAD.
 
-The concept of workflow is essential in simulations and analysis of Materials Science and Chemistry data. In NOMAD, we give support to workflows and understand them as a way of organizing data to keep the full provenance of an activity (either experimental or computational). Workflows can be also parsed in NOMAD in two slightly different ways: in an automatic way or by defining a custom workflow additional file. The first case is done when the simulation input and output files contain enough information to recognize a certain workflow, and it is typically done in the parser plugin. You can read more on how to prepare your input/output files to make this automatic recognition easier in the [Extra: Automatic workflows](#automaticworkflows) section at the end of this page.
+The concept of workflow is essential in simulations and analysis of Materials Science and Chemistry data. In NOMAD, we give support to workflows and understand them as a way of organizing data to keep the full provenance of an activity (either experimental or computational). Workflows can be also parsed in NOMAD in two slightly different ways: in an automatic way or by defining a custom workflow additional file. The first case is done when the simulation input and output files contain enough information to recognize a certain workflow, and it is typically done in the parser plugin. You can read more on how to prepare your input/output files to make this automatic recognition easier in the [Extra: Standard workflows recognition](#standard-workflows-recognition) section at the end of this page.
 
 This part of the Tutorial will show you the basic concepts of workflows in NOMAD, as well as how to define your own custom workflow. For that, we will use a ficticious example of a simulation workflow, where the [files and folder structure](https://www.fairmat-nfdi.eu/uploads/Area%20C/example_files.zip) is:
 ```
@@ -364,7 +364,7 @@ workflow2:
 This has no practical effect, but it actually shows that if new methods/class functions are implemented in `SinglePoint` and called in `SinglePoint.normalize()` we could extract more information into the workflow entry and even display some derived properties.
 
 
-## Extra: Automatic workflows {#automaticworkflows}
+## Extra: Standard workflows recognition {#standard-workflows-recognition}
 
 There are some cases where the NOMAD infrastructure is able to recognize certain workflows automatically when processing the uploaded files. The simplest example is any `SinglePoint` calculation, as explained above. Other examples include `GeometryOptimization`, `Phonons`, `DFT+GW`, and `MolecularDynamics`. Automated workflow detection may require your folder structure to fulfill certain conditions.
 
