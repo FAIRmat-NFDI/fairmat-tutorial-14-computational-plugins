@@ -490,6 +490,7 @@ class VasprunXMLParser(MatchingParser):
 
 Lastly, if at any point you require a derived property, you can `normalize()` the section and extract it.
 Just ensure to pass the necessary information through.
+The NOMAD base will anyhow invoke normalization, so do not feel responsible for normalizing the entire archive.
 
 ### Via Mapping
 
@@ -520,8 +521,6 @@ class VasprunXMLParser(MatchingParser):
         XMLParser(filepath=mainfile).convert(data_parser)
         archive.data = data_parser.data_object
 ```
-
-<!-- TODO Is normalization automatically triggered here? -->
 
 Look at the power of this technique: this is the full parser!
 We only need to provide the root object, i.e. `Simulation`, from which to start the instantiation procedure.
