@@ -1,6 +1,6 @@
 # Part II: Working with the NOMAD-Simulations schema plugin
 
-In NOMAD, all the simulation metadata is defined under the `Simulation` section. You can find its Python schema defined in the [`nomad-simulations`](https://github.com/nomad-coe/nomad-simulations/) repository. The entry point for the schema is defined in [src/nomad_simulations/schema_packages/\_\_init\_\_.py](https://github.com/nomad-coe/nomad-simulations/blob/develop/src/nomad_simulations/schema_packages/__init__.py) module. This section will appear under the `data` section for each NOMAD [*entry*](https://nomad-lab.eu/prod/v1/staging/docs/reference/glossary.html#entry). There is also a [specialized documentation page](https://nomad-coe.github.io/nomad-simulations/) in the `nomad-simulations` repository.
+In NOMAD, all the simulation metadata is defined under the `Simulation` section. You can find its Python schema defined in the [`nomad-simulations`](https://github.com/nomad-coe/nomad-simulations/) repository. The [entry point](parser_plugins.md) for the schema is defined in [src/nomad_simulations/schema_packages/\_\_init\_\_.py](https://github.com/nomad-coe/nomad-simulations/blob/develop/src/nomad_simulations/schema_packages/__init__.py) module. This section will appear under the `data` section for each NOMAD [*entry*](https://nomad-lab.eu/prod/v1/staging/docs/reference/glossary.html#entry). There is also a [specialized documentation page](https://nomad-coe.github.io/nomad-simulations/) in the `nomad-simulations` repository.
 
 The `Simulation` section inherits from a more abstract section or concept called `BaseSimulation`, which at the same time inherits from another section, `Activity`. 
 
@@ -16,24 +16,20 @@ A set of [base sections](https://nomad-lab.eu/prod/v1/staging/docs/howto/customi
     </label>
 </div>
 
-Note that the white-headed arrow here indicates _inheritance_ / _is a_ relationship. `BaseSimulation` contains the general information about the `Program` used (see [Program](#program)), as well as general times of the simulation, e.g., the datetime at which it started (`datetime` is defined in `Activity` and inherit for `BaseSimulation`) and ended (`datetime_end`). `Simulation` contains further information about the specific input and output sections ([see below](#sub-sections-in-simulation)).
+Note that the white-headed arrow here indicates _inheritance_ / _is a_ relationship. `BaseSimulation` contains the general information about the `Program` used (see [Program](#program)), as well as general time information about the simulation, e.g., the datetime at which it started (`datetime` is defined within `Activity` and is inherited by `BaseSimulation`) and ended (`datetime_end`). `Simulation` contains further information about the specific input and output sections ([see below](#sub-sections-in-simulation)).
 
 ??? question "Notation for the section attributes in the UML diagram"
-    Throughout this documentation pages we will use UML diagrams to describe our sections or classes definitions, as well as to include the information of their attributes / quantities with their main definitions. The notation is:
+    Throughout this documentation page we will use UML diagrams to describe our section / class definitions, as well as to include the information abpit their attributes / quantities including their main definitions. The notation is:
 
         <name-of-quantity>: <type-of-quantity>, <(optional) units-of-quantity>
 
     Thus, `cpu1_start: np.float64, s` means that there is a quantity named `'cpu1_start'` of type `numpy.float64` and whose units are `'s'` (seconds).
-    We also include the existance of sub-sections by bolding the name, i.e.:
-
-        <name-of-sub-section>: <sub-section-definition>
-
-    E.g., there is a sub-section under `Simulation` named `'model_method'` whose section defintion can be found in the `ModelMethod` section. We will represent this sub-section containment in more complex UML diagrams in the future using the containment arrow (see below for the specific ase of [`Program`](#program)).
+    We also include the existence of sub-sections by bolding the name. For example, there is a sub-section under `Simulation` named `'model_method'` whose section defintion can be found in the `ModelMethod` section. We will represent this sub-section containment in more complex UML diagrams in the future using the containment arrow (see below for the specific ase of [`Program`](#program)).
 
 We use double inheritance from `EntryData` in order to populate the `data` section in the NOMAD archive. All of the base sections discussed here are subject to the [public normalize function](#normalize-function) in NOMAD. The private function `set_system_branch_depth()` is related with the [ModelSystem section](#modelsystem).
 
 !!! abstract "Assignement 2.1"
-    Create a new directory and a new virtual environment within it, activate the environment, and install the `nomad-simulations` package. Once this is done, create an instance of the `Simulation` section. Imagine you know that the CPU1 took 24 minutes and 30 seconds on finishing the simulation; can you parse the relevant times into the `Simulation` section? What is the elapsed time in seconds? And in hours?
+    Create a new directory and a new virtual environment within it, activate the environment, and install the `nomad-simulations` package. Once this is done, create an instance of the `Simulation` section. Imagine you know that the CPU1 took 24 minutes and 30 seconds on finishing the simulation; can you populate the `Simulation` section with these times? What is the elapsed time in seconds? And in hours?
 
 ??? success "Solution 2.1"
     First, we will create the directory and the virtual environment; remember that the Python version must be 3.9 for `nomad-simulations` to work:
@@ -61,7 +57,7 @@ We use double inheritance from `EntryData` in order to populate the `data` secti
     simulation = Simulation()
     ```
 
-    Now, we can assign the elapsed time of the CPU1 by defining the start and the end quantities, i.e., `cpu1_start` and `cpu1_end`. Due to the units, we need to also import the [Pint](https://pint.readthedocs.io/en/stable/) utility class `ureg`:
+    Now, we can assign the elapsed time of the CPU1 by defining the start and the end quantities, i.e., `cpu1_start` and `cpu1_end`. To assign the units, we also need to import the [Pint](https://pint.readthedocs.io/en/stable/) utility class `ureg`:
     ```python
     from nomad.units import ureg
     simulation.cpu1_start = 0 * ureg.second
@@ -87,7 +83,7 @@ The `Simulation` section is composed of 4 main sub-sections:
 
 1. [`Program`](#program): contains all the program metadata, e.g., `name` of the program, `version`, etc.
 2. [`ModelSystem`](#modelsystem): contains all the system metadata about geometrical positions of atoms, their states, simulation cells, symmetry information, etc.
-3. [`ModelMethod`](#modelmethod): contains all the methodological metadata, and it is divided in two main aspects: the mathematical model or approximation used in the simulation (e.g., `DFT`, `GW`, `ForceFields`, etc.) and the numerical settings used to compute the properties (e.g., meshes, self-consistent parameters, basis sets settings, etc.).
+3. [`ModelMethod`](#modelmethod): contains all the methodological metadata, and is divided in two main aspects: the mathematical model or approximation used in the simulation (e.g., `DFT`, `GW`, `ForceFields`, etc.) and the numerical settings used to compute the properties (e.g., meshes, self-consistent parameters, basis sets settings, etc.).
 4. [`Outputs`](#outputs): contains all the output properties obtained during the simulation.
 
 !!! note "Self-consistent steps, SinglePoint entries, and more complex workflows."
@@ -156,10 +152,10 @@ The `ModelMethod` section is an input section which contains all the information
     </label>
 </div>
 
-`ModelMethod` is thus a sub-section under `Simulation`. It inherits from an abstract section `BaseModelMethod`, as well as containing a sub-section called `contributions` of the same section. The underlying idea of `ModelMethod` is to parse the input parameters of the mathematical model, typically a Hamiltonian. This total Hamiltonian or model could be splitted into individual sub-terms or `contributions`. Each of the electronic-structure methodologies inherits from `ModelMethodElectronic` that contains a boolean `is_spin_polarized` which indicates if the `Simulation` is spin polarized or not. The different levels of abstractions are useful when dealing with commonalities amongst the methods. 
+`ModelMethod` is thus a sub-section under `Simulation`. It inherits from an abstract section `BaseModelMethod`, as well as containing a sub-section called `contributions` of the same section. The underlying idea of `ModelMethod` is to parse the input parameters of the mathematical model, typically a Hamiltonian. This total Hamiltonian or model could be split into individual sub-terms or `contributions`. Each of the electronic-structure methodologies inherit from `ModelMethodElectronic`, which contains a boolean `is_spin_polarized` indicating if the `Simulation` is spin polarized or not. The different levels of abstractions are useful when dealing with commonalities amongst the methods. 
 
 !!! abstract "Assignement 2.3"
-    Instantiate a `DFT` section. For simplicity, you can also assign the `jacobs_ladder` quantity to be `'LDA'`. Add this sub-section to the `Simulation` section created in the Assignement 2.1. What is the underlying concept that allows you to add directly the `class DFT` under `Simulation.model_method`, provided that the definition of this attribute is a `ModelMethod` sub-section? Can you reason why the current schema (July 2024) is inconsistent in handling the `xc_functionals` contributions?
+    Instantiate a `DFT` section. For simplicity, you can also assign the `jacobs_ladder` quantity to be `'LDA'`. Add this sub-section to the `Simulation` section created in the Assignement 2.1. What is the underlying concept that allows you to add directly the `class DFT` under `Simulation.model_method`, provided that the definition of this attribute is a `ModelMethod` sub-section? Can you reason why the current schema (version 0.0.2) is inconsistent in handling the `xc_functionals` contributions?
 
 ??? success "Solution 2.3"
     Similarly to Assignement 2.2, we can import and create the `DFT` section:
@@ -223,7 +219,7 @@ The `NumericalSettings` section is an abstract section used to define the numeri
 
 The `ModelSystem` section is an input section which contains all the information about the geometrical space quantities (positions, lattice vectors, volumes, etc) of the simulated system. This section contains various quantities and sub-sections which aim to describe the system in the most complete way and in a variety of cases, from unit cells of crystals and molecules up to microstructures. In order to handle this _hierarchical_ structure, `ModelSystem` is nested over itself, i.e., a `ModelSystem` can be composed of sub-systems, which at the same time could be composed of smaller sub-systems, and so on. This is done thanks to the (proxy) sub-section attribute called `model_system`.
 
-The `Cell` sub-section is an important section which contains information of the simulated cell. It does not necessarily contain the information of the elements sitting in each `positions`, as this is responsability of a more specialized section, the `AtomicCell`. This section contains information about the atoms conforming the material in the [`AtomsState`](#atomsstate) section. The `Symmetry` sub-section contains information about the symmetry of the system, and the `ChemicalFormula` sub-section about the strings that allow the system to be identified in a specific format of the chemical formulas (IUPAC, Hill, etc).
+The `Cell` sub-section is an important section which contains information of the simulated cell, including the `lattice_vectors` and the `positions` of the particles within. However, it does not contain specific information about these particles, e.g., their chemical identity or electronic state, as this is the responsability of a more specialized section, the `AtomicCell`. This section stores the relevant information about each of the atoms constituting the material via the [`AtomsState`](#atomsstate) sub-section. The `Symmetry` sub-section contains standard symmetry classifications of the system, while the `ChemicalFormula` sub-section stores various strings that allow the system to be identified in a specific format of the chemical formulas (IUPAC, Hill, etc).
 
 The detailed relationship tree is:
 
@@ -237,12 +233,12 @@ The detailed relationship tree is:
 The abstract section `Entity` is defined in the [Basic Formal Ontology (BFO)](https://basic-formal-ontology.org/) as a continuant entity, and we use it to abstract our `ModelSystem` using the intermediate base section `System`. This base section, `System`, is also used by the experimental data models.
 
 ??? note "GeometricSpace and simulated cells."
-    The abstract section `GeometricSpace` is used to define more general real space quantities related with the system of reference used, areas, lengths, volumes, etc. However, this section and `Cell` are currently (July 2024) under revision and will probably change in the near future.
+    The abstract section `GeometricSpace` is used to define more general real space quantities related with the system of reference used, areas, lengths, volumes, etc. However, this section and `Cell` are currently (version 0.0.2) under revision and will probably change in the near future.
 
 
 ### `AtomsState` and other sub-sections {#atomsstate}
 
-The `AtomsState` section is a sub-section of `AtomicCell` containing information about the specific chemical element used in the simulation which is located in each of the `positions` defined under `Cell`. It also contains information about the relevant `OrbitalsState`, as well as of `CoreHole` or `HubbardInteractions` information. The detailed relationship tree is:
+The `AtomsState` section is a list of sub-sections within `AtomicCell`, corresponding to the list of particles specified by the `positions` array defined under `Cell`. Each `AtomsState` section contains information about a specific chemical element used in the simulation, and may also contain additional `OrbitalsState`, `CoreHole`, or `HubbardInteractions` information. The detailed relationship tree is:
 
 <div class="click-zoom">
     <label>
@@ -317,7 +313,7 @@ The `AtomsState` section is a sub-section of `AtomicCell` containing information
 
 ## `Outputs` {#outputs}
 
-The `Outputs` section is an output section which contains all the information about the computed properties by the simulation, as well as references to the specific `ModelMethod` and `ModelSystem` used to compute such properties. These properties are under `Outputs` in a long list of sub-sections, and they inherit from an abstract section called `PhysicalProperty`. This section contains the `value` of the property as well as other quantities. The `variables` sub-section allows to write a physical property in term of a varying parameter, and it also allows to calculate the shape of `value` in a dynamic way. This means that, the same physical property (e.g., `ElectronicBandGap`) could have different shapes depending on the problem being parsed (e.g., a single scalar number or a set of varying scalars with respect to a variable, e.g., `Temperature`).
+The `Outputs` section contains all the information about the properties computed by the simulations, as well as references to the relevant `ModelMethod` and `ModelSystem`. Each property is stored individually under `Outputs`, and inherits from an abstract section call `PhysicalProperty`. The `PhysicalProperty` base section contains the `value` of the property along with other relevant quantities. The `variables` sub-section enables the physical property to be stored as a function of a varying parameter. Accordingly, the shape of value is calculated in a dynamic way. This means that the same physical property (e.g., `ElectronicBandGap`) could have different shapes depending on the use-case being parsed (e.g., a single scalar number or a set of varying scalars with respect to a variable, e.g., `Temperature`).
 
 The `Outputs` section can be further specialized into `SCFOutputs` in case the properties are calculated in a series of self-consistent steps. The steps are stored under a sub-section called `scf_steps`, while the last step and other non-self-consistently calculated properties are stored directly under `SCFOutputs`. The reference to the `SelfConsistency` section (see [NumericalSettings](#numericalsettings)) allows us to automatically determine if a self-consistently calculated property is converged or not.
 
@@ -332,7 +328,7 @@ The detailed relationship tree is:
 
 
 !!! abstract "Assignement 2.7"
-    Instantiate a `SCFOutputs` section. We are going to store a self-consistently calculated `FermiLevel`, whose steps where `[1, 1.5, 2, 2.1, 2.101]` in eV. Also add the references to the section `ModelMethod` done in Assignement 2.3 and the section `ModelSystem` done in Assignement 2.6. For the self-consistently calculated `FermiLevel` section, add the reference to the section `SelfConsistency` done in Assignement 2.4.
+    Instantiate an `SCFOutputs` section. We are going to store a self-consistently calculated `FermiLevel`, whose values at each step are `[1, 1.5, 2, 2.1, 2.101]` in eV. Add the appropiate references to the `ModelMethod` and `ModelSystem` sections created in Assignement 2.3 and Assignement 2.6, respectively. For the self-consistently calculated `FermiLevel` section, add the reference to the section `SelfConsistency` created in Assignement 2.4.
 
     Check if the `FermiLevel` is self-consistently converged or not by using a class method from `SCFOutputs`. What happens if the `SelfConsistency.threshold_change` is now `1e-24`?
 
@@ -447,7 +443,7 @@ Each base section defined using the NOMAD schema has a set of public functions w
 
 This function is run within the NOMAD infrastructure by the [`MetainfoNormalizer`](https://github.com/nomad-coe/nomad/blob/develop/nomad/normalizing/metainfo.py) in the following order:
 
-1. A child section's `normalize()` function is run before their/its parents' `normalize()` function.
+1. A child section's `normalize()` function is run before its parents' `normalize()` function.
 2. For sibling sections, the `normalize()` function is executed from the smaller to the larger `normalizer_level` attribute. If `normalizer_level` is not set or if they are the same for two different sections, the order is established by the attributes definition order in the parent section.
 3. Using `super().normalize(archive, logger)` runs the inherited section normalize function.
 

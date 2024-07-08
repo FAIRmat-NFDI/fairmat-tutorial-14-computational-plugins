@@ -24,7 +24,7 @@ python3 -m venv .pyenvtuto
 ```
 and activate it in your shell:
 ```
-. .pyenvdoc/bin/activate
+. .pyenvtuto/bin/activate
 ```
 Always ensure that the environment is active.
 Else run the command above again.
