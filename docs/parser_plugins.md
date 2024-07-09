@@ -487,8 +487,8 @@ class VasprunXMLParser(MatchingParser):
         )
 ```
 
-Lastly, if at any point you require a derived property, you can `normalize()` the section and extract it.
-Just ensure to pass the necessary information through.
+Lastly, if at any point you require a derived property for your parser logic, you can `normalize()` the section and extract it.
+Just ensure to pass through the necessary information at the instantiation.
 The NOMAD base will anyhow invoke normalization, so do not feel responsible for normalizing the entire archive.
 
 ??? warning "The Sense and Nonsense of Readers"
@@ -631,3 +631,30 @@ Conceptually, there are five key players to keep track off:
 - **module setup file**: _exposes_ the entry point (and its group) under the format of `<module_name>.<object_name>:<entry_point_name>`. This is the name by which you should refer to it within the entry point system. For importing the within a Python script, use only `<module_name>.<object_name>`. In NOMAD we use the `pyproject.toml` setup file under the module's root folder.
 - **NOMAD configuration file**: called in `nomad.yaml`, controls which entry points are _included_ or _excluded_, as well as their _configuration parameters_.
 
+## Extra: Working from a NoteBook
+
+In Jupyter Notebook, you can manipulate data in a head-on way without NOMAD base as an intermediary.
+Note that this means providing the parsing input yourself, as well as manually triggering normalization.
+A template setup looks something like:
+
+```python
+from nomad.datamodel import EntryArchive
+from nomad.client.processing import parse
+from nomad.client import normalize_all
+from nomad.normalizing.metainfo import MetainfoNormalizer
+from <parser_plugin>.parser import <ParserPlugin>
+
+p = ParserPlugin()
+a = EntryArchive()
+
+# parsing ONLY
+p.parse(<mainfile>, a, logger=None)
+
+# parsing + full normalization
+a = parse(<mainfile>)
+normalize_all(a[0])
+
+# parsing + schema-only normalization
+p.parse(<mainfile>, a, logger=None)
+MetainfoNormalizer().normalize(archive=a)
+```
