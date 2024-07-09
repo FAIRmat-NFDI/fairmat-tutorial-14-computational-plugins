@@ -95,7 +95,7 @@ The final piece in the entry point system, the `NOMAD configurations`, are exter
 The configurations refers back to the `publication specifications`.
 It allows you to control the loading of plugins and their options, however, normally you don't have to touch anything there for NOMAD to pick up on your parser.
 
-??? info "Managing Entry Points"
+??? tip "Managing Entry Points"
     ### What are they?
     The plugin setup follows the common [entry-points](https://setuptools.pypa.io/en/latest/userguide/entry_point.html) Python standard from `importlib.metadata`.
     It works in tandem with `pip` install to allow for a more elegant and controlled way of exposing and loading (specific functionalities in) modules.
@@ -125,7 +125,7 @@ The code snippets provided below should go under `src/nomad_parser_vasp/parsers/
 As denoted in step 1, the parser first has to read in the file contents as passed through by the NOMAD base.
 The directives for selecting _mainfiles_ are passed on via an interaction cascade from `nomad.yaml` > `ParserEntryPoint` > `MatchingParser`.
 
-??? info "What are mainfiles?"
+??? note "What are mainfiles?"
     Mainfiles are files by which an expert / program can determine the code used / the parser to use.
     The selection directives (see below) target these files specifically.
     Their file paths are passed on to the parser, which can either process them or navigate the folder for other, auxiliary files.
@@ -190,7 +190,7 @@ class VasprunXMLParser(MatchingParser):
     pass
 ```
 
-??? info "Running your Parser"
+??? tip "Running your Parser"
     ### Front-end
     In everyday NOMAD use, the user only interacts with NOMAD via the GUI or API.
     NOMAD will regulate parsing as the user uploads via these channels.
@@ -233,9 +233,64 @@ NOMAD can already run this parser, but will raise a `NotImplementedError`.
 The interface may be defined, but we still need to fill in the actual parsing by overwriting the default `parse(...)` function.
 That is for the next section.
 
+### Getting the Data
+
+Where `MatchingParser` provides a path to the mainfiles, a separate parser is needed for actually reading the _file contents_.
+NOMAD already provides several parsers for popular, general-purpose formats like JSON, HDF5, and XML. <!-- TODO verify JSON -->
+Plain text is also supported, but a bit more involved.
+We cover it in section [From Text to Hierarchies](#from-text-to-hierarchies).
+
+Contrary to `MatchingParser`, none of these parsers interface directly with the NOMAD base.
+For example, they do not support the `parse(...)` function.
+Therefore, our parser has to call `XMLParser`.
+The typical strategy here is to save the _reader object_ for later manipulation.
+In the example below, we read in the whole file.
+The [XPath syntax](https://www.w3schools.com/xml/xpath_syntax.asp) also supports subbranch extraction, which can be incrementally added to the reader object. 
+
+```python
+from structlog.stdlib import BoundLogger
+from nomad.datamodel.datamodel import EntryArchive
+from nomad.parsing.file_parser.xml_parser import XMLParser
+
+class VasprunXMLParser(MatchingParser):
+    def parse(
+        self, mainfile: str, archive: EntryArchive, logger: BoundLogger,
+        child_archives: dict[str, EntryArchive] = None,
+    ) -> None:
+        xml_reader = XMLParser(mainfile=mainfile).parse('/*')  # XPath syntax
+        archive.data = xml_reader._results
+```
+<!-- note that this XMLParser does not have a universal interface -->
+
+??? note "To Return or not to Return"
+    Should `parse(...)` return a filled out `EntryArchive` object to the NOMAD base or rather overwrite `archive`?
+    Its _type signature_, i.e. `-> None`, denotes that it should in fact **not** return any output.
+
+    In NOMAD, we use type signatures as much as possible.
+    They are also tested in our CI/CD, which might request adding them in cases where types cannot be inferred.
+
+The `NotImplementedError` is now resolved.
+Running the parser results in a new error, however, `AttributeError: 'dict' object has no attribute 'm_parent'`.
+This may look discouraging, but progress was made!
+The data has been successfully extracted: check `xml_reader._results`.
+The issue stems from data not yet meeting the high-quality standards of the NOMAD schema.
+In the next section, we convert it.
+
+??? info "What is the Archive?"
+    An archive is a (typically empty) storage object for an entry.
+    It is populated by the parser and later on serialized into an `archive.json` file by NOMAD for permanent storage.
+
+    It has five sections, but for novel parsers we are solely interested in `data` and `workflow`.
+
+    - `metainfo`: internal NOMAD metadata registering who uploaded the data and when is was uploaded. This is handled completely automatically by the NOMAD base.
+    - `results`: the data indexed and ready to query at full database scale. It is automatically produced from `worfklow`, `data`, and `run`.
+    - `workflow`: some entries coordinate other entries. This section coordinates the . For more, see [Interfacing complex simulations](custom_workflows.md).
+    - `data`: the new section detailing all extracted values. It comes with the updated schema presented in [NOMAD-Simulations schema plugin](nomad_simulations.md).
+    - `run`: the predecessor to `data`. It should only be targeted by legacy parsers, and has been marked for deprecation.
+
 ??? info "Communicating via Logs"
 
-    Each entry has an associated log.
+    Each entry has an associated log. <!-- Add screenshot GUI? -->
     These communicate info or warnings about the processing, as well as debugging info and (critical) errors for tracing bugs.
     Include the latter when contacting us regarding any processing issues.
 
@@ -258,61 +313,6 @@ That is for the next section.
         logger.info('VasprunXMLParser.parse', parameter=configuration.parameter)
         ...
     ```
-
-### Getting the Data
-
-Where `MatchingParser` provides a path to the mainfiles, a separate parser is needed for actually reading the _file contents_.
-NOMAD already provides several parsers for popular, general-purpose formats like JSON, HDF5, and XML. <!-- TODO verify JSON >
-Plain text is also supported, but a bit more involved.
-We cover it in section [From Text to Hierarchies](#from-text-to-hierarchies).
-
-Contrary to `MatchingParser`, none of these parsers interface directly with the NOMAD base.
-For example, they do not support the `parse` function.
-Therefore, our parser has to call `XMLParser`.
-The typical strategy here is to save the _reader object_ for later manipulation.
-In the example below, we read in the whole file.
-The [XPath syntax](https://www.w3schools.com/xml/xpath_syntax.asp) also supports subbranch extraction, which can be incrementally added to the reader object. 
-
-```python
-from structlog.stdlib import BoundLogger
-from nomad.datamodel.datamodel import EntryArchive
-from nomad.parsing.file_parser.xml_parser import XMLParser
-
-class VasprunXMLParser(MatchingParser):
-    def parse(
-        self, mainfile: str, archive: EntryArchive, logger: BoundLogger,
-        child_archives: dict[str, EntryArchive] = None,
-    ) -> None:
-        xml_reader = XMLParser(mainfile=mainfile).parse('/*')  # XPath syntax
-        archive.data = xml_reader._results
-```
-<!-- note that this XMLParser does not have a universal interface -->
-
-??? info "What is the Archive?"
-    An archive is a (typically empty) storage object for an entry.
-    It is populated by the parser and later on serialized into an `archive.json` file by NOMAD for permanent storage.
-
-    It has five sections, but for novel parsers we are solely interested in `data` and `workflow`.
-
-    - `metainfo`: internal NOMAD metadata registering who uploaded the data and when is was uploaded. This is handled completely automatically by the NOMAD base.
-    - `results`: the data indexed and ready to query at full database scale. It is automatically produced from `worfklow`, `data`, and `run`.
-    - `workflow`: some entries coordinate other entries. This section coordinates the . For more, see [Interfacing complex simulations](custom_workflows.md).
-    - `data`: the new section detailing all extracted values. It comes with the updated schema presented in [NOMAD-Simulations schema plugin](nomad_simulations.md).
-    - `run`: the predecessor to `data`. It should only be targeted by legacy parsers, and has been marked for deprecation.
-
-The `NotImplementedError` is now resolved.
-Running the parser results in a new error, however, `AttributeError: 'dict' object has no attribute 'm_parent'`.
-This may look discouraging, but progress was made!
-The data has been successfully extracted: check `xml_reader._results`.
-The issue stems from data not yet meeting the high-quality standards of the NOMAD schema.
-In the next section, we convert it.
-
-??? info "To Return or not to Return"
-    Should `parse(...)` return a filled out `EntryArchive` object to the NOMAD base or rather overwrite `archive`?
-    Its _type signature_, i.e. `-> None`, denotes that it should in fact **not** return any output.
-
-    In NOMAD, we use type signatures as much as possible.
-    They are also tested in our CI/CD, which might request adding them in cases where types cannot be inferred.
 
 ## From Parser back to NOMAD
 
@@ -373,6 +373,13 @@ class VasprunXMLParser(MatchingParser):
             ),
         )
 ```
+
+??? warning "Data Type Conversion"
+    NOMAD strictly enforces `Quantity` types like `np.int32`, `np.float64`, `np.complex128`, `str`, etc.
+    These do no necessarily include all concepts from the `typing` or `numpy` module.
+    `List`, for example, is controlled via the `Quantity.shape` attribute.
+
+    Note that you should apply the proper type before storing the quantity value, as conversions that lead to loss of precision are returned as errors, e.g. `int` cannot be readily cast into `np.float64`.
 
 The final `archive.json` will look something like the following.
 Obviously, the exact values depend on the file parsed.
@@ -658,7 +665,7 @@ txt_reader = TextParser(                # root node
 Note that the regex patterns should always contain _match groups_, i.e. `()`, else no text is extracted.
 This is especially important for blocks, where the typical regex pattern has the form `r'<re_header>(?[\s\S]+)<re_footer>'` to match everything between the block header and footer.
 
-??? info "Dissecting Tables"
+??? note "Dissecting Tables"
     The typical approach to processing text tables is to match, in order:
     
     1. the table and extract (at least) the body.
@@ -669,16 +676,14 @@ This is especially important for blocks, where the typical regex pattern has the
     <!-- TODO how to extract as a matrix immediately (no dict keys) -- >
 
 The main concern is how to leverage the additional freedom of a third format.
-Our foremost advice is to
+Our foremost advice is to:
 
 1. follow the order in which the data normally appears.
 2. use as similar as possible node names as in the file. If none are present, fall back on the NOMAD schema names.
 3. systematically break down blocks of text via the weaving technique.
 4. use the same node names when multiple versions exist. Maximize the common nodes and overall keep the alternatives as close as possible together.
 
-Handling contingent values is more so reserved for step 3, mapping.
-An example would be reading file units:
-
+<!-- Handling contingent values is more so reserved for step 3, mapping. -->
 <!-- TODO add dynamic units example -->
 
 ??? info "Semantic Patterns"
