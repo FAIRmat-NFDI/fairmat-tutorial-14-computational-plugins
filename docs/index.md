@@ -12,16 +12,19 @@ The focus of this tutorial is the `nomad-simulations` schema package. If you are
 
 First, create the directory and the virtual environment in the terminal. Note that the Python version must be 3.9 for `nomad-simulations` to work:
 
-    mkdir test_nomadsimulations
-    cd test_nomadsimulations/
-    python3.9 -m venv .pyenv
-    source .pyenv/bin/activate
-
+```sh
+mkdir test_nomadsimulations
+cd test_nomadsimulations/
+python3.9 -m venv .pyenv
+source .pyenv/bin/activate
+```
 
 Once this is done, we can pip install the `nomad-simulations` package:
 
-    pip install --upgrade pip
-    pip install nomad-simulations --index-url https://gitlab.mpcdf.mpg.de/api/v4/projects/2187/packages/pypi/simple`
+```sh
+pip install --upgrade pip
+pip install nomad-simulations --index-url https://gitlab.mpcdf.mpg.de/api/v4/projects/2187/packages/pypi/simple
+```
 
 If you have any problems, please contact us via the Discord event channel.
 
