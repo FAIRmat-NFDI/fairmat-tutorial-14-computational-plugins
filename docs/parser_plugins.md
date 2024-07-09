@@ -491,6 +491,18 @@ Lastly, if at any point you require a derived property, you can `normalize()` th
 Just ensure to pass the necessary information through.
 The NOMAD base will anyhow invoke normalization, so do not feel responsible for normalizing the entire archive.
 
+??? warning "The Sense and Nonsense of Readers"
+    In the examples above we fixated on the `XMLParser`, which really is more of a "reader", as it does not interface with NOMAD base directly.
+    Instead, its only purpose is to make the file data accessible to Python.
+
+    As such, a pragmatic attitude dictates that if you have more affinity for another reader, e.g. `lxml`, `BeautifulSoup`, HDF5 (demonstrated in the [Schema Plugin]() part), etc.
+    Just mind the dependencies.
+    Indeed, `XMLParser` itself is based on `ElementTree`, and just extends the reading into `dict`.
+    Feel free to similarly add logic to your own readers above the parsing class.
+    This sums up the legacy approach.
+
+    Note that the alternative approach shown in [Mapping Annotations on the Schema side](parser_plugins.md#mapping-annotations-on-the-schema-side) does require specific NOMAD base converters for interacting with the NOMAD schema.
+
 ### Via Mapping
 
 **DISCLAIMER: the code and functionalities covered in this section are still under construction and only serves as an illustration of the underlying concepts. Stay tuned for updates.**
@@ -498,7 +510,7 @@ The NOMAD base will anyhow invoke normalization, so do not feel responsible for 
 The second option is to have the instantiation run automatically.
 In that case, the mapping is added directly to our schema as an _annotation_.
 Leveraging this enhanced schema requires some new readers, like `mapping_parser.XMLParser` for the XML side and `MetainfoParser` for the schema side.
-The mapping is thus relegated to `schema_packages/vasp_package.py`, leaving `parsers/xml_parser.py` as:
+The mapping is thus relegated to `schema_packages/vasp_schema.py`, leaving `parsers/xml_parser.py` as:
 
 ```python
 from structlog.stdlib import BoundLogger
