@@ -28,9 +28,9 @@ NOMAD therefore offers powerful _tools_ and documentation on _best practices_ to
 The exact solutions are, in the same order:
 
 1. `MatchingParser` - This class selects the file to be parsed. Since it interfaces with the NOMAD base directly, it will read in most of the settings automatically from there.
-2. `XMLParser` and co. / `TextParser` - There are several _reader classes_ for loading common source formats into Python data types. Examples include the `XMLParser` and `HDF5Parser`. We will demonstrate `XMLParser` in [Parsing Hierarchical Tree Formats](parser_plugins.md#getting-the-data). Plain text files, meanwhile, involve an additional _matching step_ via the `TextParser`. More on this in [From Text to Hierarchies](parser_plugins.md#from-text-to-hierarchies).
-3. `MappingAnnotationModel` - This is arguably the most involved part for the parser developer, as this is where the external data gets further semantically enriched and standardized. It requires domain expertise to understand the relationship between the data fields in the source file and the [NOMAD-Simulations schema](nomad_simulations.md). If step 2 went well, step 3 could just involve _annotating_ the target/NOMAD schema. We show how this is conceptually possible with `MappingAnnotationModel` in [Mapping a to Schema](parser_plugins.md#mapping-a-to-schema), but note that it still at the prototype stage.
-4. [NOMAD-Simulations schema](nomad_simulations.md) / `MappingAnnotationModel` - The `MSection`s and `utils.py` in the schema provide _normalizers_ and _helper functions_ to alleviate most of the data mangling. For small amendments, use the mapping approach described in [Via Mapping](parser_plugins.md#via-mapping). For larger ones, consider extending the schema as covered in [Extending NOMAD-Simulations](schema_plugins.md).
+2. `XMLParser` and co. / `TextParser` - There are several _reader classes_ for loading common source formats into Python data types. Examples include the `XMLParser` and `HDF5Parser`. We will demonstrate `XMLParser` in [Parsing Hierarchical Tree Formats](#getting-the-data). Plain text files, meanwhile, involve an additional _matching step_ via the `TextParser`. More on this in [From Text to Hierarchies](#from-text-to-hierarchies).
+3. `MappingAnnotationModel` - This is arguably the most involved part for the parser developer, as this is where the external data gets further semantically enriched and standardized. It requires domain expertise to understand the relationship between the data fields in the source file and the [NOMAD-Simulations schema](nomad_simulations.md). If step 2 went well, step 3 could just involve _annotating_ the target/NOMAD schema. We show how this is conceptually possible with `MappingAnnotationModel` in [Mapping a to Schema](#mapping-a-to-schema), but note that it still at the prototype stage.
+4. [NOMAD-Simulations schema](nomad_simulations.md) / `MappingAnnotationModel` - The `MSection`s and `utils.py` in the schema provide _normalizers_ and _helper functions_ to alleviate most of the data mangling. For small amendments, use the mapping approach described in [Via Mapping](#via-mapping). For larger ones, consider extending the schema as covered in [Extending NOMAD-Simulations](schema_plugins.md).
 5. `MetainfoParser` - this _converter_ bridges the annotated schema from step 3 with the reader classes in step 2. `MetainfoParser.data_object` contains the final `ArchiveSection` that is stored under `archive.data`.
 
 In the next section, we will briefly illustrate how `MatchingParser`, `XMLParser`, and `MetainfoParser` interconnect, as well as flesh out some setup details.
@@ -76,7 +76,7 @@ Please select the same license for maximal legal compatibility.
 ```
 
 This examples also highlights the files containing _entry point_ information between parentheses.
-They are explained in greater detail in section [Extra: Managing Entry Points](parser_plugins.md#extra-managing-entry-points).
+They are explained in greater detail in section [Extra: Managing Entry Points](#extra-managing-entry-points).
 For now, it suffices to understand them as the official mechanism for `pip` installing modules.
 The dependence runs bottom up, i.e. the `module setup file` refers to `entry point` that refers to `target functionality`.
 
@@ -501,7 +501,7 @@ The NOMAD base will anyhow invoke normalization, so do not feel responsible for 
     Feel free to similarly add logic to your own readers above the parsing class.
     This sums up the legacy approach.
 
-    Note that the alternative approach shown in [Mapping Annotations on the Schema side](parser_plugins.md#mapping-annotations-on-the-schema-side) does require specific NOMAD base converters for interacting with the NOMAD schema.
+    Note that the alternative approach shown in [Mapping Annotations on the Schema side](#mapping-annotations-on-the-schema-side) does require specific NOMAD base converters for interacting with the NOMAD schema.
 
 ### Via Mapping
 
