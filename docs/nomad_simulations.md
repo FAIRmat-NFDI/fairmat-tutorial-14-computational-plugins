@@ -1,4 +1,4 @@
-# Part II: Working with the NOMAD-Simulations schema plugin
+# Part 2 - Working with the NOMAD-Simulations schema plugin
 
 In NOMAD, all the simulation metadata is defined under the `Simulation` section. You can find its Python schema defined in the [`nomad-simulations`](https://github.com/nomad-coe/nomad-simulations/) repository. The [entry point](parser_plugins.md) for the schema is defined in [src/nomad_simulations/schema_packages/\_\_init\_\_.py](https://github.com/nomad-coe/nomad-simulations/blob/develop/src/nomad_simulations/schema_packages/__init__.py) module. This section will appear under the `data` section for each NOMAD [*entry*](https://nomad-lab.eu/prod/v1/staging/docs/reference/glossary.html#entry). There is also a [specialized documentation page](https://nomad-coe.github.io/nomad-simulations/) in the `nomad-simulations` repository.
 

@@ -1,4 +1,4 @@
-# Part V: Interfacing complex simulation and analysis workflows with NOMAD.
+# Part 5 - Interfacing complex simulation and analysis workflows with NOMAD.
 
 The concept of workflow is essential in simulations and analysis of Materials Science and Chemistry data. In NOMAD, we give support to workflows and understand them as a way of organizing data to keep the full provenance of an activity (either experimental or computational). Workflows can be also parsed in NOMAD in two slightly different ways: in an automatic way or by defining a custom workflow additional file. The first case is done when the simulation input and output files contain enough information to recognize a certain workflow, and it is typically done in the parser plugin. You can read more on how to prepare your input/output files to make this automatic recognition easier in the [Extra: Standard workflows recognition](#standard-workflows-recognition) section at the end of this page.
 
