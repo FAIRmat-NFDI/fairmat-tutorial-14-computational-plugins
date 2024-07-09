@@ -4,11 +4,11 @@ site_description: |
 site_author: FAIRmat consortium
 nav:
   - Overview: index.md
-  - Part I - Intro to NOMAD: intro.md
-  - Part II - NOMAD-Simulations: nomad_simulations.md
-  - Part III - Parser Plugins: parser_plugins.md
-  - Part IV - Schema Plugins: schema_plugins.md
-  - Part V - Custom Workflows: custom_workflows.md
+  - Part 1 - Intro to NOMAD: intro.md
+  - Part 2 - NOMAD-Simulations: nomad_simulations.md
+  - Part 3 - Parser Plugins: parser_plugins.md
+  - Part 4 - Schema Plugins: schema_plugins.md
+  - Part 5 - Custom Workflows: custom_workflows.md
 theme:
   name: material
   palette:
