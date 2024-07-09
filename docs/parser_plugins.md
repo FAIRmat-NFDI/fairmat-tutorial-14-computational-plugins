@@ -150,7 +150,10 @@ There are three kinds of file aspects that can be targeted, all via _regular exp
     <?xml version="1.0" encoding="ISO-8859-1"?>
     <modeling>
     ```
-    You can capture this via `mainfile_contents_re` in a regex like `r'<\?xml version="1\.0" encoding="ISO\-8859\-1"?>\n<modeling>`.
+    You can capture this via `mainfile_contents_re` in a regex like
+    ```python
+    r'<\?xml version="1\.0" encoding="ISO\-8859\-1"?>\n<modeling>
+    ```
 <!-- TODO double-check -->
 
 #### Mainfile Interfacing
@@ -170,15 +173,15 @@ class VasprunXMLParser(MatchingParser):
 NOMAD can already run this parser, but will raise a `NotImplementedError`.
 The interface may be defined, but we still need to fill in the actual parsing by overwriting the default `parse(...)` function.
 
-??? info "Run your parser"
+??? info "Running your Parser"
     In everyday NOMAD use, the user only interacts with NOMAD via the GUI or API.
     NOMAD will regulate parsing as the user uploads via these channels.
+
     During development, the command line is probably the preferable option, as you can load changes faster and incorporate it into your favorite test setups.
     To print the archive to the terminal, use `nomad parse --show-archive <mainfile>`.
     If you already know which parser to use, add the `--parser 'parser/<parser or entry point name>'` flag.
     To list all options, type `nomad parse --help`.
     Note that even the command line passes through the NOMAD base, so make sure to have it installed and set up correctly.
-
 
 ### Getting the Data
 
@@ -209,10 +212,12 @@ class VasprunXMLParser(MatchingParser):
 ```
 <!-- note that this XMLParser does not have a universal interface -->
 
-??? info "What is the archive?"
+??? info "What is the Archive?"
     An archive is a (typically empty) storage object for an entry.
     It is populated by the parser and later on serialized into an `archive.json` file by NOMAD for permanent storage.
+
     It has five sections, but for novel parsers we are solely interested in `data` and `workflow`.
+
     - `metainfo`: internal NOMAD metadata registering who uploaded the data and when is was uploaded. This is handled completely automatically by the NOMAD base.
     - `results`: the data indexed and ready to query at full database scale. It is automatically produced from `worfklow`, `data`, and `run`.
     - `workflow`: some entries coordinate other entries. This section coordinates the . For more, see [Interfacing complex simulations](custom_workflows.md).
@@ -226,12 +231,12 @@ The data has been successfully extracted: check `xml_reader._results`.
 The issue stems from data not yet meeting the high-quality standards of the NOMAD schema.
 In the next section, we convert it.
 
-??? info "To return or not return"
-    Does the NOMAD base expect an `EntryArchive` object back from `parse`.
-    In NOMAD we use type annotation as much as possible.
-    It also tested in our CI/CD.
-    The type signature of `parse` denotes that it should not return any output, i.e. `-> None`.
-    Instead, the input will be overwritten and later on extracted.
+??? info "To Return or not to Return"
+    Should `parse(...)` return a filled out `EntryArchive` object to the NOMAD base or rather overwrite `archive`?
+    Its _type signature_, i.e. `-> None`, denotes that it should in fact **not** return any output.
+
+    In NOMAD, we use type signatures as much as possible.
+    They are also tested in our CI/CD, which might request adding them in cases where types cannot be inferred.
 
 #### Extra: Communicating via Logs
 
@@ -400,15 +405,17 @@ Obviously, the exact values depend on the file parsed.
     The boundary conditions, meanwhile, are always periodic in VASP.
 
 ??? success "Solution 3.2"
-    ```
-    python
+    The new `ModelSystem().cell` attribute now reads as:
+
+    ```python
     ...
     cell=AtomicCell(
         positions=xml_get("structure[@name='finalpos']/./varray[@name='positions']/v")[0],
         lattice_vectors=xml_get("structure//varray[@name='basis']/v")[0],
         periodic_boundary_conditions=[True] * 3,
     )
-    ``` <!-- TODO double-check -->
+    ```
+    <!-- TODO double-check -->
 
 This example shows a declarative approach to object instantiation:
 any quantity/subsection listed under a section in the schema can be directly passed to the constructor.
@@ -417,10 +424,10 @@ Or course, the existence of section may be contingent on one and another.
 If no `finalpos` are extracted &mdashmaybe due to a premature termination&mdash neither should `model_system` be populated.
 In this case, it is better to set the section attribute after constructing the main skeleton.
 
-??? note "Updating the getter"
-    `xml_get` should now be responsible of failure handling/signaling.
+??? note "Updating the Getter"
+    Given our modifications, `xml_get` should now also be in charge of failure signaling.
     Depending on the type expected, we may use `None` or `[]`.
-    To prevent `IndexError` when extracting, we also pass the slice along as an argument.
+    To prevent `IndexError` when extracting, we also pass the array `slice(...)` along as an argument.
 
 ```python
 ...
@@ -602,7 +609,12 @@ Note that the regex patterns should always contain _match groups_, i.e. `()`, el
 This is especially important for blocks, where the typical regex pattern has the form `r'<re_header>(?[\s\S]+)<re_footer>'` to match everything between the block header and footer.
 
 ??? info "Dissecting Tables"
-    The typical approach to processing text tables is to match the table (body), a standard line, and lastly, a standard column. <!-- TODO explore tools for when column semantics is tied to its index -->
+    The typical approach to processing text tables is to match, in order:
+    
+    1. the table and extract (at least) the body.
+    2. a standard line.
+    3. the relevant column. <!-- TODO explore tools for when column semantics is tied to its index -->
+
     Ensure that you toggle the `Quantity.repeats: Union[bool, int]` option to obtain a list of matches.
     <!-- TODO how to extract as a matrix immediately (no dict keys) -- >
 
@@ -630,7 +642,7 @@ The plugin setup follows the common [entry-points](https://setuptools.pypa.io/en
 It works in tandem with `pip` install to allow for a more elegant and controlled way of exposing and loading (specific functionalities in) modules.
 Entry points also provide the module developer tools for controlling how it ought to be exposed to the environment, e.g. name, description, configuration.
 
-??? note "Entry Point Visibility"
+??? info "Entry Point Visibility"
     Contrary to regular Python dependencies, entry points are visible at a system-wide level, even when installed in a local environment.
     You can therefore choose whether to install plugins in their own environment, or construct a shared one (with the NOMAD base).
     We recommend the former to prevent dependency clashing.
