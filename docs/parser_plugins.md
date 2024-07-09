@@ -55,10 +55,8 @@ They are explained in greater detail in section [Extra: Managing Entry Points](p
 For now, it suffices to understand them as the official mechanism for `pip` installing modules.
 The dependence runs bottom up, i.e. the `module setup file` refers to `entry point` that refers to `target functionality`.
 
-The final entry point piece (`NOMAD configuration file`) resides in `nomad.yaml` and refers back to the `module setup file`.
-Normally, you don't have to touch anything there for NOMAD to pick up on your parser.
-It does allows you to control the loading of plugins and their options.
-Closing the "dependence" cycle, `myparser.py` has to read in these options.
+The final piece in the entry point system (NOMAD configuration file) resides in `nomad.yaml` and refers back to the module setup file. <!-- clarify terminology -->
+It allows you to control the loading of plugins and their options, however, normally you don't have to touch anything there for NOMAD to pick up on your parser.
 
 ## Fundamentals of Parsing
 
@@ -77,23 +75,23 @@ Blurring these responsibilities leads to a wild-growth in parser design and adde
 NOMAD therefore offers powerful _tools_ and documentation on _best practices_ to help the parser developer manage each distinct responsibility.
 The exact solutions are, in the same order:
 
-1. `MatchingParser` - This class passes selects the file to be parsed. Since it interfaces with the NOMAD base directly, it will read most of the settings automatically in from there.
+1. `MatchingParser` - This class selects the file to be parsed. Since it interfaces with the NOMAD base directly, it will read in most of the settings automatically from there.
 2. `XMLParser` and co. / `TextParser` - There are several _reader classes_ for loading common source formats into Python data types. Examples include the `XMLParser` and `HDF5Parser`. We will demonstrate `XMLParser` in [Parsing Hierarchical Tree Formats](parser_plugins.md#getting-the-data). Plain text files, meanwhile, involve an additional _matching step_ via the `TextParser`. More on this in [From Text to Hierarchies](parser_plugins.md#from-text-to-hierarchies).
 3. `MappingAnnotationModel` - This is arguably the most involved part for the parser developer, as this is where the external data gets further semantically enriched and standardized. It requires doamin expertise to understand the relationship between the data fields in the source file and the [NOMAD-Simulations schema](nomad_simulations.md). If step 2 went well, this step only involves _annotating_ the target schema via `MappingAnnotationModel`. More on this in [Mapping a to Schema](parser_plugins.md#mapping-a-to-schema).
-4. [NOMAD-Simulations schema](nomad_simulations.md) / `MappingAnnotationModel` - The `MSection`s and `utils.py` in the schema provide _normalizers_ and _helper functions_ to alleviate most of the data mangling. For small amendments*, use `MappingAnnotationModel.operator`. For larger ones, consider extending the schema as covered in [Extending NOMAD-Simulations](schema_plugins.md).
+4. [NOMAD-Simulations schema](nomad_simulations.md) / `MappingAnnotationModel` - The `MSection`s and `utils.py` in the schema provide _normalizers_ and _helper functions_ to alleviate most of the data mangling. For small amendments, use the mapping approach described in [Via Mapping](parser_plugins.md#via-mapping). For larger ones, consider extending the schema as covered in [Extending NOMAD-Simulations](schema_plugins.md).
 5. `MetainfoParser` - this _converter_ bridges the annotated schema from step 3 with the reader classes in step 2. `MetainfoParser.data_object` contains the final `ArchiveSection` that is stored under `archive.data`.
 
 In the next section, we will briefly illustrate how `MatchingParser`, `XMLParser`, and `MetainfoParser` interconnect, as well as flesh out some setup details.
 
 ## Assembling a Parser Class
 
-Throughout this subsection, we will step-by-step illustrate the process of building out a parser using the VASP XML output format as an example.
+Throughout this subsection, we will provide a step-by-step guide of the process for building out a parser using the VASP XML output format as an example.
 The code snippets provided below should go under `src/nomad_parser_vasp/parsers/`, in a file clarifying the use, e.g. `xml_parser.py`.
 
 ### Hooking up a Parser
 
 As denoted in step 1, the parser first has to read in the file contents as passed through by the NOMAD base.
-The directives for selecting _mainfiles_ are passed on via an interaction cascades from `nomad.yaml` > `ParserEntryPoint` > `MatchingParser`.
+The directives for selecting _mainfiles_ are passed on via an interaction cascade from `nomad.yaml` > `ParserEntryPoint` > `MatchingParser`.
 
 !!! info "What are mainfiles?"
     Mainfiles are files by which an expert / program can determine the code used / the parser to use.
@@ -103,7 +101,7 @@ The directives for selecting _mainfiles_ are passed on via an interaction cascad
 #### Mainfile matching
 
 Since mainfiles are intrinsically connected to the scripts that parse them, the directives should be set via `ParserEntryPoint`.
-I rare cases, however, an Oasis admin may decide to override these selection directives via the `nomad.yaml`.
+In rare cases, however, an Oasis admin may decide to override these selection directives via the `nomad.yaml`.
 We publish our VASP XML parser in `src/nomad_parser_vasp/parsers/__init__.py` as
 
 ```python
@@ -132,7 +130,7 @@ There are three kinds of file aspects that can be targeted, all via _regular exp
 !!! abstract "Assignment"
     XML is a common file extension, and the user may remove `vasprun` from the name.
     Swap out `mainfile_name_re` for a different selection directive.
-    <!-- TODO research how multiple directives combine>
+<!-- TODO research how multiple directives combine -->
 
 !!! success "Solution"
     VASP XML typically starts with the tags
@@ -140,15 +138,16 @@ There are three kinds of file aspects that can be targeted, all via _regular exp
     <?xml version="1.0" encoding="ISO-8859-1"?>
     <modeling>
     ```
-    You can capture this via `mainfile_contents_re` in a regex like `r'<\?xml version="1\.0" encoding="ISO\-8859\-1"?>\n<modeling>`. <!-- TODO double-check>
+    You can capture this via `mainfile_contents_re` in a regex like `r'<\?xml version="1\.0" encoding="ISO\-8859\-1"?>\n<modeling>`.
+<!-- TODO double-check -->
 
 #### Mainfile Interfacing
 
 Within the cascade, `MatchingParser`, acts as the connection point on the parser side.
-It plays less of a role in manipulating the directives, and more so in defining the _interface_ -a formalization of mutually agreed upon behavior- back to the parser.
+It plays less of a role in manipulating the directives, and more so in defining the _interface_ &mdasha formalization of mutually agreed upon behavior&mdash back to the parser.
 The two main specifications are instantiation and `parse`.
 Since `MatchingParser` already defines both, parsers may simply _inherit_ therefrom.
-The most rudimentary parser, thus looks as follows.
+The most rudimentary parser, thus looks as follows:
 
 ```python
 from nomad.parsing import MatchingParser
@@ -157,11 +156,11 @@ class VasprunXMLParser(MatchingParser):
 ```
 
 NOMAD can already run this parser, but will raise a `NotImplementedError`.
-The interface may be defined, but we still need to fill in the actual parsing by overwriting `parse`.
+The interface may be defined, but we still need to fill in the actual parsing by overwriting the default `parse(...)` function.
 
 !!! info "Run your parser"
     In everyday NOMAD use, the user only interacts with NOMAD via the GUI or API.
-    NOMAD will regulate parsing as the user uploads via any of these channels.
+    NOMAD will regulate parsing as the user uploads via these channels.
     During development, the command line is probably the preferable option, as you can load changes faster and incorporate it into your favorite test setups.
     To print the archive to the terminal, use `nomad parse --show-archive <mainfile>`.
     If you already know which parser to use, add the `--parser 'parser/<parser or entry point name>'` flag.
@@ -200,9 +199,9 @@ class VasprunXMLParser(MatchingParser):
 
 !!! info "What is the archive?"
     An archive is a (typically empty) storage object for an entry.
-    It wis populated by the parser and later on serialized into an `archive.json` file by NOMAD for permanent storage.
+    It is populated by the parser and later on serialized into an `archive.json` file by NOMAD for permanent storage.
     It has five sections, but for novel parsers we are solely interested in `data` and `workflow`.
-    - `metainfo`: internal NOMAD metadata registering who and when the data were uploaded. Is handled completely automatically by the NOMAD base.
+    - `metainfo`: internal NOMAD metadata registering who uploaded the data and when is was uploaded. This is handled completely automatically by the NOMAD base.
     - `results`: the data indexed and ready to query at full database scale. It is automatically produced from `worfklow`, `data`, and `run`.
     - `workflow`: some entries coordinate other entries. This section coordinates the . For more, see [Interfacing complex simulations](custom_workflows.md).
     - `data`: the new section detailing all extracted values. It comes with the updated schema presented in [NOMAD-Simulations schema plugin](nomad_simulations.md).
@@ -384,7 +383,7 @@ Obviously, the exact values depend on the file parsed.
 ```
 
 !!! abstract "Assignment"
-    `AtomicCell` should also contain information about the lattice vectors -reciprocal lattice vectors are derived- and periodic boundary conditions.
+    `AtomicCell` should also contain information about the lattice vectors &mdashreciprocal lattice vectors are derived&mdash and periodic boundary conditions.
     Add these to the instantiation, knowing that the lattice vectors fall under `<structure><crystal><varray name="basis" >`.
     The boundary conditions, meanwhile, are always periodic in VASP.
 
@@ -403,7 +402,7 @@ This example shows a declarative approach to object instantiation:
 any quantity / subsection listed under a section in the schema can be directly passed to the constructor.
 Or course, the existence of section may be contingent on one and another.
 
-If no `finalpos` are extracted -maybe due to a premature termination- neither should `model_system` be populated.
+If no `finalpos` are extracted &mdashmaybe due to a premature termination&mdash neither should `model_system` be populated.
 In this case, it is better to set the section attribute after constructing the main skeleton.
 
 !!! note "Updating the getter"
@@ -494,6 +493,8 @@ The NOMAD base will anyhow invoke normalization, so do not feel responsible for 
 
 ### Via Mapping
 
+**DISCLAIMER: the code and functionalities covered in this section are still under construction and only serves as an illustration of the underlying concepts. Stay tuned for updates.**
+
 The second option is to have the instantiation run automatically.
 In that case, the mapping is added directly to our schema as an _annotation_.
 Leveraging this enhanced schema requires some new readers, like `mapping_parser.XMLParser` for the XML side and `MetainfoParser` for the schema side.
@@ -526,6 +527,8 @@ Look at the power of this technique: this is the full parser!
 We only need to provide the root object, i.e. `Simulation`, from which to start the instantiation procedure.
 
 ### Mapping Annotations on the Schema side
+
+**DISCLAIMER: the code and functionalities covered in this section are still under construction and only serves as an illustration of the underlying concepts. Stay tuned for updates.**
 
 So how do the annotations to the schema look like?
 Firstly, only attributes of `ArchiveSection`, i.e. `Quantity` (i.e. leaf nodes) or `SubSection` (i.e. branching nodes), have to be annotated.
