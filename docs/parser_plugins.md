@@ -8,7 +8,14 @@ These files are then read in and their data extracted.
 Lastly, the semantics of the file format are clarified and specified as its data is mapped into the NOMAD schema.
 The data is now ready to interact with the NOMAD ecosystem and apps.
 
-![Parser Architecture](assets/parser_architecture.png)
+<div class="click-zoom">
+    <label>
+        <input type="checkbox">
+        <img src="../assets/assets/parsing_illustration.png" alt="Symbolic, 3-step representation of the parsing process: 1. SELECT FILES; 2. EXTRACT DATA;  3. SCHEMA" width="80%" title="Click to zoom in">
+    </label>
+</div>
+
+![Parser Architecture]()
 
 ## Fundamentals of Parsing
 
