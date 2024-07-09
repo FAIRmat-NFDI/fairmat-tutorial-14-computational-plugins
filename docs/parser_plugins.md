@@ -162,7 +162,7 @@ There are three kinds of file aspects that can be targeted, all via _regular exp
 - `mainfile_contents_re`, `mainfile_contents_dict` - the file contents. It is by default restricted to the first 1024 bytes, i.e. the file header.
 - `mainfile_mime_re` - the file mime.  <!-- TODO define file mime -->
 
-??? abstract "Assignment 3.1"
+!!! abstract "Assignment 3.1"
     XML is a common file extension, and the user may remove `vasprun` from the name.
     Swap out `mainfile_name_re` for a different selection directive.
 <!-- TODO research how multiple directives combine -->
@@ -248,7 +248,7 @@ For example, they do not support the `parse(...)` function.
 Therefore, our parser has to call `XMLParser`.
 The typical strategy here is to save the _reader object_ for later manipulation.
 In the example below, we read in the whole file.
-The [XPath syntax](https://www.w3schools.com/xml/xpath_syntax.asp) also supports subbranch extraction, which can be incrementally added to the reader object. 
+The [XPath syntax](https://www.w3schools.com/xml/xpath_syntax.asp) also supports subbranch extraction, which can be incrementally added to the reader object.
 
 ```python
 from structlog.stdlib import BoundLogger
@@ -317,7 +317,7 @@ In the next section, we convert it.
         ...
     ```
 
-## From Parser back to NOMAD
+## From Parser to NOMAD
 
 We conceptualize format conversion as restructuring a _hierarchical data tree_, formally known as a _directed acyclic graph_.
 A tree structure always starts at a common node, the _root_, where it splits of into several branches.
@@ -460,7 +460,7 @@ Obviously, the exact values depend on the file parsed.
 }
 ```
 
-??? abstract "Assignment 3.2"
+!!! abstract "Assignment 3.2"
     `AtomicCell` should also contain information about the lattice vectors &mdash;reciprocal lattice vectors are derived&mdash; and periodic boundary conditions.
     Add these to the instantiation, knowing that the lattice vectors fall under `<structure><crystal><varray name="basis" >`.
     The boundary conditions, meanwhile, are always periodic in VASP.
@@ -673,7 +673,7 @@ This is especially important for blocks, where the typical regex pattern has the
 
 ??? note "Dissecting Tables"
     The typical approach to processing text tables is to match, in order:
-    
+
     1. the table and extract (at least) the body.
     2. a standard line.
     3. the relevant column. <!-- TODO explore tools for when column semantics is tied to its index -->

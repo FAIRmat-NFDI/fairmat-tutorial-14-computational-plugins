@@ -30,7 +30,7 @@ We use double inheritance from `EntryData` in order to populate the `data` secti
 
 Let's use this knowledge to see how to work with the schema in practice. If you have not already installed `nomad-simulations`, do so now following the instructions in the [Overview](index.md#tutorial-information-and-preparation).
 
-!!! abstract "Assignement 2.1"
+!!! abstract "Assignment 2.1"
     Create an instance of the `Simulation` section. Imagine you know that the CPU1 took 24 minutes and 30 seconds on finishing the simulation; can you populate the `Simulation` section with these times? What is the elapsed time in seconds? And in hours?
 
 ??? success "Solution 2.1"
@@ -102,8 +102,8 @@ The `Program` section contains all the information about the program / software 
 
 Note that the rhombo-headed arrow here indicates a _composition_ / _has a_ relationship, so that `BaseSimulation` has a `Program` sub-section under it.
 
-!!! abstract "Assignement 2.2"
-    Instantiate a `Program` section and directly assign the name `'VASP'` and the version `'5.0.0'` quantities. Add this sub-section to the `Simulation` section created in the Assignement 2.1. Can you re-assign the `Program.version` quantity to be an integer number, 5?
+!!! abstract "Assignment 2.2"
+    Instantiate a `Program` section and directly assign the name `'VASP'` and the version `'5.0.0'` quantities. Add this sub-section to the `Simulation` section created in the Assignment 2.1. Can you re-assign the `Program.version` quantity to be an integer number, 5?
 
 ??? success "Solution 2.2"
     We can import and assign directly quantities of sections by doing:
@@ -142,11 +142,11 @@ The `ModelMethod` section is an input section which contains all the information
 
 `ModelMethod` is thus a sub-section under `Simulation`. It inherits from an abstract section `BaseModelMethod`, as well as containing a sub-section called `contributions` of the same section. The underlying idea of `ModelMethod` is to parse the input parameters of the mathematical model, typically a Hamiltonian. This total Hamiltonian or model could be split into individual sub-terms or `contributions`. Each of the electronic-structure methodologies inherit from `ModelMethodElectronic`, which contains a boolean `is_spin_polarized` indicating if the `Simulation` is spin polarized or not. The different levels of abstractions are useful when dealing with commonalities amongst the methods.
 
-!!! abstract "Assignement 2.3"
-    Instantiate a `DFT` section. For simplicity, you can also assign the `jacobs_ladder` quantity to be `'LDA'`. Add this sub-section to the `Simulation` section created in the Assignement 2.1. What is the underlying concept that allows you to add directly the `class DFT` under `Simulation.model_method`, provided that the definition of this attribute is a `ModelMethod` sub-section? Can you reason why the current schema (version 0.0.2) is inconsistent in handling the `xc_functionals` contributions?
+!!! abstract "Assignment 2.3"
+    Instantiate a `DFT` section. For simplicity, you can also assign the `jacobs_ladder` quantity to be `'LDA'`. Add this sub-section to the `Simulation` section created in the Assignment 2.1. What is the underlying concept that allows you to add directly the `class DFT` under `Simulation.model_method`, provided that the definition of this attribute is a `ModelMethod` sub-section? Can you reason why the current schema (version 0.0.2) is inconsistent in handling the `xc_functionals` contributions?
 
 ??? success "Solution 2.3"
-    Similarly to Assignement 2.2, we can import and create the `DFT` section:
+    Similarly to Assignment 2.2, we can import and create the `DFT` section:
     ```python
     from nomad_simulations.schema_packages.model_method import DFT
     dft = DFT(jacobs_ladder='LDA')
@@ -174,8 +174,8 @@ The `NumericalSettings` section is an abstract section used to define the numeri
     </label>
 </div>
 
-!!! abstract "Assignement 2.4"
-    Instantiate a `SelfConsistency` section and assign the quantity `threshold_change` to be `1e-3` and the `threshold_change_unit` to be `'joule'`. Add this sub-section to the `DFT` section created in the Assignement 2.3. Is the new information also stored in the `Simulation` section created in Assignement 2.1? Can you access the information of the Jacobs ladder string used in this simulation **starting** from the newly instantiated class?
+!!! abstract "Assignment 2.4"
+    Instantiate a `SelfConsistency` section and assign the quantity `threshold_change` to be `1e-3` and the `threshold_change_unit` to be `'joule'`. Add this sub-section to the `DFT` section created in the Assignment 2.3. Is the new information also stored in the `Simulation` section created in Assignment 2.1? Can you access the information of the Jacobs ladder string used in this simulation **starting** from the newly instantiated class?
 
 ??? success "Solution 2.4"
     We can import and create the class `SelfConsistency`, assign the specified quantities, and append it under `dft`:
@@ -237,8 +237,8 @@ The `AtomsState` section is a list of sub-sections within `AtomicCell`, correspo
 
 
 
-!!! abstract "Assignement 2.5"
-    Instantiate two `AtomsState` sections and assign the `chemical_symbol` to be `'Ga'` and `'As'` for each of these sections. For this assignement, we also need to define a `logger` object in order for the functionalities to work:
+!!! abstract "Assignment 2.5"
+    Instantiate two `AtomsState` sections and assign the `chemical_symbol` to be `'Ga'` and `'As'` for each of these sections. For this assignment, we also need to define a `logger` object in order for the functionalities to work:
     ```python
     from nomad import utils
     logger = utils.get_logger(__name__)
@@ -263,8 +263,8 @@ The `AtomsState` section is a list of sub-sections within `AtomicCell`, correspo
     Hence, the atomic number of Ga is 31 and of As is 33.
 
 
-!!! abstract "Assignement 2.6"
-    Instantiate a `ModelSystem` section and a `AtomicCell` section. Assign the `positions` in the `AtomicCell` section to be `[[0, 0, 0], [1, 1, 1]]` in meters. Add the `atoms_states` defined in the Assignement 2.5 under the `AtomicCell` section. Append this `AtomicCell` section under `ModelSystem`, and append `ModelSystem` to the `Simulation` section created in Assignement 2.1.
+!!! abstract "Assignment 2.6"
+    Instantiate a `ModelSystem` section and a `AtomicCell` section. Assign the `positions` in the `AtomicCell` section to be `[[0, 0, 0], [1, 1, 1]]` in meters. Add the `atoms_states` defined in the Assignment 2.5 under the `AtomicCell` section. Append this `AtomicCell` section under `ModelSystem`, and append `ModelSystem` to the `Simulation` section created in Assignment 2.1.
 
     Now, we want to extract the different formats in which the chemical formulas of this system can be written. For that, instantiate directly the `ChemicalFormula` sub-section under `ModelSystem`. Note: you can use the `ChemicalFormula.normalize(archive, logger)` method, and pass `archive=None` to this function.
 
@@ -315,8 +315,8 @@ The detailed relationship tree is:
 </div>
 
 
-!!! abstract "Assignement 2.7"
-    Instantiate an `SCFOutputs` section. We are going to store a self-consistently calculated `FermiLevel`, whose values at each step are `[1, 1.5, 2, 2.1, 2.101]` in eV. Add the appropiate references to the `ModelMethod` and `ModelSystem` sections created in Assignement 2.3 and Assignement 2.6, respectively. For the self-consistently calculated `FermiLevel` section, add the reference to the section `SelfConsistency` created in Assignement 2.4.
+!!! abstract "Assignment 2.7"
+    Instantiate an `SCFOutputs` section. We are going to store a self-consistently calculated `FermiLevel`, whose values at each step are `[1, 1.5, 2, 2.1, 2.101]` in eV. Add the appropiate references to the `ModelMethod` and `ModelSystem` sections created in Assignment 2.3 and Assignment 2.6, respectively. For the self-consistently calculated `FermiLevel` section, add the reference to the section `SelfConsistency` created in Assignment 2.4.
 
     Check if the `FermiLevel` is self-consistently converged or not by using a class method from `SCFOutputs`. What happens if the `SelfConsistency.threshold_change` is now `1e-24`?
 
@@ -386,8 +386,8 @@ The detailed relationship tree is:
 
 
 
-!!! abstract "Assignement 2.8"
-    We are going to store two `ElectronicBandGap` property sections under the `SCFOutputs` section created in the Assignement 2.7:
+!!! abstract "Assignment 2.8"
+    We are going to store two `ElectronicBandGap` property sections under the `SCFOutputs` section created in the Assignment 2.7:
 
     * An `ElectronicBandGap` whose value is 2 eV.
     * An `ElectronicBandGap` varying with `Temperature`, whose values are `[1, 1.5, 2]` in eV for `[100, 150, 200]` temperatures in Kelvin.
