@@ -399,7 +399,7 @@ Obviously, the exact values depend on the file parsed.
     ``` <!-- TODO double-check -->
 
 This example shows a declarative approach to object instantiation:
-any quantity / subsection listed under a section in the schema can be directly passed to the constructor.
+any quantity/subsection listed under a section in the schema can be directly passed to the constructor.
 Or course, the existence of section may be contingent on one and another.
 
 If no `finalpos` are extracted &mdashmaybe due to a premature termination&mdash neither should `model_system` be populated.
@@ -604,12 +604,17 @@ An example would be reading file units:
 
 The plugin setup follows the common [entry-points](https://setuptools.pypa.io/en/latest/userguide/entry_point.html) Python standard from `importlib.metadata`.
 It works in tandem with `pip` install to allow for a more elegant and controlled way of exposing and loading (specific functionalities in) modules.
-Entry points also provide the module developer how these functionalities ought to be exposed to the environment, e.g. their name and own configuration.
+Entry points also provide the module developer tools for controlling how it ought to be exposed to the environment, e.g. name, description, configuration.
+
+!!! note "Entry Point Visibility"
+    Contrary to regular Python dependencies, entry points are visible at a system-wide level, even when installed in a local environment.
+    You can therefore choose whether to install plugins in their own environment, or construct a shared one (with the NOMAD base).
+    We recommend the former to prevent dependency clashing.
 
 Conceptually, there are five key players to keep track off:
 
 - **target functionality**: the entity that we want to _expose_ to the NOMAD base installation. In our case, this will amount to our parser class, which typically is a child class of `MatchingParser`. It may use `configurations` parameters passed along via the nomad settings.
 - **entry point**: instance of `EntryPoint`, responsible for _registering_ the target functionality. It therefore also retains metadata like its name, a description and most importantly, the file matching directives. It is typically located in the `__init__.py` of the relevant functionality folder (see folder structure).
     - **entry point group**: bundles several entry points together. By default, NOMAD scans all plugins under the group name `project.entry-points.'nomad.plugin'`.
-- **module setup file**: _exposes_ the entry point (and its group) under the format of `<module_name>.<functionality_folder_name>:<entry_point_name>`. This is the name by which you should call this entry point. In NOMAD we use the `pyproject.toml` setup file under the module's root folder.
+- **module setup file**: _exposes_ the entry point (and its group) under the format of `<module_name>.<object_name>:<entry_point_name>`. This is the name by which you should refer to it within the entry point system. For importing the within a Python script, use only `<module_name>.<object_name>`. In NOMAD we use the `pyproject.toml` setup file under the module's root folder.
 - **NOMAD configuration file**: called in `nomad.yaml`, controls which entry points are _included_ or _excluded_, as well as their _configuration parameters_.
