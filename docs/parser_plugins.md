@@ -15,8 +15,6 @@ The data is now ready to interact with the NOMAD ecosystem and apps.
     </label>
 </div>
 
-![Parser Architecture]()
-
 ## Fundamentals of Parsing
 
 As parsing involves the mapping between two well-defined formats, one could expect it to be trivial.
@@ -48,6 +46,13 @@ To create your own parser plugin, visit our [plugin template](https://github.com
 Follow the [How to get started with plugins](https://nomad-lab.eu/prod/v1/staging/docs/howto/plugins/plugins.html) documentation for detailed setup instructions.
 The template will appear bare-bones at the start.
 Following the instructions in the `README.md`  and the `cruft` setup will allow you to tune the project to your needs.
+
+<div class="click-zoom">
+    <label>
+        <input type="checkbox">
+        <img src="../assets/assets/github_plugin_template.png" alt="Overview of the GitHub repository page `nomad-plugin-template` with the 'Use this template' button highlighted in red." width="80%" title="Click to zoom in">
+    </label>
+</div>
 
 By the end, your repository should look like the example below.
 Make sure to include both a `parsers` and a `schema_packages` folder.
