@@ -10,7 +10,32 @@ The data is now ready to interact with the NOMAD ecosystem and apps.
 
 ![Parser Architecture](assets/parser_architecture.png)
 
-### Getting Started
+## Fundamentals of Parsing
+
+As parsing involves the mapping between two well-defined formats, one could expect it to be trivial.
+In practice, however, parser developers have to manage discrepancies in semantics, shape, data type or units.
+This has lead to five distinct categories of responsibility for the developer to manage.
+Here, they are ordered to match the parser's execution:
+
+1. **file selection** - navigate the upload's folder structure and select the relevant files.
+2. **source extraction** - read the files into Python. This step may already include some level of data field filtering.
+3. **source to target** - map the data of interest with their counterparts in the target/NOMAD schema. This is where the bulk of the filtering happens.
+4. **data mangling** - manipulate the data to match the target/NOMAD `Quantity`s' specification, e.g. dimensionality, shape. This may include computing derived properties not present in the original source files.
+5. **archive construction** - build up a Python `EntryArchive` object using the classes provided by the target/NOMAD schema. NOMAD will automatically write it commit it to the database as an `archive.json`
+
+Blurring these responsibilities leads to a wild-growth in parser design and added complexity, especially in larger, more feature-rich parsers.
+NOMAD therefore offers powerful _tools_ and documentation on _best practices_ to help the parser developer manage each distinct responsibility.
+The exact solutions are, in the same order:
+
+1. `MatchingParser` - This class selects the file to be parsed. Since it interfaces with the NOMAD base directly, it will read in most of the settings automatically from there.
+2. `XMLParser` and co. / `TextParser` - There are several _reader classes_ for loading common source formats into Python data types. Examples include the `XMLParser` and `HDF5Parser`. We will demonstrate `XMLParser` in [Parsing Hierarchical Tree Formats](parser_plugins.md#getting-the-data). Plain text files, meanwhile, involve an additional _matching step_ via the `TextParser`. More on this in [From Text to Hierarchies](parser_plugins.md#from-text-to-hierarchies).
+3. `MappingAnnotationModel` - This is arguably the most involved part for the parser developer, as this is where the external data gets further semantically enriched and standardized. It requires doamin expertise to understand the relationship between the data fields in the source file and the [NOMAD-Simulations schema](nomad_simulations.md). If step 2 went well, this step only involves _annotating_ the target schema via `MappingAnnotationModel`. More on this in [Mapping a to Schema](parser_plugins.md#mapping-a-to-schema).
+4. [NOMAD-Simulations schema](nomad_simulations.md) / `MappingAnnotationModel` - The `MSection`s and `utils.py` in the schema provide _normalizers_ and _helper functions_ to alleviate most of the data mangling. For small amendments, use the mapping approach described in [Via Mapping](parser_plugins.md#via-mapping). For larger ones, consider extending the schema as covered in [Extending NOMAD-Simulations](schema_plugins.md).
+5. `MetainfoParser` - this _converter_ bridges the annotated schema from step 3 with the reader classes in step 2. `MetainfoParser.data_object` contains the final `ArchiveSection` that is stored under `archive.data`.
+
+In the next section, we will briefly illustrate how `MatchingParser`, `XMLParser`, and `MetainfoParser` interconnect, as well as flesh out some setup details.
+
+## Starting a Plugin Project
 
 To create your own parser plugin, visit our [plugin template](https://github.com/FAIRmat-NFDI/nomad-plugin-template) and click the “Use this template” button.
 Follow the [How to get started with plugins](https://nomad-lab.eu/prod/v1/staging/docs/howto/plugins/plugins.html) documentation for detailed setup instructions.
@@ -58,31 +83,6 @@ The dependence runs bottom up, i.e. the `module setup file` refers to `entry poi
 The final piece in the entry point system (NOMAD configuration file) resides in `nomad.yaml` and refers back to the module setup file. <!-- clarify terminology -->
 It allows you to control the loading of plugins and their options, however, normally you don't have to touch anything there for NOMAD to pick up on your parser.
 
-## Fundamentals of Parsing
-
-As parsing involves the mapping between two well-defined formats, one could expect it to be trivial.
-In practice, however, parser developers have to manage discrepancies in semantics, shape, data type or units.
-This has lead to five distinct categories of responsibility for the developer to manage.
-Here, they are ordered to match the parser's execution:
-
-1. **file selection** - navigate the upload's folder structure and select the relevant files.
-2. **source extraction** - read the files into Python. This step may already include some level of data field filtering.
-3. **source to target** - map the data of interest with their counterparts in the target/NOMAD schema. This is where the bulk of the filtering happens.
-4. **data mangling** - manipulate the data to match the target/NOMAD `Quantity`s' specification, e.g. dimensionality, shape. This may include computing derived properties not present in the original source files.
-5. **archive construction** - build up a Python `EntryArchive` object using the classes provided by the target/NOMAD schema. NOMAD will automatically write it commit it to the database as an `archive.json`
-
-Blurring these responsibilities leads to a wild-growth in parser design and added complexity, especially in larger, more feature-rich parsers.
-NOMAD therefore offers powerful _tools_ and documentation on _best practices_ to help the parser developer manage each distinct responsibility.
-The exact solutions are, in the same order:
-
-1. `MatchingParser` - This class selects the file to be parsed. Since it interfaces with the NOMAD base directly, it will read in most of the settings automatically from there.
-2. `XMLParser` and co. / `TextParser` - There are several _reader classes_ for loading common source formats into Python data types. Examples include the `XMLParser` and `HDF5Parser`. We will demonstrate `XMLParser` in [Parsing Hierarchical Tree Formats](parser_plugins.md#getting-the-data). Plain text files, meanwhile, involve an additional _matching step_ via the `TextParser`. More on this in [From Text to Hierarchies](parser_plugins.md#from-text-to-hierarchies).
-3. `MappingAnnotationModel` - This is arguably the most involved part for the parser developer, as this is where the external data gets further semantically enriched and standardized. It requires doamin expertise to understand the relationship between the data fields in the source file and the [NOMAD-Simulations schema](nomad_simulations.md). If step 2 went well, this step only involves _annotating_ the target schema via `MappingAnnotationModel`. More on this in [Mapping a to Schema](parser_plugins.md#mapping-a-to-schema).
-4. [NOMAD-Simulations schema](nomad_simulations.md) / `MappingAnnotationModel` - The `MSection`s and `utils.py` in the schema provide _normalizers_ and _helper functions_ to alleviate most of the data mangling. For small amendments, use the mapping approach described in [Via Mapping](parser_plugins.md#via-mapping). For larger ones, consider extending the schema as covered in [Extending NOMAD-Simulations](schema_plugins.md).
-5. `MetainfoParser` - this _converter_ bridges the annotated schema from step 3 with the reader classes in step 2. `MetainfoParser.data_object` contains the final `ArchiveSection` that is stored under `archive.data`.
-
-In the next section, we will briefly illustrate how `MatchingParser`, `XMLParser`, and `MetainfoParser` interconnect, as well as flesh out some setup details.
-
 ## Assembling a Parser Class
 
 Throughout this subsection, we will provide a step-by-step guide of the process for building out a parser using the VASP XML output format as an example.
@@ -98,7 +98,7 @@ The directives for selecting _mainfiles_ are passed on via an interaction cascad
     The selection directives (see below) target these files specifically.
     Their file paths are passed on to the parser, which can either process them or navigate the folder for other, auxiliary files.
 
-#### Mainfile matching
+#### Mainfile Matching
 
 Since mainfiles are intrinsically connected to the scripts that parse them, the directives should be set via `ParserEntryPoint`.
 In rare cases, however, an Oasis admin may decide to override these selection directives via the `nomad.yaml`.
