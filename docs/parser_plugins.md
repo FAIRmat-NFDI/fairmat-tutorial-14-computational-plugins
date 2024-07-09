@@ -11,7 +11,7 @@ The data is now ready to interact with the NOMAD ecosystem and apps.
 <div class="click-zoom">
     <label>
         <input type="checkbox">
-        <img src="../assets/assets/parsing_illustration.png" alt="Symbolic, 3-step representation of the parsing process: 1. SELECT FILES; 2. EXTRACT DATA;  3. SCHEMA" width="80%" title="Click to zoom in">
+        <img src="../assets/parsing_illustration.png" alt="Symbolic, 3-step representation of the parsing process: 1. SELECT FILES; 2. EXTRACT DATA;  3. SCHEMA" width="80%" title="Click to zoom in">
     </label>
 </div>
 
@@ -50,7 +50,7 @@ Following the instructions in the `README.md`  and the `cruft` setup will allow 
 <div class="click-zoom">
     <label>
         <input type="checkbox">
-        <img src="../assets/assets/github_plugin_template.png" alt="Overview of the GitHub repository page `nomad-plugin-template` with the 'Use this template' button highlighted in red." width="80%" title="Click to zoom in">
+        <img src="../assets/github_plugin_template.png" alt="Overview of the GitHub repository page `nomad-plugin-template` with the 'Use this template' button highlighted in red." width="80%" title="Click to zoom in">
     </label>
 </div>
 
