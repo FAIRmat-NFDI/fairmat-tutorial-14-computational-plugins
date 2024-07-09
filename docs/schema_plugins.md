@@ -1,15 +1,17 @@
 # Extending NOMAD-Simulations to support custom methods and outputs
 
-As you develop your parser, you may find that the `nomad-simulations` package does not include some relevant quantities for your particular use case. You can easily extend upon the schema by adding your own custom schema under the `schema_packages/` directory in your parser plugin. For this, you should utilize and build upon `nomad-simulations` for consistency and future compatibility or integration. The following page demonstrates the basics of how to implement your own schema in practice.
+As you develop your parser, you may find that the `nomad-simulations` package does not include some relevant quantities for your particular use case. You can easily extend upon the schema by adding your own custom schema under the `schema_packages/` directory in your parser plugin. For this, you should utilize and build upon `nomad-simulations` for consistency and future compatibility or integration. Below (click to zoom) is a decision tree which illustrates the schema development process:
 
 <div class="click-zoom">
     <label>
         <input type="checkbox">
-        <img src="../assets/schema_plugins/NOMAD_Simulations-extending-the-schema.png" alt="Schema extension decision tree." width="80%" title="Click to zoom in">
+        <img src="../assets/schema_plugins/decision_tree.png" alt="Schema extension decision tree." width="80%" title="Click to zoom in">
     </label>
 </div>
 
-Within your parser plugin project, under `schema_packages/`, create a python file for your schema, e.g., `<parser_name>_schema.py`.
+The following demonstrates some simple examples of extending the `nomad-simulations` schema. More detailed documentation about writing schemas packages can be found in [How to write a schema package](https://nomad-lab.eu/prod/v1/docs/howto/plugins/schema_packages.html){:target="_blank"} within the general NOMAD documentation.
+
+To start developing a custom schema, create a python file for your schema, e.g., `<parser_name>_schema.py`, within your parser plugin project, under `schema_packages/`, .
 
 Add the following imports to this file:
 
@@ -17,7 +19,7 @@ Add the following imports to this file:
 import nomad_simulations
 import numpy as np
 from nomad.datamodel.data import ArchiveSection
-from nomad.metainfo import Context, MEnum, Quantity, Section, SectionProxy, SubSection
+from nomad.metainfo import Quantity, SubSection
 ```
 
 - `nomad_simulations`:
@@ -28,7 +30,7 @@ from nomad.metainfo import Context, MEnum, Quantity, Section, SectionProxy, SubS
 
 - `SubSection`:
 
--
+- `Quantity`:
 
 For the following examples we will use the H5MD-NOMAD file format, which is essentially a schema for molecular dynamics simulations, specified within the hdf5 file format. Imagine we have developed a parser for this file.
 
