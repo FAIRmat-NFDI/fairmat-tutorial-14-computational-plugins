@@ -93,7 +93,7 @@ The code snippets provided below should go under `src/nomad_parser_vasp/parsers/
 As denoted in step 1, the parser first has to read in the file contents as passed through by the NOMAD base.
 The directives for selecting _mainfiles_ are passed on via an interaction cascade from `nomad.yaml` > `ParserEntryPoint` > `MatchingParser`.
 
-!!! info "What are mainfiles?"
+??? info "What are mainfiles?"
     Mainfiles are files by which an expert / program can determine the code used / the parser to use.
     The selection directives (see below) target these files specifically.
     Their file paths are passed on to the parser, which can either process them or navigate the folder for other, auxiliary files.
@@ -127,12 +127,12 @@ There are three kinds of file aspects that can be targeted, all via _regular exp
 - `mainfile_contents_re`, `mainfile_contents_dict` - the file contents. It is by default restricted to the first 1024 bytes, i.e. the file header.
 - `mainfile_mime_re` - the file mime.  <!-- TODO define file mime -->
 
-!!! abstract "Assignment"
+??? abstract "Assignment 3.1"
     XML is a common file extension, and the user may remove `vasprun` from the name.
     Swap out `mainfile_name_re` for a different selection directive.
 <!-- TODO research how multiple directives combine -->
 
-!!! success "Solution"
+??? success "Solution 3.1"
     VASP XML typically starts with the tags
     ```xml
     <?xml version="1.0" encoding="ISO-8859-1"?>
@@ -158,7 +158,7 @@ class VasprunXMLParser(MatchingParser):
 NOMAD can already run this parser, but will raise a `NotImplementedError`.
 The interface may be defined, but we still need to fill in the actual parsing by overwriting the default `parse(...)` function.
 
-!!! info "Run your parser"
+??? info "Run your parser"
     In everyday NOMAD use, the user only interacts with NOMAD via the GUI or API.
     NOMAD will regulate parsing as the user uploads via these channels.
     During development, the command line is probably the preferable option, as you can load changes faster and incorporate it into your favorite test setups.
@@ -197,7 +197,7 @@ class VasprunXMLParser(MatchingParser):
 ```
 <!-- note that this XMLParser does not have a universal interface -->
 
-!!! info "What is the archive?"
+??? info "What is the archive?"
     An archive is a (typically empty) storage object for an entry.
     It is populated by the parser and later on serialized into an `archive.json` file by NOMAD for permanent storage.
     It has five sections, but for novel parsers we are solely interested in `data` and `workflow`.
@@ -214,7 +214,7 @@ The data has been successfully extracted: check `xml_reader._results`.
 The issue stems from data not yet meeting the high-quality standards of the NOMAD schema.
 In the next section, we convert it.
 
-!!! info "To return or not return"
+??? info "To return or not return"
     Does the NOMAD base expect an `EntryArchive` object back from `parse`.
     In NOMAD we use type annotation as much as possible.
     It also tested in our CI/CD.
@@ -382,12 +382,12 @@ Obviously, the exact values depend on the file parsed.
 }
 ```
 
-!!! abstract "Assignment"
+??? abstract "Assignment 3.2"
     `AtomicCell` should also contain information about the lattice vectors &mdashreciprocal lattice vectors are derived&mdash and periodic boundary conditions.
     Add these to the instantiation, knowing that the lattice vectors fall under `<structure><crystal><varray name="basis" >`.
     The boundary conditions, meanwhile, are always periodic in VASP.
 
-!!! success "Solution"
+??? success "Solution 3.2"
     ```
     python
     ...
@@ -405,7 +405,7 @@ Or course, the existence of section may be contingent on one and another.
 If no `finalpos` are extracted &mdashmaybe due to a premature termination&mdash neither should `model_system` be populated.
 In this case, it is better to set the section attribute after constructing the main skeleton.
 
-!!! note "Updating the getter"
+??? note "Updating the getter"
     `xml_get` should now be responsible of failure handling/signaling.
     Depending on the type expected, we may use `None` or `[]`.
     To prevent `IndexError` when extracting, we also pass the slice along as an argument.
@@ -577,7 +577,7 @@ txt_reader = TextParser(                # root node
 Note that the regex patterns should always contain _match groups_, i.e. `()`, else no text is extracted.
 This is especially important for blocks, where the typical regex pattern has the form `r'<re_header>(?[\s\S]+)<re_footer>'` to match everything between the block header and footer.
 
-!!! info "Dissecting Tables"
+??? info "Dissecting Tables"
     The typical approach to processing text tables is to match the table (body), a standard line, and lastly, a standard column. <!-- TODO explore tools for when column semantics is tied to its index -->
     Ensure that you toggle the `Quantity.repeats: Union[bool, int]` option to obtain a list of matches.
     <!-- TODO how to extract as a matrix immediately (no dict keys) -- >
@@ -595,7 +595,7 @@ An example would be reading file units:
 
 <!-- TODO add dynamic units example -->
 
-!!! info "Semantic Patterns"
+??? info "Semantic Patterns"
     Modern text parsers come equipped with several common patterns to expedite the construction of complex patterns.
     Examples include `re_float` covering decimals and scientific notation, separators like `re_blank_line` or `re_eol`, and `re_non_greedy` for matching whole chunks of text, as shown above.
     The `capture(pattern)` function applies the match groups.   
@@ -606,7 +606,7 @@ The plugin setup follows the common [entry-points](https://setuptools.pypa.io/en
 It works in tandem with `pip` install to allow for a more elegant and controlled way of exposing and loading (specific functionalities in) modules.
 Entry points also provide the module developer tools for controlling how it ought to be exposed to the environment, e.g. name, description, configuration.
 
-!!! note "Entry Point Visibility"
+??? note "Entry Point Visibility"
     Contrary to regular Python dependencies, entry points are visible at a system-wide level, even when installed in a local environment.
     You can therefore choose whether to install plugins in their own environment, or construct a shared one (with the NOMAD base).
     We recommend the former to prevent dependency clashing.
