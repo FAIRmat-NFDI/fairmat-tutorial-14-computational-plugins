@@ -495,7 +495,7 @@ The NOMAD base will anyhow invoke normalization, so do not feel responsible for 
     In the examples above we fixated on the `XMLParser`, which really is more of a "reader", as it does not interface with NOMAD base directly.
     Instead, its only purpose is to make the file data accessible to Python.
 
-    As such, a pragmatic attitude dictates that if you have more affinity for another reader, e.g. `lxml`, `BeautifulSoup`, HDF5 (demonstrated in the [Schema Plugin]() part), etc.
+    As such, a pragmatic attitude dictates that if you have more affinity for another reader, e.g. `lxml`, `BeautifulSoup`, `h5py` (demonstrated in the [Schema Plugin](schema_plugins.md) part), etc.
     Just mind the dependencies.
     Indeed, `XMLParser` itself is based on `ElementTree`, and just extends the reading into `dict`.
     Feel free to similarly add logic to your own readers above the parsing class.
@@ -630,3 +630,4 @@ Conceptually, there are five key players to keep track off:
     - **entry point group**: bundles several entry points together. By default, NOMAD scans all plugins under the group name `project.entry-points.'nomad.plugin'`.
 - **module setup file**: _exposes_ the entry point (and its group) under the format of `<module_name>.<object_name>:<entry_point_name>`. This is the name by which you should refer to it within the entry point system. For importing the within a Python script, use only `<module_name>.<object_name>`. In NOMAD we use the `pyproject.toml` setup file under the module's root folder.
 - **NOMAD configuration file**: called in `nomad.yaml`, controls which entry points are _included_ or _excluded_, as well as their _configuration parameters_.
+
