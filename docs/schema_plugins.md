@@ -9,6 +9,17 @@ As you develop your parser, you may find that the `nomad-simulations` package do
     </label>
 </div>
 
+
+different types of extensions
+
+- reuse (no extension)
+
+- semantic extension
+
+- normalization extension
+
+
+
 The following demonstrates some simple examples of extending the `nomad-simulations` schema. More detailed documentation about writing schemas packages can be found in [How to write a schema package](https://nomad-lab.eu/prod/v1/docs/howto/plugins/schema_packages.html){:target="_blank"} within the general NOMAD documentation.
 
 To start developing a custom schema, create a python file for your schema, e.g., `<parser_name>_schema.py`, within your parser plugin project, under `schema_packages/`, .
@@ -16,49 +27,78 @@ To start developing a custom schema, create a python file for your schema, e.g.,
 Add the following imports to this file:
 
 ```python
-import nomad_simulations
 import numpy as np
+import nomad_simulations
 from nomad.datamodel.data import ArchiveSection
 from nomad.metainfo import Quantity, SubSection
 ```
 
-- `nomad_simulations`:
+The `ArchiveSection` class should be inherited by every class defined in your schema and provides the base NOMAD functionalities, e.g., normalization function capabilities. [`SubSections`](https://nomad-lab.eu/prod/v1/docs/reference/glossary.html#section-and-subsection){:target="_blank"} and [`Quantities`](https://nomad-lab.eu/prod/v1/docs/reference/glossary.html#quantity){:target="_blank"} are then used to populate each `ArchiveSection` class with specific metadata as demonstrated below.
 
-- `numpy`:
+## Extending the overarching metadata
 
-- `ArchiveSection`:
+Suppose you are developing a parser for a well-defined schema specified within the hdf5 file format. Importantly, the simulation data is harvested from the original simulation files and mapped into this schema/file format by some researcher. The overarching metadata in this file can be represented
 
-- `SubSection`:
+```
+hdf5_schema
+    +-- version: Integer[2]
+    \-- author
+    |    +-- name: String[]
+    |    +-- (email: String[])
+    \-- hdf5_generator
+    |    +-- name: String[]
+    |    +-- version: String[]
+    \-- program
+        +-- name: String[]
+        +-- version: String[]
+```
 
-- `Quantity`:
+!!! note "hdf5 schema syntax"
+    `\-- item` &ndash;
+    An object within a group, that is either a dataset or a group. If it is a group itself, the objects within the group are indented by five spaces with respect to the group name.
 
-For the following examples we will use the H5MD-NOMAD file format, which is essentially a schema for molecular dynamics simulations, specified within the hdf5 file format. Imagine we have developed a parser for this file.
+    `+-- attribute:` -
+    An attribute, that relates either to a group or a dataset.
 
-Because the H5MD-NOMAD file is not created directly from a simulation program, there is additional metadata (beyond the program information), specifying the authorship of the file and the specifications for the generation (creator) of the H5MD schema used:
+    `\-- data: <type>[dim1][dim2]` -
+    A dataset with array dimensions dim1 by dim2 and of type <type>, following the HDF5 Datatype classes.
 
-    h5md
-     +-- version: Integer[2]
-     \-- author
-     |    +-- name: String[]
-     |    +-- (email: String[])
-     \-- creator
-     |    +-- name: String[]
-     |    +-- version: String[]
-     \-- program
-          +-- name: String[]
-          +-- version: String[]
-
-The program information can be stored under the existing `Program()` class within `nomad-simulations`. We already learned how to implement this into our parser:
+For demonstration purposed, let's assume that your parser grabs this information and stores it in the following dictionary:
 
 ```python
-from nomad_simulations.schema_packages.general import Simulation, Program
-
-simulation = Simulation()
-simulation.program = Program(
-    name=group_h5md_dict.get('program_name'),
-    version=group_h5md_dict.get('program_version'),
-)
+hdf_dict = {
+'version': <x.x.x>,
+'author': {
+    'name': <author name of the person who created the hdf5 file>,
+    'email': <author email of the person who created the hdf5 file>
+},
+'hdf5_generator': {
+    'name': <name of software used to write hdf5 file>,
+    'version': <version of the software used to write the hdf5 file>
+},
+'program': {
+    'name': <name of the program used to run the simulation that generated the data>,
+    'version': <version of the program used to run the simulation that generated the data>
+},
+}
 ```
+
+!!! abstract "Assignment 4.1"
+    Using what you have already learned, how would you store the program information within the archive object in your parser?
+
+??? success "Solution 4.1"
+    The program information can be stored under the existing `Program()` class within `nomad-simulations`. We already learned how to implement this in our parser:
+
+    ```python
+    from nomad_simulations.schema_packages.general import Simulation, Program
+
+    simulation = Simulation()
+    simulation.program = Program(
+        name=h5md_dict.get('program', {}).get('name', {}),
+        version=h5md_dict.get('program', {}).get('version', {}),
+    )
+    archive.data = simulation
+    ```
 
  However, we need to create a new class for the rest of the metadata. The "creator" information is referring to a secondary software used to create the hdf5 file, so it makes sense to store this in a class very similar to `Program()`. Let's first take a look at the current `Program()` schema:
 
