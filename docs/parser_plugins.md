@@ -346,6 +346,7 @@ In the parser code itself, the sections and quantities are both just classes.
 We thus construct a tree of their objects by _instantiating_ them one-by-one.
 
 ```python
+from nomad.units import ureg
 ...
 
 class VasprunXMLParser(MatchingParser):
@@ -368,7 +369,7 @@ class VasprunXMLParser(MatchingParser):
             ),
             model_system=ModelSystem(
                 cell=AtomicCell(
-                    positions=xml_get("structure[@name='finalpos']/./varray[@name='positions']/v")[0],
+                    positions=np.float64(xml_get("structure[@name='finalpos']/./varray[@name='positions']/v")[0]) * ureg.angstrom,
                 ),
             ),
         )
@@ -511,7 +512,9 @@ class VasprunXMLParser(MatchingParser):
             )
         ).any():
             archive.data.model_system.append(
-                ModelSystem(cell=[AtomicCell(positions=positions)])
+                ModelSystem(
+                    cell=[AtomicCell(positions=np.float64(positions) * ureg.angstrom)]
+                )
             )
 ```
 
