@@ -6,8 +6,8 @@ nav:
   - Overview: index.md
   - Part I - Intro to NOMAD: intro.md
   - Part II - NOMAD-Simulations: nomad_simulations.md
-  - Part III - Schema Plugins: schema_plugins.md
-  - Part IV - Parser Plugins: parser_plugins.md
+  - Part III - Parser Plugins: parser_plugins.md
+  - Part IV - Schema Plugins: schema_plugins.md
   - Part V - Custom Workflows: custom_workflows.md
 theme:
   name: material

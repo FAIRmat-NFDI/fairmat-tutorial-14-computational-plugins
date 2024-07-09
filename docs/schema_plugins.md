@@ -35,13 +35,13 @@ from nomad.metainfo import Quantity, SubSection
 
 The `ArchiveSection` class should be inherited by every class defined in your schema and provides the base NOMAD functionalities, e.g., normalization function capabilities. [`SubSections`](https://nomad-lab.eu/prod/v1/docs/reference/glossary.html#section-and-subsection){:target="_blank"} and [`Quantities`](https://nomad-lab.eu/prod/v1/docs/reference/glossary.html#quantity){:target="_blank"} are then used to populate each `ArchiveSection` class with specific metadata as demonstrated below.
 
-## Extending the overarching metadata
+## Extending the overarching simulation metadata
 
-Suppose you are developing a parser for a well-defined schema specified within the hdf5 file format. Importantly, the simulation data is harvested from the original simulation files and mapped into this schema/file format by some researcher. The overarching metadata in this file can be represented
+Suppose you are developing a parser for a well-defined schema specified within the hdf5 file format. Importantly, the simulation data is harvested from the original simulation files and mapped into this schema/file format by some researcher. The overarching metadata in this file can be represented as
 
 ```
 hdf5_schema
-    +-- version: Integer[2]
+    +-- version: Integer[3]
     \-- author
     |    +-- name: String[]
     |    +-- (email: String[])
@@ -63,44 +63,41 @@ hdf5_schema
     `\-- data: <type>[dim1][dim2]` -
     A dataset with array dimensions dim1 by dim2 and of type <type>, following the HDF5 Datatype classes.
 
-For demonstration purposed, let's assume that your parser grabs this information and stores it in the following dictionary:
-
-```python
-hdf_dict = {
-'version': <x.x.x>,
-'author': {
-    'name': <author name of the person who created the hdf5 file>,
-    'email': <author email of the person who created the hdf5 file>
-},
-'hdf5_generator': {
-    'name': <name of software used to write hdf5 file>,
-    'version': <version of the software used to write the hdf5 file>
-},
-'program': {
-    'name': <name of the program used to run the simulation that generated the data>,
-    'version': <version of the program used to run the simulation that generated the data>
-},
-}
-```
 
 !!! abstract "Assignment 4.1"
-    Using what you have already learned, how would you store the program information within the archive object in your parser?
+    Which quantities within this hdf5 schema can we store using existing classes within `nomad-simulations` and which require the creation of new schema classes? For the quantities that directly use the existing schema, write some code to demonstrate how your parser would populate the archive with this information.
 
 ??? success "Solution 4.1"
-    The program information can be stored under the existing `Program()` class within `nomad-simulations`. We already learned how to implement this in our parser:
+    The program information can be stored under the existing `Program()` class within `Simulation()`. However the hdf5 schema `version` and `hdf5_generator` information require some extensions to the schema.
+
+    For populating the program information, the parser code would look something like this (NOTE: the specifics of how to access the hdf5 file is not essential to understand for the purposes here):
 
     ```python
+    import h5py
     from nomad_simulations.schema_packages.general import Simulation, Program
 
-    simulation = Simulation()
-    simulation.program = Program(
-        name=h5md_dict.get('program', {}).get('name', {}),
-        version=h5md_dict.get('program', {}).get('version', {}),
-    )
-    archive.data = simulation
+    class ParserName(MatchingParser):
+
+        def parse(
+            self,
+            mainfile: str,
+            archive: EntryArchive,
+            logger: BoundLogger,
+            child_archives: dict[str, EntryArchive] = None,
+        ) -> None:
+
+            h5_data = h5py.File(mainfile, 'r')
+
+            simulation = Simulation()
+            simulation.program = Program(
+                name=h5_data['program'].attrs['name'],
+                version=h5_data['program'].attrs['version']
+            )
+
+            archive.data = simulation
     ```
 
- However, we need to create a new class for the rest of the metadata. The "creator" information is referring to a secondary software used to create the hdf5 file, so it makes sense to store this in a class very similar to `Program()`. Let's first take a look at the current `Program()` schema:
+The `hdf_generator` information is referring to a secondary software used to create the hdf5 file, so it makes sense to store this in a class very similar to `Program()`. Let's first take a look at the current `Program()` schema:
 
 ```python
 from nomad_simulations.general import Program
@@ -117,155 +114,220 @@ print(program.m_def.all_quantities)
  'link': nomad_simulations.general.Program.link:Quantity,
  'version_internal': nomad_simulations.general.Program.version_internal:Quantity,
  'compilation_host': nomad_simulations.general.Program.compilation_host:Quantity}
- ```
-
- Indeed, this class contains `name` and `version` information, along with other quantities that make sense in the context of the H5MD-NOMAD creator. So, in this case we can simply reuse this class. We need to simply add a new section within the `Simulation()` class for the H5MD-NOMAD file creator that is of type `Program()`. In `schema_packages/<parser_name>_schema.py`:
-
- ```python
-class Simulation(nomad_simulations.schema_packages.general.Simulation):
-
-    x_h5md_creator = SubSection(
-        sub_section=nomad_simulations.schema_packages.general.Program.m_def
-    )
 ```
 
-Here, we create a new class called `Simulation()` that inherits from `Simulation()` from `nomad-simulations` while adding the additional `x_h5md_creator` section of type `Program()`. Note that the `x_<program_name>_<quantity_name>` notation is our standard notation for specifying program-specific quantities that are not necessarily generalizable.
+Indeed, this class contains `name` and `version` information, along with other quantities that make sense in the context of a software which generates hdf5 files. So, in this case we can simply reuse this class and add a new subsection to `Simulation()`.
 
-Now we can use this new class within our parser to store the creator information:
+!!! abstract "Assignment 4.2"
+    Write down a new class that extends `Simulation()` to include a subsection `hdf_generator` of type `Program()`.
 
-```python
-from nomad_simulations.schema_packages.general import Program
-from nomad_simulations.schema_packages/<parser_name>_schema.py import Simulation
+    HINT: Here is how the `program` section is defined within the `BaseSimulation()` class (parent of `Simulation()`) of `nomad-simulations`:
 
-simulation = Simulation()
-simulation.x_h5md_creator = Program(
-    name=group_h5md_dict.get('h5md_creator_name'),
-    version=group_h5md_dict.get('h5md_creator_version'),
-)
-```
-
-We now need to extend the schema further to store the h5md-nomad author information. For this, let's make a new class with `name` and `email` quantities in `schema_packages/<parser_name>_schema.py`:
-
-```python
-class Author(ArchiveSection):
+    ```python
+    class BaseSimulation(Activity):
     """
-    Contains the specifications of the program.
     """
 
-    name = Quantity(
-        type=str,
-        shape=[],
-        description="""
-        Specifies the name of the author who generated the h5md file.
-        """,
-    )
+        program = SubSection(sub_section=Program.m_def, repeats=False)
+    ```
 
-    email = Quantity(
-        type=str,
-        shape=[],
-        description="""
-        Author's email.
-        """,
-    )
-```
+??? success "Solution 4.2"
+    We need to add a `Simulation()` class to `schema_packages/<parser_name>_schema.py` that inherits all the quantities and subsections from `nomad-simulation`'s `Simulation()` class, and additionally defines a subsection `hdf_generator`:
 
-Again, we need to add this to our custom `Simulation()` class:
+    ```python
+    class Simulation(nomad_simulations.schema_packages.general.Simulation):
 
- ```python
-class Simulation(nomad_simulations.schema_packages.general.Simulation):
+        h5md_generator = SubSection(
+            sub_section=nomad_simulations.schema_packages.general.Program.m_def
+        )
+    ```
 
-    x_h5md_creator = SubSection(
-        sub_section=nomad_simulations.schema_packages.general.Program.m_def
-    )
+    The `sub_section` argument of `SubSection` specifies that this new section under `Simulation()` is of type `Program()` and will thus inherit all of its attributes.
 
-    x_h5md_author = SubSection(sub_section=Author.m_def)
-```
 
-And, in our parser:
+    Now we can use this new class within our parser to store the hdf generator information:
+
+    ```python
+    from nomad_simulations.schema_packages.general import Program
+    from nomad_simulations.schema_packages/<parser_name>_schema.py import Simulation
+
+    class ParserName(MatchingParser):
+
+        def parse(
+            self,
+            mainfile: str,
+            archive: EntryArchive,
+            logger: BoundLogger,
+            child_archives: dict[str, EntryArchive] = None,
+        ) -> None:
+
+            h5_data = h5py.File(mainfile, 'r')
+
+            simulation = Simulation()
+            simulation.h5md_generator = Program(
+                name=h5_data['hdf_generator'].attrs['name'],
+                version=h5_data['hdf_generator'].attrs['version']
+            )
+
+            archive.data = simulation
+    ```
+
+Finally, we need to store the h5md schema version.
+
+We could simply add a string quantity to `Simulation()`, however since the h5md schema uses [semantic versioning](https://semver.org/){:target="_blank"}, we could store this as a list of 3 integers to ensure that the user provides the relevant information for this quantity. In `schema_packages/<parser_name>_schema.py`:
+
+!!! abstract "Assignment 4.3"
+    Add a quantity `hdf5_schema_verion` with the appropriate `type`, `shape`, and `description` to your `Simulation()` class in `schema_packages/<parser_name>_schema.py`.
+
+    HINT: You can browse some existing examples of quantity definitions in the [`nomad-simulations` source code](https://github.com/nomad-coe/nomad-simulations/blob/develop/src/nomad_simulations/schema_packages/numerical_settings.py){:target="_blank"}.
+
+
+??? success "Solution 4.3"
+
+    ```python
+    class Simulation(nomad_simulations.schema_packages.general.Simulation):
+
+        hdf5_schema_version = Quantity(
+            type=np.dtype(np.int32),
+            shape=[3],
+            description="""
+            Specifies the version of the h5md schema being followed.
+            """,
+        )
+    ```
+
+    And in the parser:
+
+    ```python
+    from nomad_simulations.schema_packages/<parser_name>_schema.py import Simulation
+
+    class ParserName(MatchingParser):
+
+        def parse(
+            self,
+            mainfile: str,
+            archive: EntryArchive,
+            logger: BoundLogger,
+            child_archives: dict[str, EntryArchive] = None,
+        ) -> None:
+
+            h5_data = h5py.File(mainfile, 'r')
+
+            simulation = Simulation()
+            simulation.hdf5_schema_version = h5_data.attrs['version']
+
+            archive.data = simulation
+    ```
+    ```
+
+
+## Extending the simulation outputs
+
 
 ```python
-from nomad_simulations.schema_packages/<parser_name>_schema.py import Simulation, Author
+from nomad_simulations.schema_packages.outputs import Outputs
+from nomad_simulations.schema_packages.properties.energies import BaseEnergy
 
-simulation = Simulation()
-simulation.x_h5md_author = Author(
-    name=group_h5md_dict.get('h5md_author_name'),
-    email=group_h5md_dict.get('h5md_author_email'),
-)
-
-```
-
-Finally, we need to store the h5md-nomad schema version. We could simply add a string quantity to `Simulation()`, however since the h5md schema uses semantic versioning, we could store this as a list of 3 integers to ensure that the user provides the relevant information for this quantity. In `schema_packages/<parser_name>_schema.py`:
-
-
- ```python
-class Simulation(nomad_simulations.schema_packages.general.Simulation):
-
-    x_h5md_creator = SubSection(
-        sub_section=nomad_simulations.schema_packages.general.Program.m_def
-    )
-
-    x_h5md_author = SubSection(sub_section=Author.m_def)
-
-    x_h5md_version = Quantity(
-        type=np.dtype(np.int32),
-        shape=[3],
-        description="""
-        Specifies the version of the h5md schema being followed.
-        """,
-    )
-```
-
-And in the parser:
-
-```python
-from nomad_simulations.schema_packages/<parser_name>_schema.py import Simulation, Author
-
-simulation = Simulation()
-simulation.x_h5md_version = group_h5md_dict.get('h5md_version')
-```
-
-
-Now, imagine that your simulation outputs some observable that is not yet defined within `nomad-simulations`. We can easily extend the schema following the approach from above (in `schema_packages/<parser_name>_schema.py`):
-
-```python
-class Stress(nomad_simulations.schema_packages.physical_property.PhysicalProperty):
-    """
-    Here you should give a detailed description of this property.
-    """
-
+class DoubleCountingEnergy(BaseEnergy):
     value = Quantity(
         type=np.dtype(np.float64),
-        unit='newton',
+        unit='eV',
     )
 
-class Outputs(nomad_simulations.schema_packages.outputs.Outputs):
+    type = Quantity(
+        type=MEnum('double_counting'),
+    )
+
+    def normalize(self, archive: 'EntryArchive', logger: 'BoundLogger') -> None:
+        super().normalize(archive, logger)
+
+        if not self.type:
+            self.type = 'double_counting'
+
+class HartreeDCEnergy(DoubleCountingEnergy):
+
+    def normalize(self, archive: 'EntryArchive', logger: 'BoundLogger') -> None:
+        super().normalize(archive, logger)
 
 
-    stress = SubSection(
-        sub_section=Stress.m_def,
+class XCdcEnergy(DoubleCountingEnergy):
+
+    def normalize(self, archive: 'EntryArchive', logger: 'BoundLogger') -> None:
+        super().normalize(archive, logger)
+
+class RestEnergy(BaseEnergy):
+
+    def normalize(self, archive: 'EntryArchive', logger: 'BoundLogger') -> None:
+        super().normalize(archive, logger)
+
+
+class TotalEnergy(nomad_simulations.schema_packages.properties.TotalEnergy):
+
+    def normalize(self, archive: 'EntryArchive', logger: 'BoundLogger') -> None:
+        super().normalize(archive, logger)
+
+        if self.total_energy:
+            for total_energy in self.total_energy:
+                if total_energy.value and total_energy.contributions:
+                    value = total_energy.value
+                    for contribution in total_energy.contributions:
+                        value -= contribution.value
+                    total_energy.rest_energy.append(RestEnergy(value=value))
+
+class Outputs(Outputs):
+
+    # add a new section for the custom output
+    hartreedc = SubSection(
+        sub_section=HartreeDCEnergy.m_def,
+        repeats=True,
+    )
+
+    xcdc = SubSection(
+        sub_section=XCdcEnergy.m_def,
         repeats=True,
     )
 ```
 
-And in the parser:
 
 
 ```python
-from nomad_simulations.schema_packages/<parser_name>_schema.py import Outputs, Stress
-from nomad.units import ureg
+from nomad_simulations.schema_packages.outputs import Outputs
+from nomad_simulations.schema_packages.properties.energies import BaseEnergy
 
-output = Outputs()
-simulation.outputs.append(output)
-output.stress.append(
-  Stress(value=<value_from_file_parsing> * ureg.newton)
-)
+
+class ParserName(MatchingParser):
+
+    def parse(
+        self,
+        mainfile: str,
+        archive: EntryArchive,
+        logger: BoundLogger,
+        child_archives: dict[str, EntryArchive] = None,
+    ) -> None:
+
+        h5_data = h5py.File(mainfile, 'r')
+
+        simulation = Simulation()
+        simulation.h5md_generator = Program(
+            name=h5_data['hdf_generator'].attrs['name'],
+            version=h5_data['hdf_generator'].attrs['version']
+        )
+
+        archive.data = simulation
+
+
+        total_energy = xml_get(<path to total energy>)
+        hartreedc = xml_get(<path to hartreedc energy>)
+        xcdc = xml_get(<path to xcdc energy>)
+
+        simulation = Simulation()
+        output = Outputs()
+        simulation.outputs.append(output)
+        output.total_energy.append(TotalEnergy())
+
+        output.total_energy[0].contributions.append(HartreeDCEnergy(value=total_energy * ureg.eV))
+        output.total_energy[0].contributions.append(XCdcEnergy(value=total_energy * ureg.eV))
 ```
-
-
-
-
-
-
 
 
 
