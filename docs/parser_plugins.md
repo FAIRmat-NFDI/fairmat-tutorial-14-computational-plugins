@@ -11,7 +11,7 @@ The data is now ready to interact with the NOMAD ecosystem and apps.
 <div class="click-zoom">
     <label>
         <input type="checkbox">
-        <img src="../assets/assets/parsing_illustration.png" alt="Symbolic, 3-step representation of the parsing process: 1. SELECT FILES; 2. EXTRACT DATA;  3. SCHEMA" width="80%" title="Click to zoom in">
+        <img src="../assets/parsing_illustration.png" alt="Symbolic, 3-step representation of the parsing process: 1. SELECT FILES; 2. EXTRACT DATA;  3. SCHEMA" width="80%" title="Click to zoom in">
     </label>
 </div>
 
@@ -50,7 +50,7 @@ Following the instructions in the `README.md`  and the `cruft` setup will allow 
 <div class="click-zoom">
     <label>
         <input type="checkbox">
-        <img src="../assets/assets/github_plugin_template.png" alt="Overview of the GitHub repository page `nomad-plugin-template` with the 'Use this template' button highlighted in red." width="80%" title="Click to zoom in">
+        <img src="../assets/github_plugin_template.png" alt="Overview of the GitHub repository page `nomad-plugin-template` with the 'Use this template' button highlighted in red." width="80%" title="Click to zoom in">
     </label>
 </div>
 
@@ -67,6 +67,7 @@ More elaborate explanations should go under `docs`.
 You can deploy them on GitHub or locally via `mkdocs`.
 Lastly, NOMAD uses the Apache 2.0 license (option 4 in the `cruft` setup).
 Please select the same license for maximal legal compatibility.
+<!-- TODO remove explanation once resolved on template's end -->
 
 ```
 ├── nomad-plugin-parser
@@ -80,32 +81,54 @@ Please select the same license for maximal legal compatibility.
 |   |   │   │   ├── __init__.py
 │   ├── docs
 │   ├── tests
-│   ├── pyproject.toml             (module setup file)
+│   ├── pyproject.toml             (publication specifications)
 │   ├── LICENSE.txt
 │   ├── README.md
--------------------------------------------------------------
-├── nomad.yaml                     (NOMAD configuration file)
+---------------------------------------------------------------
+├── nomad.yaml                     (NOMAD configurations)
 ```
 
 This examples also highlights the files containing _entry point_ information between parentheses.
-They are explained in greater detail in section [Extra: Managing Entry Points](#extra-managing-entry-points).
-For now, it suffices to understand them as the official mechanism for `pip` installing modules.
-The dependence runs bottom up, i.e. the `module setup file` refers to `entry point` that refers to `target functionality`.
+Entry points are the official mechanism for `pip` installing modules.
+Just note that their referencing runs bottom up, i.e. from the `publication specifications` to the `entry point` itself, and from thereon to the `target functionality`.
 
-The final piece in the entry point system (NOMAD configuration file) resides in `nomad.yaml` and refers back to the module setup file. <!-- clarify terminology -->
+The final piece in the entry point system, the `NOMAD configurations`, are external to plugin package.
+The configurations refers back to the `publication specifications`.
 It allows you to control the loading of plugins and their options, however, normally you don't have to touch anything there for NOMAD to pick up on your parser.
+
+??? tip "Managing Entry Points"
+    ### What are they?
+    The plugin setup follows the common [entry-points](https://setuptools.pypa.io/en/latest/userguide/entry_point.html) Python standard from `importlib.metadata`.
+    It works in tandem with `pip` install to allow for a more elegant and controlled way of exposing and loading (specific functionalities in) modules.
+    Entry points also provide the module developer tools for controlling how it ought to be exposed to the environment, e.g. name, description, configuration.
+
+    ### Relation with the Python Environment
+    Contrary to regular dependencies, entry points are visible at a system-wide level, even when installed in a local environment.
+    You can therefore choose whether to install plugins in their own environment, or construct a shared one (with the NOMAD base).
+    We recommend the former to prevent dependency clashing.
+
+    ### Key Players
+    Conceptually, there are five roles to keep track off:
+
+    - **target functionality**: the entity that we want to _expose_ to the NOMAD base installation. In our case, this will amount to our parser class, which typically is a child class of `MatchingParser`. It may use `configurations` parameters passed along via the nomad settings.
+    - **entry point**: instance of `EntryPoint`, responsible for _registering_ the target functionality. It therefore also retains metadata like its name, a description and most importantly, the file matching directives. It is typically located in the `__init__.py` of the relevant functionality folder (see folder structure).
+        - **entry point group**: bundles several entry points together. By default, NOMAD scans all plugins under the group name `project.entry-points.'nomad.plugin'`.
+    - **publication specifications**: _exposes_ the entry point (and its group) under the format of `<module_name>.<object_name>:<entry_point_name>`. This is the name by which you should refer to it within the entry point system. For importing the within a Python script, use only `<module_name>.<object_name>`. In NOMAD we use the `pyproject.toml` setup file under the module's root folder.
+    - **NOMAD configurations**: called in `nomad.yaml`, controls which entry points are _included_ or _excluded_, as well as their _configuration parameters_.
 
 ## Assembling a Parser Class
 
 Throughout this subsection, we will provide a step-by-step guide of the process for building out a parser using the VASP XML output format as an example.
-The code snippets provided below should go under `src/nomad_parser_vasp/parsers/`, in a file clarifying the use, e.g. `xml_parser.py`.
+For an overview of the code in its complete form, you can check out the [official repository](https://github.com/FAIRmat-NFDI/nomad-parser-vasp/tree/older_alt).
+Make sure to fork it in case you want to track your modifications.
+The code snippets provided below should are located under `src/nomad_parser_vasp/parsers/`, in a file clarifying the intended extension, `xml_parser.py`.
 
 ### Hooking up a Parser
 
 As denoted in step 1, the parser first has to read in the file contents as passed through by the NOMAD base.
 The directives for selecting _mainfiles_ are passed on via an interaction cascade from `nomad.yaml` > `ParserEntryPoint` > `MatchingParser`.
 
-??? info "What are mainfiles?"
+??? note "What are mainfiles?"
     Mainfiles are files by which an expert / program can determine the code used / the parser to use.
     The selection directives (see below) target these files specifically.
     Their file paths are passed on to the parser, which can either process them or navigate the folder for other, auxiliary files.
@@ -150,13 +173,16 @@ There are three kinds of file aspects that can be targeted, all via _regular exp
     <?xml version="1.0" encoding="ISO-8859-1"?>
     <modeling>
     ```
-    You can capture this via `mainfile_contents_re` in a regex like `r'<\?xml version="1\.0" encoding="ISO\-8859\-1"?>\n<modeling>`.
+    You can capture this via `mainfile_contents_re` in a regex like
+    ```python
+    r'<\?xml version="1\.0" encoding="ISO\-8859\-1"?>\n<modeling>
+    ```
 <!-- TODO double-check -->
 
 #### Mainfile Interfacing
 
 Within the cascade, `MatchingParser`, acts as the connection point on the parser side.
-It plays less of a role in manipulating the directives, and more so in defining the _interface_ &mdasha formalization of mutually agreed upon behavior&mdash back to the parser.
+It plays less of a role in manipulating the directives, and more so in defining the _interface_ &mdash;a formalization of mutually agreed upon behavior&mdash; back to the parser.
 The two main specifications are instantiation and `parse`.
 Since `MatchingParser` already defines both, parsers may simply _inherit_ therefrom.
 The most rudimentary parser, thus looks as follows:
@@ -167,28 +193,58 @@ class VasprunXMLParser(MatchingParser):
     pass
 ```
 
-NOMAD can already run this parser, but will raise a `NotImplementedError`.
-The interface may be defined, but we still need to fill in the actual parsing by overwriting the default `parse(...)` function.
-
-??? info "Run your parser"
+??? tip "Running your Parser"
+    ### Front-end
     In everyday NOMAD use, the user only interacts with NOMAD via the GUI or API.
     NOMAD will regulate parsing as the user uploads via these channels.
+
+    ### Command-line
     During development, the command line is probably the preferable option, as you can load changes faster and incorporate it into your favorite test setups.
     To print the archive to the terminal, use `nomad parse --show-archive <mainfile>`.
     If you already know which parser to use, add the `--parser 'parser/<parser or entry point name>'` flag.
     To list all options, type `nomad parse --help`.
     Note that even the command line passes through the NOMAD base, so make sure to have it installed and set up correctly.
 
+    ### Notebooks
+    If you are using Jupyter Notebook, you can manipulate data in a head-on way without NOMAD base as an intermediary.
+    Note that this enntails providing the parsing input yourself, as well as manually triggering normalization.
+    A template setup looks something like:
+
+    ```python
+    from nomad.datamodel import EntryArchive
+    from nomad.client.processing import parse
+    from nomad.client import normalize_all
+    from nomad.normalizing.metainfo import MetainfoNormalizer
+    from <parser_plugin>.parser import <ParserPlugin>
+
+    p = ParserPlugin()
+    a = EntryArchive()
+
+    # parsing ONLY
+    p.parse(<mainfile>, a, logger=None)
+
+    # parsing + full normalization
+    a = parse(<mainfile>)
+    normalize_all(a[0])
+
+    # parsing + schema-only normalization
+    p.parse(<mainfile>, a, logger=None)
+    MetainfoNormalizer().normalize(archive=a)
+    ```
+
+NOMAD can already run this parser, but will raise a `NotImplementedError`.
+The interface may be defined, but we still need to fill in the actual parsing by overwriting the default `parse(...)` function.
+That is for the next section.
 
 ### Getting the Data
 
 Where `MatchingParser` provides a path to the mainfiles, a separate parser is needed for actually reading the _file contents_.
-NOMAD already provides several parsers for popular, general-purpose formats like JSON, HDF5, and XML. <!-- TODO verify JSON >
+NOMAD already provides several parsers for popular, general-purpose formats like JSON, HDF5, and XML. <!-- TODO verify JSON -->
 Plain text is also supported, but a bit more involved.
 We cover it in section [From Text to Hierarchies](#from-text-to-hierarchies).
 
 Contrary to `MatchingParser`, none of these parsers interface directly with the NOMAD base.
-For example, they do not support the `parse` function.
+For example, they do not support the `parse(...)` function.
 Therefore, our parser has to call `XMLParser`.
 The typical strategy here is to save the _reader object_ for later manipulation.
 In the example below, we read in the whole file.
@@ -209,15 +265,12 @@ class VasprunXMLParser(MatchingParser):
 ```
 <!-- note that this XMLParser does not have a universal interface -->
 
-??? info "What is the archive?"
-    An archive is a (typically empty) storage object for an entry.
-    It is populated by the parser and later on serialized into an `archive.json` file by NOMAD for permanent storage.
-    It has five sections, but for novel parsers we are solely interested in `data` and `workflow`.
-    - `metainfo`: internal NOMAD metadata registering who uploaded the data and when is was uploaded. This is handled completely automatically by the NOMAD base.
-    - `results`: the data indexed and ready to query at full database scale. It is automatically produced from `worfklow`, `data`, and `run`.
-    - `workflow`: some entries coordinate other entries. This section coordinates the . For more, see [Interfacing complex simulations](custom_workflows.md).
-    - `data`: the new section detailing all extracted values. It comes with the updated schema presented in [NOMAD-Simulations schema plugin](nomad_simulations.md).
-    - `run`: the predecessor to `data`. It should only be targeted by legacy parsers, and has been marked for deprecation.
+??? note "To Return or not to Return"
+    Should `parse(...)` return a filled out `EntryArchive` object to the NOMAD base or rather overwrite `archive`?
+    Its _type signature_, i.e. `-> None`, denotes that it should in fact **not** return any output.
+
+    In NOMAD, we use type signatures as much as possible.
+    They are also tested in our CI/CD, which might request adding them in cases where types cannot be inferred.
 
 The `NotImplementedError` is now resolved.
 Running the parser results in a new error, however, `AttributeError: 'dict' object has no attribute 'm_parent'`.
@@ -226,38 +279,43 @@ The data has been successfully extracted: check `xml_reader._results`.
 The issue stems from data not yet meeting the high-quality standards of the NOMAD schema.
 In the next section, we convert it.
 
-??? info "To return or not return"
-    Does the NOMAD base expect an `EntryArchive` object back from `parse`.
-    In NOMAD we use type annotation as much as possible.
-    It also tested in our CI/CD.
-    The type signature of `parse` denotes that it should not return any output, i.e. `-> None`.
-    Instead, the input will be overwritten and later on extracted.
+??? info "What is the Archive?"
+    An archive is a (typically empty) storage object for an entry.
+    It is populated by the parser and later on serialized into an `archive.json` file by NOMAD for permanent storage.
 
-#### Extra: Communicating via Logs
+    It has five sections, but for novel parsers we are solely interested in `data` and `workflow`.
 
-Each entry has an associated log.
-These communicate info or warnings about the processing, as well as debugging info and (critical) errors for tracing bugs.
-Include the latter when contacting us regarding any processing issues.
+    - `metainfo`: internal NOMAD metadata registering who uploaded the data and when is was uploaded. This is handled completely automatically by the NOMAD base.
+    - `results`: the data indexed and ready to query at full database scale. It is automatically produced from `worfklow`, `data`, and `run`.
+    - `workflow`: some entries coordinate other entries. This section coordinates the . For more, see [Interfacing complex simulations](custom_workflows.md).
+    - `data`: the new section detailing all extracted values. It comes with the updated schema presented in [NOMAD-Simulations schema plugin](nomad_simulations.md).
+    - `run`: the predecessor to `data`. It should only be targeted by legacy parsers, and has been marked for deprecation.
 
-Here, we use the `logger` object to `info`rm which parser was called.
+??? info "Communicating via Logs"
 
-```python
-...
-from nomad.config import config
+    Each entry has an associated log. <!-- Add screenshot GUI? -->
+    These communicate info or warnings about the processing, as well as debugging info and (critical) errors for tracing bugs.
+    Include the latter when contacting us regarding any processing issues.
 
-configuration = config.get_plugin_entry_point(
-    'nomad_parser_vasp.parsers:xml_entry_point'
-)
+    Here, we use the `logger` object to `info`rm which parser was called.
 
-class VasprunXMLParser(MatchingParser):
-    def parse(
-        self, mainfile: str, archive: EntryArchive, logger: BoundLogger,
-        child_archives: dict[str, EntryArchive] = None,
-    ) -> None:
-
-    logger.info('VasprunXMLParser.parse', parameter=configuration.parameter)
+    ```python
     ...
-```
+    from nomad.config import config
+
+    configuration = config.get_plugin_entry_point(
+        'nomad_parser_vasp.parsers:xml_entry_point'
+    )
+
+    class VasprunXMLParser(MatchingParser):
+        def parse(
+            self, mainfile: str, archive: EntryArchive, logger: BoundLogger,
+            child_archives: dict[str, EntryArchive] = None,
+        ) -> None:
+
+        logger.info('VasprunXMLParser.parse', parameter=configuration.parameter)
+        ...
+    ```
 
 ## From Parser back to NOMAD
 
@@ -291,6 +349,7 @@ In the parser code itself, the sections and quantities are both just classes.
 We thus construct a tree of their objects by _instantiating_ them one-by-one.
 
 ```python
+from nomad.units import ureg
 ...
 
 class VasprunXMLParser(MatchingParser):
@@ -313,11 +372,18 @@ class VasprunXMLParser(MatchingParser):
             ),
             model_system=ModelSystem(
                 cell=AtomicCell(
-                    positions=xml_get("structure[@name='finalpos']/./varray[@name='positions']/v")[0],
+                    positions=np.float64(xml_get("structure[@name='finalpos']/./varray[@name='positions']/v")[0]) * ureg.angstrom,
                 ),
             ),
         )
 ```
+
+??? warning "Data Type Conversion"
+    NOMAD strictly enforces `Quantity` types like `np.int32`, `np.float64`, `np.complex128`, `str`, etc.
+    These do no necessarily include all concepts from the `typing` or `numpy` module.
+    `List`, for example, is controlled via the `Quantity.shape` attribute.
+
+    Note that you should apply the proper type before storing the quantity value, as conversions that lead to loss of precision are returned as errors, e.g. `int` cannot be readily cast into `np.float64`.
 
 The final `archive.json` will look something like the following.
 Obviously, the exact values depend on the file parsed.
@@ -395,32 +461,34 @@ Obviously, the exact values depend on the file parsed.
 ```
 
 ??? abstract "Assignment 3.2"
-    `AtomicCell` should also contain information about the lattice vectors &mdashreciprocal lattice vectors are derived&mdash and periodic boundary conditions.
+    `AtomicCell` should also contain information about the lattice vectors &mdash;reciprocal lattice vectors are derived&mdash; and periodic boundary conditions.
     Add these to the instantiation, knowing that the lattice vectors fall under `<structure><crystal><varray name="basis" >`.
     The boundary conditions, meanwhile, are always periodic in VASP.
 
 ??? success "Solution 3.2"
-    ```
-    python
+    The new `ModelSystem().cell` attribute now reads as:
+
+    ```python
     ...
     cell=AtomicCell(
         positions=xml_get("structure[@name='finalpos']/./varray[@name='positions']/v")[0],
         lattice_vectors=xml_get("structure//varray[@name='basis']/v")[0],
         periodic_boundary_conditions=[True] * 3,
     )
-    ``` <!-- TODO double-check -->
+    ```
+    <!-- TODO double-check -->
 
 This example shows a declarative approach to object instantiation:
 any quantity/subsection listed under a section in the schema can be directly passed to the constructor.
 Or course, the existence of section may be contingent on one and another.
 
-If no `finalpos` are extracted &mdashmaybe due to a premature termination&mdash neither should `model_system` be populated.
+If no `finalpos` are extracted &mdash;maybe due to a premature termination&mdash; neither should `model_system` be populated.
 In this case, it is better to set the section attribute after constructing the main skeleton.
 
-??? note "Updating the getter"
-    `xml_get` should now be responsible of failure handling/signaling.
+??? note "Updating the Getter"
+    Given our modifications, `xml_get` should now also be in charge of failure signaling.
     Depending on the type expected, we may use `None` or `[]`.
-    To prevent `IndexError` when extracting, we also pass the slice along as an argument.
+    To prevent `IndexError` when extracting, we also pass the array `slice(...)` along as an argument.
 
 ```python
 ...
@@ -447,7 +515,9 @@ class VasprunXMLParser(MatchingParser):
             )
         ).any():
             archive.data.model_system.append(
-                ModelSystem(cell=[AtomicCell(positions=positions)])
+                ModelSystem(
+                    cell=[AtomicCell(positions=np.float64(positions) * ureg.angstrom)]
+                )
             )
 ```
 
@@ -517,7 +587,7 @@ The NOMAD base will anyhow invoke normalization, so do not feel responsible for 
 
 ### Via Mapping
 
-**DISCLAIMER: the code and functionalities covered in this section are still under construction and only serves as an illustration of the underlying concepts. Stay tuned for updates.**
+**DISCLAIMER: the code and functionalities covered in this section are still under construction and only serve as an illustration of the underlying concepts. Stay tuned for updates.**
 
 The second option is to have the instantiation run automatically.
 In that case, the mapping is added directly to our schema as an _annotation_.
@@ -552,7 +622,7 @@ We only need to provide the root object, i.e. `Simulation`, from which to start 
 
 ### Mapping Annotations on the Schema side
 
-**DISCLAIMER: the code and functionalities covered in this section are still under construction and only serves as an illustration of the underlying concepts. Stay tuned for updates.**
+**DISCLAIMER: the code and functionalities covered in this section are still under construction and only serve as an illustration of the underlying concepts. Stay tuned for updates.**
 
 So how do the annotations to the schema look like?
 Firstly, only attributes of `ArchiveSection`, i.e. `Quantity` (i.e. leaf nodes) or `SubSection` (i.e. branching nodes), have to be annotated.
@@ -601,72 +671,28 @@ txt_reader = TextParser(                # root node
 Note that the regex patterns should always contain _match groups_, i.e. `()`, else no text is extracted.
 This is especially important for blocks, where the typical regex pattern has the form `r'<re_header>(?[\s\S]+)<re_footer>'` to match everything between the block header and footer.
 
-??? info "Dissecting Tables"
-    The typical approach to processing text tables is to match the table (body), a standard line, and lastly, a standard column. <!-- TODO explore tools for when column semantics is tied to its index -->
+??? note "Dissecting Tables"
+    The typical approach to processing text tables is to match, in order:
+    
+    1. the table and extract (at least) the body.
+    2. a standard line.
+    3. the relevant column. <!-- TODO explore tools for when column semantics is tied to its index -->
+
     Ensure that you toggle the `Quantity.repeats: Union[bool, int]` option to obtain a list of matches.
     <!-- TODO how to extract as a matrix immediately (no dict keys) -- >
 
 The main concern is how to leverage the additional freedom of a third format.
-Our foremost advice is to
+Our foremost advice is to:
 
 1. follow the order in which the data normally appears.
 2. use as similar as possible node names as in the file. If none are present, fall back on the NOMAD schema names.
 3. systematically break down blocks of text via the weaving technique.
 4. use the same node names when multiple versions exist. Maximize the common nodes and overall keep the alternatives as close as possible together.
 
-Handling contingent values is more so reserved for step 3, mapping.
-An example would be reading file units:
-
+<!-- Handling contingent values is more so reserved for step 3, mapping. -->
 <!-- TODO add dynamic units example -->
 
 ??? info "Semantic Patterns"
     Modern text parsers come equipped with several common patterns to expedite the construction of complex patterns.
     Examples include `re_float` covering decimals and scientific notation, separators like `re_blank_line` or `re_eol`, and `re_non_greedy` for matching whole chunks of text, as shown above.
-    The `capture(pattern)` function applies the match groups.   
-
-## Extra: Managing Entry Points
-
-The plugin setup follows the common [entry-points](https://setuptools.pypa.io/en/latest/userguide/entry_point.html) Python standard from `importlib.metadata`.
-It works in tandem with `pip` install to allow for a more elegant and controlled way of exposing and loading (specific functionalities in) modules.
-Entry points also provide the module developer tools for controlling how it ought to be exposed to the environment, e.g. name, description, configuration.
-
-??? note "Entry Point Visibility"
-    Contrary to regular Python dependencies, entry points are visible at a system-wide level, even when installed in a local environment.
-    You can therefore choose whether to install plugins in their own environment, or construct a shared one (with the NOMAD base).
-    We recommend the former to prevent dependency clashing.
-
-Conceptually, there are five key players to keep track off:
-
-- **target functionality**: the entity that we want to _expose_ to the NOMAD base installation. In our case, this will amount to our parser class, which typically is a child class of `MatchingParser`. It may use `configurations` parameters passed along via the nomad settings.
-- **entry point**: instance of `EntryPoint`, responsible for _registering_ the target functionality. It therefore also retains metadata like its name, a description and most importantly, the file matching directives. It is typically located in the `__init__.py` of the relevant functionality folder (see folder structure).
-    - **entry point group**: bundles several entry points together. By default, NOMAD scans all plugins under the group name `project.entry-points.'nomad.plugin'`.
-- **module setup file**: _exposes_ the entry point (and its group) under the format of `<module_name>.<object_name>:<entry_point_name>`. This is the name by which you should refer to it within the entry point system. For importing the within a Python script, use only `<module_name>.<object_name>`. In NOMAD we use the `pyproject.toml` setup file under the module's root folder.
-- **NOMAD configuration file**: called in `nomad.yaml`, controls which entry points are _included_ or _excluded_, as well as their _configuration parameters_.
-
-## Extra: Working from a NoteBook
-
-In Jupyter Notebook, you can manipulate data in a head-on way without NOMAD base as an intermediary.
-Note that this means providing the parsing input yourself, as well as manually triggering normalization.
-A template setup looks something like:
-
-```python
-from nomad.datamodel import EntryArchive
-from nomad.client.processing import parse
-from nomad.client import normalize_all
-from nomad.normalizing.metainfo import MetainfoNormalizer
-from <parser_plugin>.parser import <ParserPlugin>
-
-p = ParserPlugin()
-a = EntryArchive()
-
-# parsing ONLY
-p.parse(<mainfile>, a, logger=None)
-
-# parsing + full normalization
-a = parse(<mainfile>)
-normalize_all(a[0])
-
-# parsing + schema-only normalization
-p.parse(<mainfile>, a, logger=None)
-MetainfoNormalizer().normalize(archive=a)
-```
+    The `capture(pattern)` function applies the match groups.
