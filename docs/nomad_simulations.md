@@ -2,7 +2,7 @@
 
 In NOMAD, all the simulation metadata is defined under the `Simulation` section. You can find its Python schema defined in the [`nomad-simulations`](https://github.com/nomad-coe/nomad-simulations/) repository. The [entry point](parser_plugins.md) for the schema is defined in [src/nomad_simulations/schema_packages/\_\_init\_\_.py](https://github.com/nomad-coe/nomad-simulations/blob/develop/src/nomad_simulations/schema_packages/__init__.py) module. This section will appear under the `data` section for each NOMAD [*entry*](https://nomad-lab.eu/prod/v1/staging/docs/reference/glossary.html#entry). There is also a [specialized documentation page](https://nomad-coe.github.io/nomad-simulations/) in the `nomad-simulations` repository.
 
-The `Simulation` section inherits from a more abstract section or concept called `BaseSimulation`, which at the same time inherits from another section, `Activity`. 
+The `Simulation` section inherits from a more abstract section or concept called `BaseSimulation`, which at the same time inherits from another section, `Activity`.
 
 ??? note "Inheritance and composition"
     During this part, we will identify the **is a** concept with inheritance of one section into another (e.g., a `Simulation` _is an_ `Activity`) and the **has a** concept with composition of one section under another (e.g., a `Simulation` **has a** `ModelSystem` sub-section). Strictly speaking, this equivalency is not entirely true, as we are loosing it in some cases. But for the purpose of learning the complicated rules of inheritance and composition, we will conceptually maintain this equivalency during this Tutorial.
@@ -28,24 +28,12 @@ Note that the white-headed arrow here indicates _inheritance_ / _is a_ relations
 
 We use double inheritance from `EntryData` in order to populate the `data` section in the NOMAD archive. All of the base sections discussed here are subject to the [public normalize function](#normalize-function) in NOMAD. The private function `set_system_branch_depth()` is related with the [ModelSystem section](#modelsystem).
 
+Let's use this knowledge to see how to work with the schema in practice. If you have not already installed `nomad-simulations`, do so now following the instructions in the [Overview](index.md#tutorial-information-and-preparation).
+
 !!! abstract "Assignement 2.1"
-    Create a new directory and a new virtual environment within it, activate the environment, and install the `nomad-simulations` package. Once this is done, create an instance of the `Simulation` section. Imagine you know that the CPU1 took 24 minutes and 30 seconds on finishing the simulation; can you populate the `Simulation` section with these times? What is the elapsed time in seconds? And in hours?
+    Create an instance of the `Simulation` section. Imagine you know that the CPU1 took 24 minutes and 30 seconds on finishing the simulation; can you populate the `Simulation` section with these times? What is the elapsed time in seconds? And in hours?
 
 ??? success "Solution 2.1"
-    First, we will create the directory and the virtual environment; remember that the Python version must be 3.9 for `nomad-simulations` to work:
-    ```sh
-    mkdir test_nomadsimulations
-    cd test_nomadsimulations/
-    python3.9 -m venv .pyenv
-    source .pyenv/bin/activate
-    ```
-    
-    Once this is done, we can pip install the `nomad-simulations` package:
-    ```sh
-    pip install --upgrade pip
-    pip install nomad-simulations --index-url https://gitlab.mpcdf.mpg.de/api/v4/projects/2187/packages/pypi/simple
-    ```
-
     We can open a Python console:
     ```sh
     python
@@ -152,7 +140,7 @@ The `ModelMethod` section is an input section which contains all the information
     </label>
 </div>
 
-`ModelMethod` is thus a sub-section under `Simulation`. It inherits from an abstract section `BaseModelMethod`, as well as containing a sub-section called `contributions` of the same section. The underlying idea of `ModelMethod` is to parse the input parameters of the mathematical model, typically a Hamiltonian. This total Hamiltonian or model could be split into individual sub-terms or `contributions`. Each of the electronic-structure methodologies inherit from `ModelMethodElectronic`, which contains a boolean `is_spin_polarized` indicating if the `Simulation` is spin polarized or not. The different levels of abstractions are useful when dealing with commonalities amongst the methods. 
+`ModelMethod` is thus a sub-section under `Simulation`. It inherits from an abstract section `BaseModelMethod`, as well as containing a sub-section called `contributions` of the same section. The underlying idea of `ModelMethod` is to parse the input parameters of the mathematical model, typically a Hamiltonian. This total Hamiltonian or model could be split into individual sub-terms or `contributions`. Each of the electronic-structure methodologies inherit from `ModelMethodElectronic`, which contains a boolean `is_spin_polarized` indicating if the `Simulation` is spin polarized or not. The different levels of abstractions are useful when dealing with commonalities amongst the methods.
 
 !!! abstract "Assignement 2.3"
     Instantiate a `DFT` section. For simplicity, you can also assign the `jacobs_ladder` quantity to be `'LDA'`. Add this sub-section to the `Simulation` section created in the Assignement 2.1. What is the underlying concept that allows you to add directly the `class DFT` under `Simulation.model_method`, provided that the definition of this attribute is a `ModelMethod` sub-section? Can you reason why the current schema (version 0.0.2) is inconsistent in handling the `xc_functionals` contributions?
@@ -280,10 +268,10 @@ The `AtomsState` section is a list of sub-sections within `AtomicCell`, correspo
 
     Now, we want to extract the different formats in which the chemical formulas of this system can be written. For that, instantiate directly the `ChemicalFormula` sub-section under `ModelSystem`. Note: you can use the `ChemicalFormula.normalize(archive, logger)` method, and pass `archive=None` to this function.
 
-    What are the different formats of the chemical formula? What is the string of the `descriptive` format and why it coincides with other format(s) in the sub-section? 
+    What are the different formats of the chemical formula? What is the string of the `descriptive` format and why it coincides with other format(s) in the sub-section?
 
 ??? success "Solution 2.6"
-    We can import and create instances of `ModelSystem` and `AtomicCell` and assign the corresponding quantities directly: 
+    We can import and create instances of `ModelSystem` and `AtomicCell` and assign the corresponding quantities directly:
     ```python
     from nomad_simulations.schema_packages.model_system import ModelSystem, AtomicCell
     model_system = ModelSystem()
@@ -294,7 +282,7 @@ The `AtomsState` section is a list of sub-sections within `AtomicCell`, correspo
     We can append this section to `Simulation`:
     ```python
     simulation.model_system.append(model_system)
-    ``` 
+    ```
 
     We can now assign directly an empty `ChemicalFormula` section to `ModelSystem`, in order to be able to call for the specific class method:
     ```python
