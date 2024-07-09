@@ -1,4 +1,4 @@
-# Extending NOMAD-Simulations to support custom methods and outputs
+# Part 4 - Extending NOMAD-Simulations to support custom methods and outputs
 
 As you develop your parser, you may find that the `nomad-simulations` package does not include some relevant quantities for your particular use case. You can easily extend upon the schema by adding your own custom schema under the `schema_packages/` directory in your parser plugin. For this, you should utilize and build upon `nomad-simulations` for consistency and future compatibility or integration. Below (click to zoom) is a decision tree which illustrates the schema development process:
 
