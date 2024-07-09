@@ -67,6 +67,7 @@ More elaborate explanations should go under `docs`.
 You can deploy them on GitHub or locally via `mkdocs`.
 Lastly, NOMAD uses the Apache 2.0 license (option 4 in the `cruft` setup).
 Please select the same license for maximal legal compatibility.
+<!-- TODO remove explanation once resolved on template's end -->
 
 ```
 ├── nomad-plugin-parser
@@ -118,7 +119,9 @@ It allows you to control the loading of plugins and their options, however, norm
 ## Assembling a Parser Class
 
 Throughout this subsection, we will provide a step-by-step guide of the process for building out a parser using the VASP XML output format as an example.
-The code snippets provided below should go under `src/nomad_parser_vasp/parsers/`, in a file clarifying the use, e.g. `xml_parser.py`.
+For an overview of the code in its complete form, you can check out the [official repository](https://github.com/FAIRmat-NFDI/nomad-parser-vasp/tree/older_alt).
+Make sure to fork it in case you want to track your modifications.
+The code snippets provided below should are located under `src/nomad_parser_vasp/parsers/`, in a file clarifying the intended extension, `xml_parser.py`.
 
 ### Hooking up a Parser
 
