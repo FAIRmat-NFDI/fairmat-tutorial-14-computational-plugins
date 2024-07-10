@@ -47,9 +47,6 @@ Suppose you are developing a parser for a well-defined schema specified within t
 ```
 hdf5_schema
     +-- version: Integer[3]
-    \-- author
-    |    +-- name: String[]
-    |    +-- (email: String[])
     \-- hdf5_generator
     |    +-- name: String[]
     |    +-- version: String[]
@@ -410,13 +407,17 @@ The normalization function within each schema section definition allows us to pe
             if not self.contributions:
                 return
 
+            value = self.value
+            unknown_energy_exists = False
             for contribution in self.contributions:
                 if not contribution.value:
                     continue
-                value = self.value - contribution.value
+                if contribution.name == 'UnknownEnergy':
+                    unknown_energy_exists = True
+
+                value -= contribution.value
+            if not unknown_energy_exists:
                 self.contributions.append(UnknownEnergy(value=value))
-
-
     ```
 
 !!! abstract "Assignment 4.6"
