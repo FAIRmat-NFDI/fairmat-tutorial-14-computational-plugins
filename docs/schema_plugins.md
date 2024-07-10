@@ -378,7 +378,7 @@ The `BaseEnergy` section simply defines a `PhysicalProperty` with the appropriat
 
     `DoubleCountingEnergy` inherits from `EnergyContribution` so that we can add each of the parsed energies to `total_energy.contributions`. Then each of the newly defined specific energy sections inherits from `DoubleCountingEnergy`.
 
-    We can go one step further and utilize the normalization function of the `DoubleCountingEnergy` section to set the `type` quantity of the `PhysicalProperty()` section as a characterization for each of the child sections. We have also overwritten the `type` quantity to be an `MEnum('double_counting')`, which will cause an error to be thrown if the parser sets `energy_class.type` to anything other than `double_counting` for any section that inherits from `DoubleCountingEnergy`.
+    We can go one step further and utilize the normalization function of the `DoubleCountingEnergy` section to set the `type` quantity of the `PhysicalProperty()` section as a characterization for each of the child sections. We have also overwritten the `type` quantity to be an `MEnum('double_counting')`, which will trigger an error to be thrown if the parser sets `energy_class.type` to anything other than `double_counting` for any section that inherits from `DoubleCountingEnergy`.
 
     NOTE: In practice we also need to add detailed descriptions for each section!
 
@@ -461,9 +461,9 @@ The normalization function within each schema section definition allows us to pe
             ...
             ...
 
-            total_energy = xml_get(<path to total energy>)
-            hartreedc = xml_get(<path to hartreedc energy>)
-            xcdc = xml_get(<path to xcdc energy>)
+            total_energy = xml_get("i[@name='e_fr_energy']", slice(-2, -1))
+            hartreedc = xml_get("i[@name='hartreedc']", slice(-2, -1))
+            xcdc = xml_get("i[@name='XCdc']", slice(-2, -1))
 
             output = Outputs()
             archive.simulation.outputs.append(output)
