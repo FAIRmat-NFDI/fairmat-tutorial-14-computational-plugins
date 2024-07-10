@@ -293,9 +293,11 @@ Now take another look at the bottom of the `VASPXMLParser.parse()` code in your 
 In this example, we will use the fabricated `VasprunXMLParser()` introduced in [Parser Plugins > From Parser to NOMAD > Via Instantiation](./parser_plugins.md#via-instantiation). The `VASPXMLParser.parse()` function populates the archive with a range of metadata including the program, method, and system data, but no outputs. Imagine that within `VasprunXMLParser.parse()` we use `xml_get()` function to extract the following energy information from the VASP output file:
 
 ```python
-total_energy = xml_get(<path to total energy>)
-hartreedc = xml_get(<path to hartreedc energy>)
-xcdc = xml_get(<path to xcdc energy>)
+total_energy = xml_get("i[@name='e_fr_energy']", slice(-2, -1))
+hartreedc = xml_get("i[@name='hartreedc']", slice(-2, -1))
+xcdc = xml_get("i[@name='XCdc']", slice(-2, -1))
+
+
 ```
 
 There already exists a section for total energy within `nomad-simulations`:
