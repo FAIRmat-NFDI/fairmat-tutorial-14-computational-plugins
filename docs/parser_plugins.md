@@ -3,7 +3,7 @@
 One of NOMAD's most recognized features is drag-and-drop parsing.
 The NOMAD parsers, which automate the conversion of raw simulation files into the standardized NOMAD format, significantly offload the burden of data annotation from researchers, reducing their data management responsibilities while also improving the accessibility of their data.
 
-Behind the scenes, parsing begins with looking through the upload folder and selecting relevant files.
+Behind the scenes, parsing beings with looking through the upload folder and selecting relevant files.
 These files are then read in and their data extracted.
 Lastly, the semantics of the file format are clarified and specified as its data is mapped into the NOMAD schema.
 The data is now ready to interact with the NOMAD ecosystem and apps.
@@ -86,19 +86,17 @@ Please select the same license for maximal legal compatibility.
     ├── pyproject.toml              (publication specifications)
     ├── README.md
     └── LICENSE.txt
+
+---------------------------------------------------------------
+├── nomad.yaml                      (NOMAD configurations)
 ```
 
 This examples also highlights the files containing _entry point_ information between parentheses.
 Entry points are the official mechanism for `pip` installing modules.
 Just note that their referencing runs bottom up, i.e. from the `publication specifications` to the `entry point` itself, and from thereon to the `target functionality`.
 
-Once the plugin is ready, you can add it to your local NOMAD deployment. We recommend you to read the details in the NOMAD documentation page regarding [installing plugins in NOMAD Oasis](https://nomad-lab.eu/prod/v1/staging/docs/howto/oasis/plugins_install.html).
+Once the plugin is ready, you can add it to your local NOMAD deployment. We recommend you to read the details in the NOMAD documentation page regarding [installing plugins in NOMAD Oasis](https://nomad-lab.eu/prod/v1/staging/docs/howto/oasis/plugins_install.html). The `NOMAD configurations` refers back to the `publication specifications` to load plugins in your local NOMAD installation. It allows you to control the loading of plugins and their options, however, normally you don't have to touch anything there for NOMAD to pick up on your parser.
 
-<!--
-The final piece in the entry point system, the `NOMAD configurations`, are external to plugin package.
-The configurations refers back to the `publication specifications`.
-It allows you to control the loading of plugins and their options, however, normally you don't have to touch anything there for NOMAD to pick up on your parser.
--->
 
 ??? tip "Managing Entry Points"
     ### What are they?
@@ -118,6 +116,7 @@ It allows you to control the loading of plugins and their options, however, norm
     - **entry point**: instance of `EntryPoint`, responsible for _registering_ the target functionality. It therefore also retains metadata like its name, a description and most importantly, the file matching directives. It is typically located in the `__init__.py` of the relevant functionality folder (see folder structure).
         - **entry point group**: bundles several entry points together. By default, NOMAD scans all plugins under the group name `project.entry-points.'nomad.plugin'`.
     - **publication specifications**: _exposes_ the entry point (and its group) under the format of `<module_name>.<object_name>:<entry_point_name>`. This is the name by which you should refer to it within the entry point system. For importing the within a Python script, use only `<module_name>.<object_name>`. In NOMAD we use the `pyproject.toml` setup file under the module's root folder.
+    - **NOMAD configurations**: called in `nomad.yaml`, controls which entry points are _included_ or _excluded_, as well as their _configuration parameters_.
 
 ## Assembling a Parser Class
 
