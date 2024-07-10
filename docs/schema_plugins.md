@@ -405,20 +405,18 @@ The normalization function within each schema section definition allows us to pe
         def normalize(self, archive: 'EntryArchive', logger: 'BoundLogger') -> None:
             super().normalize(archive, logger)
 
-            if self.total_energy:
-                for total_energy in self.total_energy:
-                    if not total_energy.value:
-                        return
-                    if not total_energy.contributions:
-                        return
+            if not self.value:
+                return
+            if not self.contributions:
+                return
 
-                    value = total_energy.value
-                    unknown_energy_exists = False
-                    for contribution in total_energy.contributions:
-                        value -= contribution.value
-                        if contribution.name == 'UnknownEnergy':
-                            unknown_energy_exists = True
-                    total_energy.rest_energy.append(UnkownEnergy(value=value))
+            for contribution in self.contributions:
+                if not contribution.value:
+                    continue
+                value = self.value - contribution.value
+                self.contributions.append(UnknownEnergy(value=value))
+
+
     ```
 
 !!! abstract "Assignment 4.6"

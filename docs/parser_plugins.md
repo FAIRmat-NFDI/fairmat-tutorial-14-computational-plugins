@@ -3,7 +3,7 @@
 One of NOMAD's most recognized features is drag-and-drop parsing.
 The NOMAD parsers, which automate the conversion of raw simulation files into the standardized NOMAD format, significantly offload the burden of data annotation from researchers, reducing their data management responsibilities while also improving the accessibility of their data.
 
-Behind the scenes, parsing means looking through the upload folder and selecting relevant files.
+Behind the scenes, parsing begins with looking through the upload folder and selecting relevant files.
 These files are then read in and their data extracted.
 Lastly, the semantics of the file format are clarified and specified as its data is mapped into the NOMAD schema.
 The data is now ready to interact with the NOMAD ecosystem and apps.
@@ -26,7 +26,7 @@ Here, they are ordered to match the parser's execution:
 2. **source extraction** - read the files into Python. This step may already include some level of data field filtering.
 3. **source to target** - map the data of interest with their counterparts in the target/NOMAD schema. This is where the bulk of the filtering happens.
 4. **data mangling** - manipulate the data to match the target/NOMAD `Quantity`s' specification, e.g. dimensionality, shape. This may include computing derived properties not present in the original source files.
-5. **archive construction** - build up a Python `EntryArchive` object using the classes provided by the target/NOMAD schema. NOMAD will automatically write it commit it to the database as an `archive.json`
+5. **archive construction** - build up a Python `EntryArchive` object using the classes provided by the target/NOMAD schema. NOMAD will automatically write and commit it to the database as an `archive.json`
 
 Blurring these responsibilities leads to a wild-growth in parser design and added complexity, especially in larger, more feature-rich parsers.
 NOMAD therefore offers powerful _tools_ and documentation on _best practices_ to help the parser developer manage each distinct responsibility.
