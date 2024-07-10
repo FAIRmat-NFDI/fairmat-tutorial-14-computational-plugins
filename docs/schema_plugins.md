@@ -193,7 +193,7 @@ Finally, we need to store the hdf5 schema version.
     class Simulation(nomad_simulations.schema_packages.general.Simulation):
 
         hdf5_schema_version = Quantity(
-            type=np.dtype(np.int32),
+            type=np.int32,
             shape=[3],
             description="""
             Specifies the version of the HDF5 schema being followed, using sematic versioning.
