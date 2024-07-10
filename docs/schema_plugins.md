@@ -290,7 +290,7 @@ Feel free to browse the other populated quantities to get a feel for the archive
 
 Now take another look at the bottom of the `VASPXMLParser.parse()` code in your branch. You will find that 3 energy quantities have been extracted from the xml file and placed into variables: -->
 
-In this example, we will use the fabricated `VasprunXMLParser()` introduced in [Parser Plugins > From Parser to NOMAD > Via Instantiation](./parser_plugins.md#via-instantiation). The `VASPXMLParser.parse()` function populates the archive with a range of metadata including the program, method, and system data, but no outputs. Imagine that within `VasprunXMLParser.parse()` we use `xml_get()` function to extract the following energy information from the VASP output file:
+In this example, we will use the fabricated `VasprunXMLParser()` introduced in [Parser Plugins > From Parser to NOMAD > Via Instantiation](./parser_plugins.md#via-instantiation). The `VASPXMLParser.parse()` function populates the archive with a range of metadata including the program, method, and system data, but no outputs. Imagine that within `VasprunXMLParser.parse()` we use `xml_get()` function to extract the following energy information from the VASP output file (NOTE: the `xml_get` functionality is not important for the example):
 
 ```python
 total_energy = xml_get("i[@name='e_fr_energy']", slice(-2, -1))
