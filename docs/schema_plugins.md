@@ -35,7 +35,7 @@ import nomad_simulations
 from nomad.metainfo import Quantity, SubSection
 ```
 
-[`SubSection`](https://nomad-lab.eu/prod/v1/docs/reference/glossary.html#section-and-subsection){:target="_blank"} and [`Quantity`](https://nomad-lab.eu/prod/v1/docs/reference/glossary.html#quantity){:target="_blank"} are classes used to populate each section with specific metadata as demonstrated below. 
+[`SubSection`](https://nomad-lab.eu/prod/v1/docs/reference/glossary.html#section-and-subsection){:target="_blank"} and [`Quantity`](https://nomad-lab.eu/prod/v1/docs/reference/glossary.html#quantity){:target="_blank"} are classes used to populate each section with specific metadata as demonstrated below.
 
 ??? note "ArchiveSection"
     All classes in `NOMAD` and `nomad-simulations` inherit from the most abstract class, `ArchiveSection`. This class is using the functionalities defined for a section in NOMAD, which is defined in `MSection`, as well as adding the `normalize()` function. This class function or method is important, as it is executed after parsing and allows to leverage several tasks out of parsing (as explained in point 3. above, and in [Part II - Extra: The `normalize()` class function](nomad_simulations.md#normalize-function)).
@@ -142,7 +142,7 @@ Indeed, this section contains `name` and `version` information, along with other
 
     class Simulation(nomad_simulations.schema_packages.general.Simulation):
 
-        h5md_generator = SubSection(
+        hdf5_generator = SubSection(
             sub_section=nomad_simulations.schema_packages.general.Program.m_def
         )
     ```
@@ -169,7 +169,7 @@ Indeed, this section contains `name` and `version` information, along with other
             h5_data = h5py.File(mainfile, 'r')
 
             simulation = Simulation()
-            simulation.h5md_generator = Program(
+            simulation.hdf5_generator = Program(
                 name=h5_data['hdf_generator'].attrs['name'],
                 version=h5_data['hdf_generator'].attrs['version']
             )
@@ -177,7 +177,7 @@ Indeed, this section contains `name` and `version` information, along with other
             archive.data = simulation
     ```
 
-Finally, we need to store the h5md schema version.
+Finally, we need to store the hdf5 schema version.
 
 !!! abstract "Assignment 4.3"
     Add a quantity `hdf5_schema_verion` with the appropriate `type`, `shape`, and `description` to your `Simulation()` class in `schema_packages/<parser_name>_schema.py`.
