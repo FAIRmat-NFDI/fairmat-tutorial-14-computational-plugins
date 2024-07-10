@@ -1,6 +1,6 @@
 # Part 1 - Introduction to the NOMAD software and repository
 
-This section of the tutorial consists of a slide presentation: [Introduction Talk Slides](https://box.hu-berlin.de/f/6a12dd6c8db348918381/){:target="_blank"}
+This section of the tutorial consists of a slide presentation: [Introduction Talk Slides](https://box.hu-berlin.de/f/285129802164464eb62f/){:target="_blank"}
 
 For future use, we also include some important concepts below.
 
