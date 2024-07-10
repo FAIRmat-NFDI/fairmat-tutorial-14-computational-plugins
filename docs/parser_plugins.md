@@ -70,31 +70,35 @@ Please select the same license for maximal legal compatibility.
 <!-- TODO remove explanation once resolved on template's end -->
 
 ```
-├── nomad-plugin-parser
-│   ├── src
-|   │   ├── nomad_plugin_parser
-|   |   │   ├── parsers
-|   |   │   │   ├── myparser.py    (target functionality)
-|   |   │   │   ├── __init__.py    (entry point)
-|   |   │   ├── schema_packages
-|   |   │   │   ├── mypackage.py
-|   |   │   │   ├── __init__.py
-│   ├── docs
-│   ├── tests
-│   ├── pyproject.toml             (publication specifications)
-│   ├── LICENSE.txt
-│   ├── README.md
----------------------------------------------------------------
-├── nomad.yaml                     (NOMAD configurations)
+.
+└── nomad-plugin-parser/
+    ├── src/
+    │   └── nomad_plugin_parser/
+    │       ├── __init__.py
+    │       ├── parsers/
+    │       │   ├── __init__.py     (entry point)
+    │       │   └── myparser.py     (target functionality)
+    │       └── schema_packages/
+    │           ├── __init__.py
+    │           └── mypackage.py    (extending the schema)
+    ├── docs/
+    ├── tests/
+    ├── pyproject.toml              (publication specifications)
+    ├── README.md
+    └── LICENSE.txt
 ```
 
 This examples also highlights the files containing _entry point_ information between parentheses.
 Entry points are the official mechanism for `pip` installing modules.
 Just note that their referencing runs bottom up, i.e. from the `publication specifications` to the `entry point` itself, and from thereon to the `target functionality`.
 
+Once the plugin is ready, you can add it to your local NOMAD deployment. We recommend you to read the details in the NOMAD documentation page regarding [installing plugins in NOMAD Oasis](https://nomad-lab.eu/prod/v1/staging/docs/howto/oasis/plugins_install.html).
+
+<!--
 The final piece in the entry point system, the `NOMAD configurations`, are external to plugin package.
 The configurations refers back to the `publication specifications`.
 It allows you to control the loading of plugins and their options, however, normally you don't have to touch anything there for NOMAD to pick up on your parser.
+-->
 
 ??? tip "Managing Entry Points"
     ### What are they?
@@ -114,7 +118,6 @@ It allows you to control the loading of plugins and their options, however, norm
     - **entry point**: instance of `EntryPoint`, responsible for _registering_ the target functionality. It therefore also retains metadata like its name, a description and most importantly, the file matching directives. It is typically located in the `__init__.py` of the relevant functionality folder (see folder structure).
         - **entry point group**: bundles several entry points together. By default, NOMAD scans all plugins under the group name `project.entry-points.'nomad.plugin'`.
     - **publication specifications**: _exposes_ the entry point (and its group) under the format of `<module_name>.<object_name>:<entry_point_name>`. This is the name by which you should refer to it within the entry point system. For importing the within a Python script, use only `<module_name>.<object_name>`. In NOMAD we use the `pyproject.toml` setup file under the module's root folder.
-    - **NOMAD configurations**: called in `nomad.yaml`, controls which entry points are _included_ or _excluded_, as well as their _configuration parameters_.
 
 ## Assembling a Parser Class
 

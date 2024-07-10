@@ -2,7 +2,7 @@
 
 The concept of workflow is essential in simulations and analysis of Materials Science and Chemistry data. In NOMAD, we give support to workflows and understand them as a way of organizing data to keep the full provenance of an activity (either experimental or computational). Workflows can be also parsed in NOMAD in two slightly different ways: in an automatic way or by defining a custom workflow additional file. The first case is done when the simulation input and output files contain enough information to recognize a certain workflow, and it is typically done in the parser plugin. You can read more on how to prepare your input/output files to make this automatic recognition easier in the [Extra: Standard workflows recognition](#standard-workflows-recognition) section at the end of this page.
 
-This part of the Tutorial will show you the basic concepts of workflows in NOMAD, as well as how to define your own custom workflow. For that, we will use a ficticious example of a simulation workflow, where the [files and folder structure](https://www.fairmat-nfdi.eu/uploads/Area%20C/example_files.zip) is:
+This part of the Tutorial will show you the basic concepts of workflows in NOMAD, as well as how to define your own custom workflow. For that, we will use a ficticious example of a simulation workflow, where the [files and folder structure](https://box.hu-berlin.de/f/3c885551849f44b79f25/) is:
 ```
 .
 ├── pressure1
@@ -53,7 +53,7 @@ The assignements for this part of the tutorial are about setting manually the fo
 3. A top level workflow entry, grouping together all pressure calculations.
 4. Use or define a new plugin to run functionalities and normalizations for the custom workflows.
 
-The solutions to these assignements can be found in the [Workflow YAML files](https://www.fairmat-nfdi.eu/uploads/Area%20C/workflowyaml_files.zip). We recommend you to try writing these files yourself first, and then compare them with the tested files.
+The solutions to these assignements can be found in the [Workflow YAML files](https://box.hu-berlin.de/f/78a18bce530544938e4b/). We recommend you to try writing these files yourself first, and then compare them with the tested files.
 
 
 ## Assignement 5.1: `SinglePoint` workflow

@@ -6,7 +6,7 @@ For future use, we also include some important concepts below.
 
 ## Background
 
-[NOMAD](nomad-lab.edu){:target="_blank"} is an open-source, community-driven data infrastructure, focusing on materials science data. Originally built as a repository for data from DFT calculations, the NOMAD software can automatically extract data from the output of a large variety of simulation codes. Our previous computation-focused tutorials ([CECAM workshop](https://fairmat-nfdi.github.io/AreaC-Tutorial-CECAM-2023/){:target="_blank"}, [Tutorial 10](https://fairmat-nfdi.github.io/AreaC-Tutorial10_2023/){:target="_blank"}, and [Tutorial 7](https://www.fairmat-nfdi.eu/events/fairmat-tutorial-7/tutorial-7-materials){:target="_blank"}) have highlighted the extension of NOMAD’s functionalities to support advanced many-body calculations, classical molecular dynamics simulations, and complex simulation workflows.
+[NOMAD](https://nomad-lab.eu/nomad-lab/){:target="_blank"} is an open-source, community-driven data infrastructure, focusing on materials science data. Originally built as a repository for data from DFT calculations, the NOMAD software can automatically extract data from the output of a large variety of simulation codes. Our previous computation-focused tutorials ([CECAM workshop](https://fairmat-nfdi.github.io/AreaC-Tutorial-CECAM-2023/){:target="_blank"}, [Tutorial 10](https://fairmat-nfdi.github.io/AreaC-Tutorial10_2023/){:target="_blank"}, and [Tutorial 7](https://www.fairmat-nfdi.eu/events/fairmat-tutorial-7/tutorial-7-materials){:target="_blank"}) have highlighted the extension of NOMAD’s functionalities to support advanced many-body calculations, classical molecular dynamics simulations, and complex simulation workflows.
 
 The key advantages of the NOMAD schema are summed up in **FAIR**mat's core values:
 
@@ -19,7 +19,7 @@ The key advantages of the NOMAD schema are summed up in **FAIR**mat's core value
 
 Historically, the NOMAD parsers have always come packaged in a neat bundle.
 As interest in research data management has become more widespread and recognized across scientific disciplines, NOMAD has adapted along with those interests.
-Nowadays, in addition to the [central NOMAD cloud service](https://nomad-lab.eu/nomad-lab/), there are many standalone NOMAD *Oasis* deployments geared towards the needs of individual institutes or research groups.
+Nowadays, in addition to the [central NOMAD service](https://nomad-lab.eu/prod/v1/gui/search/entries), there are many standalone NOMAD *Oasis* deployments geared towards the needs of individual institutes or research groups.
 
 As such, NOMAD is shifting to a _plugin model_, where each deployment administrator can customize their setup.
 This permits a light-weight base installation and effective data processing pipelines.

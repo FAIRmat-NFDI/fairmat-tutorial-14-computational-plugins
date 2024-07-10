@@ -12,12 +12,12 @@ As you develop your parser, you may find that the `nomad-simulations` package do
 
 From this schematic, we can identify 3 distinct uses or extensions of `nomad-simulations`:
 
-1. direct use of existing schema classes (no extension)
+1. direct use of existing schema section definitions (no extension)
     - implementation already covered in [Parser Plugins](./parser_plugins.md)
 
 2. semantic extension
-    - create classes that refine the context through inheritance from existing classes
-    - create brand new classes that widen the scope of the overall schema
+    - create classes or sections that refine the context through inheritance from existing sections
+    - create brand new sections that widen the scope of the overall schema
 
 3. normalization functionalities
     - the schema normalization functions can be leveraged to perform various tasks, simplifying the code within individual parsers while ensuring consistency and, thus, interoperability
@@ -32,15 +32,17 @@ Add the following imports to this file:
 ```python
 import numpy as np
 import nomad_simulations
-from nomad.datamodel.data import ArchiveSection
 from nomad.metainfo import Quantity, SubSection
 ```
 
-The `ArchiveSection` class should be inherited by every class defined in your schema and provides the base NOMAD functionalities, e.g., normalization function capabilities. [`SubSections`](https://nomad-lab.eu/prod/v1/docs/reference/glossary.html#section-and-subsection){:target="_blank"} and [`Quantities`](https://nomad-lab.eu/prod/v1/docs/reference/glossary.html#quantity){:target="_blank"} are then used to populate each `ArchiveSection` class with specific metadata as demonstrated below.
+[`SubSection`](https://nomad-lab.eu/prod/v1/docs/reference/glossary.html#section-and-subsection){:target="_blank"} and [`Quantity`](https://nomad-lab.eu/prod/v1/docs/reference/glossary.html#quantity){:target="_blank"} are classes used to populate each section with specific metadata as demonstrated below. 
+
+??? note "ArchiveSection"
+    All classes in `NOMAD` and `nomad-simulations` inherit from the most abstract class, `ArchiveSection`. This class is using the functionalities defined for a section in NOMAD, which is defined in `MSection`, as well as adding the `normalize()` function. This class function or method is important, as it is executed after parsing and allows to leverage several tasks out of parsing (as explained in point 3. above, and in [Part II - Extra: The `normalize()` class function](nomad_simulations.md#normalize-function)).
 
 ## Extending the overarching simulation metadata
 
-Suppose you are developing a parser for a well-defined schema specified within the hdf5 file format. Importantly, the simulation data is harvested from the original simulation files and mapped into this schema/file format by some researcher. The overarching metadata in this file can be represented as
+Suppose you are developing a parser for a well-defined schema specified within the HDF5 file format. Importantly, the simulation data is harvested from the original simulation files and mapped into this schema/file format by some researcher. The overarching metadata in this file can be represented as
 
 ```
 hdf5_schema
@@ -56,7 +58,7 @@ hdf5_schema
         +-- version: String[]
 ```
 
-!!! note "hdf5 schema syntax"
+??? note "HDF5 schema syntax"
     `\-- item` &ndash;
     An object within a group, that is either a dataset or a group. If it is a group itself, the objects within the group are indented by five spaces with respect to the group name.
 
@@ -68,12 +70,12 @@ hdf5_schema
 
 
 !!! abstract "Assignment 4.1"
-    Which quantities within this hdf5 schema can we store using existing classes within `nomad-simulations` and which require the creation of new schema classes? For the quantities that directly use the existing schema, write some code to demonstrate how your parser would populate the archive with this information.
+    Which quantities within this HDF5 schema can we store using existing sections within `nomad-simulations` and which require the creation of new schema sections? For the quantities that directly use the existing schema, write some code to demonstrate how your parser would populate the archive with this information.
 
 ??? success "Solution 4.1"
-    The program information can be stored under the existing `Program()` class within `Simulation()`. However the hdf5 schema `version` and `hdf5_generator` information require some extensions to the schema.
+    The program information can be stored under the existing `Program()` sections within `Simulation()`. However the HDF5 schema `version` and `hdf5_generator` information require some extensions to the schema.
 
-    For populating the program information, the parser code would look something like this (NOTE: the specifics of how to access the hdf5 file is not essential to understand for the purposes here):
+    For populating the program information, the parser code would look something like this (NOTE: the specifics of how to access the HDF5 file is not essential to understand for the purposes here):
 
     ```python
     import h5py
@@ -100,7 +102,7 @@ hdf5_schema
             archive.data = simulation
     ```
 
-The `hdf_generator` information is referring to a secondary software used to create the hdf5 file, so it makes sense to store this in a class very similar to `Program()`. Let's first take a look at the current `Program()` schema:
+The `hdf_generator` information is referring to a secondary software used to create the HDF5 file, so it makes sense to store this in a section very similar to `Program()`. Let's first take a look at the current `Program()` schema:
 
 ```python
 from nomad_simulations.general import Program
@@ -119,12 +121,12 @@ print(program.m_def.all_quantities)
  'compilation_host': nomad_simulations.general.Program.compilation_host:Quantity}
 ```
 
-Indeed, this class contains `name` and `version` information, along with other quantities that make sense in the context of a software which generates hdf5 files. So, in this case we can simply reuse this class and add a new subsection to `Simulation()`.
+Indeed, this section contains `name` and `version` information, along with other quantities that make sense in the context of a software which generates HDF5 files. So, in this case we can simply reuse this section and add a new subsection to `Simulation()`.
 
 !!! abstract "Assignment 4.2"
-    Write down a new class that extends `Simulation()` to include a subsection `hdf_generator` of type `Program()`.
+    Write down a new section that extends `Simulation()` to include a subsection `hdf_generator` of type `Program()`.
 
-    HINT: Here is how the `program` section is defined within the `BaseSimulation()` class (parent of `Simulation()`) within the `nomad-simulations` package:
+    HINT: Here is how the `program` section is defined within the `BaseSimulation()` section (parent of `Simulation()`) within the `nomad-simulations` package:
 
     ```python
     class BaseSimulation(Activity):
@@ -133,7 +135,7 @@ Indeed, this class contains `name` and `version` information, along with other q
     ```
 
 ??? success "Solution 4.2"
-    We need to add a `Simulation()` class to `schema_packages/<parser_name>_schema.py` that inherits all the quantities and subsections from `nomad-simulation`'s `Simulation()` class, and additionally defines a subsection `hdf_generator`:
+    We need to add a `Simulation()` section to `schema_packages/<parser_name>_schema.py` that inherits all the quantities and subsections from `nomad-simulation`'s `Simulation()` section, and additionally defines a subsection `hdf_generator`:
 
     ```python
     import nomad_simulations
@@ -148,7 +150,7 @@ Indeed, this class contains `name` and `version` information, along with other q
     The `sub_section` argument of `SubSection` specifies that this new section under `Simulation()` is of type `Program()` and will thus inherit all of its attributes.
 
 
-    Now we can use this new class within our parser to store the hdf generator information:
+    Now we can use this new section within our parser to store the hdf generator information:
 
     ```python
     from nomad_simulations.schema_packages.general import Program
@@ -194,12 +196,12 @@ Finally, we need to store the h5md schema version.
             type=np.dtype(np.int32),
             shape=[3],
             description="""
-            Specifies the version of the hdf5 schema being followed, using sematic versioning.
+            Specifies the version of the HDF5 schema being followed, using sematic versioning.
             """,
         )
     ```
 
-    Since the hdf5 schema apparently uses [semantic versioning](https://semver.org/){:target="_blank"}, we define the `hdf5_schema_version` quantity as a list of 3 integers to ensure that the user provides the relevant information for this quantity.
+    Since the HDF5 schema apparently uses [semantic versioning](https://semver.org/){:target="_blank"}, we define the `hdf5_schema_version` quantity as a list of 3 integers to ensure that the user provides the relevant information for this quantity.
 
     And in the parser:
 
@@ -296,7 +298,7 @@ hartreedc = xml_get(<path to hartreedc energy>)
 xcdc = xml_get(<path to xcdc energy>)
 ```
 
-There already exists a class for total energy within `nomad-simulations`:
+There already exists a section for total energy within `nomad-simulations`:
 
 ```python
 class BaseEnergy(PhysicalProperty):
@@ -337,10 +339,10 @@ class TotalEnergy(BaseEnergy):
         super().normalize(archive, logger)
 ```
 
-The class `BaseEnergy` simply defines a `PhysicalProperty` with the appropriate units for its `value`. Total energy also contains a subsection `contributions` where other energies contributing to the total energy can be stored. These contribution are of type `EnergyContributions`. In short, this is a class that enables the linking of these energy contributions to specific components of the corresponding method. However, this is not important for the present example.
+The `BaseEnergy` section simply defines a `PhysicalProperty` with the appropriate units for its `value`. Total energy also contains a subsection `contributions` where other energies contributing to the total energy can be stored. These contribution are of type `EnergyContributions`. In short, this is a section that enables the linking of these energy contributions to specific components of the corresponding method. However, this is not important for the present example.
 
 !!! abstract "Assignment 4.4"
-    The parsed hartreedc and xcdc energies are both classified as "double-counting energies". Add 3 new classes in `schema_packages/vasp_parser_schema.py`: one for each of the parsed energies and then an additional abstract class that each of these energy classes inherits from.
+    The parsed hartreedc and xcdc energies are both classified as "double-counting energies". Add 3 new sections in `schema_packages/vasp_parser_schema.py`: one for each of the parsed energies and then an additional abstract class that each of these energy sections inherits from.
 
 ??? success "Solution 4.4"
 
@@ -372,17 +374,17 @@ The class `BaseEnergy` simply defines a `PhysicalProperty` with the appropriate 
             super().normalize(archive, logger)
     ```
 
-    `DoubleCountingEnergy` inherits from `EnergyContribution` so that we can add each of the parsed energies to `total_energy.contributions`. Then each of the newly defined specific energy classes inherits from `DoubleCountingEnergy`.
+    `DoubleCountingEnergy` inherits from `EnergyContribution` so that we can add each of the parsed energies to `total_energy.contributions`. Then each of the newly defined specific energy sections inherits from `DoubleCountingEnergy`.
 
-    We can go one step further and utilize the normalization function of the `DoubleCountingEnergy` class to set the `type` quantity of the `PhysicalProperty()` class as a characterization for each of the child classes. We have also overwritten the `type` quantity to be an `MEnum('double_counting')`, which will cause an error to be thrown if the parser sets `energy_class.type` to anything other than `double_counting` for any class that inherits from `DoubleCountingEnergy`.
+    We can go one step further and utilize the normalization function of the `DoubleCountingEnergy` section to set the `type` quantity of the `PhysicalProperty()` section as a characterization for each of the child sections. We have also overwritten the `type` quantity to be an `MEnum('double_counting')`, which will cause an error to be thrown if the parser sets `energy_class.type` to anything other than `double_counting` for any section that inherits from `DoubleCountingEnergy`.
 
-    NOTE: In practice we also need to add detailed descriptions for each class!
+    NOTE: In practice we also need to add detailed descriptions for each section!
 
 
-The normalization function within each schema class allows us to perform consistent operations when particular classes are instantiated or particular quantities are set. This removes complexity from individual parsers and ensures consistency and, thus, interoperability.
+The normalization function within each schema section definition allows us to perform consistent operations when particular sections are instantiated or particular quantities are set. This removes complexity from individual parsers and ensures consistency and, thus, interoperability.
 
 !!! abstract "Assignment 4.5"
-    Implement a new class for total energy which extends the `nomad-simulations`' `TotalEnergy()` class to include a normalization function that: 1. calculates the difference between the total energy and each of its contributions, and 2. stores this remainder contribution as an additional contribution to the total energy. Make sure that your function has appropriate checks to cover cases where quantities or subsections are not populated. Don't forget to create the appropriate class for the new type of energy contribution.
+    Implement a new section for total energy which extends the `nomad-simulations`' `TotalEnergy()` section to include a normalization function that: 1. calculates the difference between the total energy and each of its contributions, and 2. stores this remainder contribution as an additional contribution to the total energy. Make sure that your function has appropriate checks to cover cases where quantities or subsections are not populated. Don't forget to create the appropriate section for the new type of energy contribution.
 
 ??? success "Solution 4.5"
 
