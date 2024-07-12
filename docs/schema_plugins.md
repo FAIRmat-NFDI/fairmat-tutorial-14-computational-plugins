@@ -226,75 +226,164 @@ Finally, we need to store the hdf5 schema version.
 
 ## Extending the simulation outputs
 
-<!-- For this example, we will use the [`nomad-vasp-parser`](https://github.com/FAIRmat-NFDI/nomad-parser-vasp){:target="_blank"} plugin that was referenced in the [Parser Plugins](./parser_plugins.md) as an example. This plugin is currently under preliminary development. However we have prepared a branch with a minimal implementation for demonstration purposes. This branch follows the method of parsing described in [Parser Plugins > Via Instantiation](./parser_plugins.md#via-instantiation).
+For this example, we will use the [`nomad-vasp-parser`](https://github.com/FAIRmat-NFDI/nomad-parser-vasp){:target="_blank"} plugin that was referenced in the [Parser Plugins](./parser_plugins.md). This plugin is currently under preliminary development. However we have prepared a branch with a minimal implementation for demonstration purposes. This branch follows the method of parsing described in [Parser Plugins > Via Instantiation](./parser_plugins.md#via-instantiation).
 
-To get started, clone the `nomad-vasp-parser` repository and checkout the branch `fairmat-tutorial-14` while creating your own local branch:
+If you would like to get hands-on experience with the schema extension and parser execution, following the installation instructions below. Otherwise, you can read through the example below for a conceptual understanding.
 
-```sh
-git clone https://github.com/FAIRmat-NFDI/nomad-parser-vasp.git
-cd nomad-parser-vasp/
-git checkout origin/fairmat-tutorial-14 -b fairmat-tutorial-14
-```
+??? note "`nomad-vasp-parser` installation instructions"
+    To get started, clone the [`nomad-vasp-parser`](https://github.com/FAIRmat-NFDI/nomad-parser-vasp){:target="_blank"} repository and checkout the branch `fairmat-tutorial-14` while creating your own local branch:
 
-Now create a virtual environment and install the plugin (see the `READ.md` for full instructions):
+    ```sh
+    git clone https://github.com/FAIRmat-NFDI/nomad-parser-vasp.git
+    cd nomad-parser-vasp/
+    git checkout origin/fairmat-tutorial-14 -b fairmat-tutorial-14
+    ```
 
-```sh
-python3 -m venv .pyenv
-source .pyenv/bin/activate
-pip install --upgrade pip
-pip install -e '.[dev]' --index-url https://gitlab.mpcdf.mpg.de/api/v4/projects/2187/packages/pypi/simple
-```
+    Now create a virtual environment and install the plugin (see the `READ.md` for full instructions):
+
+    ```sh
+    python3 -m venv .pyenv
+    source .pyenv/bin/activate
+    pip install --upgrade pip
+    pip install uv
+    uv pip install -e '.[dev]' --index-url https://gitlab.mpcdf.mpg.de/api/v4/projects/2187/packages/pypi/simple
+    ```
+
+    Open `pyproject.toml` within the root directory and confirm that you have the following dependencies:
+
+    ```
+    dependencies = ["nomad-lab>=1.3.0", "nomad-simulations==0.0.3"]
+    ```
+
+    Now install the plugin:
+
+    ```sh
+    uv pip install -e '.[dev]' --index-url https://gitlab.mpcdf.mpg.de/api/v4/projects/2187/packages/pypi/simple
+    ```
 
 
-Briefly examine the `VASPXMLPaser()` in `nomad_vasp_parser/parsers/xml_parser.py`. NOTE: This is the same parser version examined in [Parser Plugins > Via Instantiation](./parser_plugins.md#via-instantiation). The current `VASPXMLParser.parse()` function populates the archive with a range of metadata including the program, method, and system data. We can view an example archive by running the parser in the terminal with some test data:
+Briefly examine the `VASPXMLPaser()` in `nomad_vasp_parser/parsers/xml_parser.py` or below:
 
-```sh
-nomad parse --show-archive `tests/data/vasprun.xml.relax` > archive.parser-test.json
-```
+??? note "`VASPXMLParser.parse()` snippet"
 
-The beginning of the archive should be:
+    ```python
+    def parse(
+        self,
+        mainfile: str,
+        archive: EntryArchive,
+        logger: BoundLogger,
+        child_archives: dict[str, EntryArchive] = None,
+    ) -> None:
+        logger.info('VasprunXMLParser.parse', parameter=configuration.parameter)
+        xml_reader = XMLParser(mainfile=mainfile)  # XPath syntax
 
-```json
-{
-  "run": [
-    {
-      "program": {
-        "name": "VASP",
-        "version": "5.3.2 13Sep12 (build Mar 19 2013 10:46:17) complex serial LinuxIFC",
-        "compilation_datetime": 1386262891.0
-      },
-      "method": [
-        {
-          "x_vasp_incar_in": {
-            "ISTART": 0,
-            "PREC": "acc",
-            "ALGO": "FAST",
-            "ISPIN": 2,
-            "NELM": [
-              60,
-              60
+        def xml_get(path: str, slicer=slice(0, 1), fallback=None):
+            try:
+                return xml_reader.parse(path)._results[path][slicer]
+            except KeyError:
+                return fallback
+
+        ####################################################
+        # Parse the basic program, method, and system data #
+        ####################################################
+        archive.data = Simulation(
+            program=Program(
+                name='VASP',
+                version=xml_get("//generator/i[@name='version']")[0],
+            ),
+            model_method=[
+                DFT(
+                    xc_functionals=[
+                        XCFunctional(
+                            libxc_name=self.convert_xc.get(
+                                xml_get(
+                                    "///separator[@name='electronic exchange-correlation']/i[@name='LSDA']"
+                                ),
+                                {},
+                            )
+                            .get(
+                                xml_get(
+                                    "///separator[@name='electronic exchange-correlation']/i[@name='METAGGA']"
+                                ),
+                                {},
+                            )
+                            .get(
+                                xml_get(
+                                    "///separator[@name='electronic exchange-correlation']/i[@name='GGA']"
+                                ),
+                                'PE',
+                            ),
+                        ),
+                    ],
+                ),
             ],
-            ...
-          }
+        )
+
+        if (
+            positions := xml_get(
+                "structure[@name='finalpos']/./varray[@name='positions']/v",
+                slice(None),
+                fallback=np.array([]),
+            )
+        ).any():
+            archive.data.model_system.append(
+                ModelSystem(cell=[AtomicCell(positions=positions)])
+            )
+    ```
+
+ The current `VASPXMLParser.parse()` function populates the archive with a range of metadata including the program, method, and system data. We can view an example archive by running the parser in the terminal with some test data:
+
+??? note "Running the parser"
+
+    ```sh
+    nomad parse --show-archive `tests/data/vasprun.xml.relax` > archive.parser-test.json
+    ```
+
+    The beginning of the archive file (after some log output) should be:
+
+    ```json
+    {
+    "run": [
+        {
+        "program": {
+            "name": "VASP",
+            "version": "5.3.2 13Sep12 (build Mar 19 2013 10:46:17) complex serial LinuxIFC",
+            "compilation_datetime": 1386262891.0
+        },
+        "method": [
+            {
+            "x_vasp_incar_in": {
+                "ISTART": 0,
+                "PREC": "acc",
+                "ALGO": "FAST",
+                "ISPIN": 2,
+                "NELM": [
+                60,
+                60
+                ],
+                ...
+            }
+            }
+        ]
         }
-      ]
+    ]
     }
-  ]
-}
-```
+    ```
 
-Feel free to browse the other populated quantities to get a feel for the archive structure.
+    Feel free to browse the other populated quantities to get a feel for the archive structure.
 
-Now take another look at the bottom of the `VASPXMLParser.parse()` code in your branch. You will find that 3 energy quantities have been extracted from the xml file and placed into variables: -->
-
-In this example, we will use the fabricated `VasprunXMLParser()` introduced in [Parser Plugins > From Parser to NOMAD > Via Instantiation](./parser_plugins.md#via-instantiation). The `VASPXMLParser.parse()` function populates the archive with a range of metadata including the program, method, and system data, but no outputs. Imagine that within `VasprunXMLParser.parse()` we use `xml_get()` function to extract the following energy information from the VASP output file (NOTE: the `xml_get` functionality is not important for the example):
+Now take another look at the next section of the `VASPXMLParser.parse()` code in your branch. You will find that 3 energy quantities have been extracted from the xml file and placed into variables with the appropriate units assigned:
 
 ```python
+#####################################################
+# Get the energy data from the raw simulation files #
+#####################################################
 total_energy = xml_get("i[@name='e_fr_energy']", slice(-2, -1))
+total_energy = total_energy[0] * ureg.eV if total_energy else None
 hartreedc = xml_get("i[@name='hartreedc']", slice(-2, -1))
+hartreedc = hartreedc[0] * ureg.eV if hartreedc else None
 xcdc = xml_get("i[@name='XCdc']", slice(-2, -1))
-
-
+xcdc = xcdc[0] * ureg.eV if xcdc else None
 ```
 
 There already exists a section for total energy within `nomad-simulations`:
@@ -350,7 +439,6 @@ The `BaseEnergy` section simply defines a `PhysicalProperty` with the appropriat
     from nomad_simulations.schema_packages.properties.energies import EnergyContribution
 
     class DoubleCountingEnergy(EnergyContribution):
-
         type = Quantity(
             type=MEnum('double_counting'),
         )
@@ -361,19 +449,30 @@ The `BaseEnergy` section simply defines a `PhysicalProperty` with the appropriat
             if not self.type:
                 self.type = 'double_counting'
 
+
     class HartreeDCEnergy(DoubleCountingEnergy):
+        def __init__(
+            self, m_def: 'Section' = None, m_context: 'Context' = None, **kwargs
+        ) -> None:
+            super().__init__(m_def, m_context, **kwargs)
+            self.name = self.m_def.name
 
         def normalize(self, archive: 'EntryArchive', logger: 'BoundLogger') -> None:
             super().normalize(archive, logger)
 
 
     class XCdcEnergy(DoubleCountingEnergy):
+        def __init__(
+            self, m_def: 'Section' = None, m_context: 'Context' = None, **kwargs
+        ) -> None:
+            super().__init__(m_def, m_context, **kwargs)
+            self.name = self.m_def.name
 
         def normalize(self, archive: 'EntryArchive', logger: 'BoundLogger') -> None:
             super().normalize(archive, logger)
     ```
 
-    `DoubleCountingEnergy` inherits from `EnergyContribution` so that we can add each of the parsed energies to `total_energy.contributions`. Then each of the newly defined specific energy sections inherits from `DoubleCountingEnergy`.
+    `DoubleCountingEnergy` inherits from `EnergyContribution` so that we can add each of the parsed energies to `total_energy.contributions`. Then each of the newly defined specific energy sections inherits from `DoubleCountingEnergy`. The `__init__` function sets the name of each contribution section to the name of the corresponding class.
 
     We can go one step further and utilize the normalization function of the `DoubleCountingEnergy` section to set the `type` quantity of the `PhysicalProperty()` section as a characterization for each of the child sections. We have also overwritten the `type` quantity to be an `MEnum('double_counting')`, which will trigger an error to be thrown if the parser sets `energy_class.type` to anything other than `double_counting` for any section that inherits from `DoubleCountingEnergy`.
 
@@ -382,8 +481,12 @@ The `BaseEnergy` section simply defines a `PhysicalProperty` with the appropriat
 
 The normalization function within each schema section definition allows us to perform consistent operations when particular sections are instantiated or particular quantities are set. This removes complexity from individual parsers and ensures consistency and, thus, interoperability.
 
+Before actually populating these new energy contributions in the parser, let's consider one additional normalization functionality.
+
 !!! abstract "Assignment 4.5"
-    Implement a new section for total energy which extends the `nomad-simulations`' `TotalEnergy()` section to include a normalization function that: 1. calculates the difference between the total energy and each of its contributions, and 2. stores this remainder contribution as an additional contribution to the total energy. Make sure that your function has appropriate checks to cover cases where quantities or subsections are not populated. Don't forget to create the appropriate section for the new type of energy contribution.
+    Implement a new section for total energy that extends the `nomad-simulations`' `TotalEnergy()` section to include a normalization function that: 1. calculates the difference between the total energy and each of its contributions, and 2. stores this remainder contribution as an additional contribution to the total energy called `UnknownEnergy`. Don't forget to create the appropriate section for this new type of energy contribution.
+
+    Challenge: Make sure your function covers the following 3 cases: 1. the `UnknownEnergy` contribution is instantiated and its value populated within the parser, 2. the `UnknownEnergy` class is instantiated in the parser but no value is give, and 3. no `UnknownEnergy` contribution is instantiated during parsing.
 
 ??? success "Solution 4.5"
 
@@ -392,13 +495,17 @@ The normalization function within each schema section definition allows us to pe
     from nomad_simulations.schema_packages.properties.energies import EnergyContribution
 
     class UnknownEnergy(EnergyContribution):
+        def __init__(
+            self, m_def: 'Section' = None, m_context: 'Context' = None, **kwargs
+        ) -> None:
+            super().__init__(m_def, m_context, **kwargs)
+            self.name = self.m_def.name
 
         def normalize(self, archive: 'EntryArchive', logger: 'BoundLogger') -> None:
             super().normalize(archive, logger)
 
 
     class TotalEnergy(nomad_simulations.schema_packages.properties.TotalEnergy):
-
         def normalize(self, archive: 'EntryArchive', logger: 'BoundLogger') -> None:
             super().normalize(archive, logger)
 
@@ -408,31 +515,39 @@ The normalization function within each schema section definition allows us to pe
                 return
 
             value = self.value
-            unknown_energy_exists = False
-            for contribution in self.contributions:
+            unknown_exists = False
+            unknown_has_value = False
+            i_unknown = None
+            for i_cont, contribution in enumerate(self.contributions):
+                if contribution.name == 'UnknownEnergy':
+                    unknown_exists = True
+                    i_unknown = i_cont
+                    unknown_has_value = True if contribution.value else False
+
                 if not contribution.value:
                     continue
-                if contribution.name == 'UnknownEnergy':
-                    unknown_energy_exists = True
 
                 value -= contribution.value
-            if not unknown_energy_exists:
+
+            if unknown_exists:
+                if not unknown_has_value:
+                    self.contributions[i_unknown].value = value
+            else:
                 self.contributions.append(UnknownEnergy(value=value))
+                self.contributions[-1].normalize(archive, logger)
     ```
 
 !!! abstract "Assignment 4.6"
-    <!-- Now add the appropriate code to the vasp parser to populate each of the parsed energies. Run the parser and check that the total energy contributions contains `UnknownEnergy`. -->
-    Now write the appropriate code for the `VasprunXMLParser()` to populate each of the parsed energies.
+    Now write the appropriate code for the `VasprunXMLParser()` to populate the energies.
 
 ??? success "Solution 4.6"
 
     ```python
     from nomad_simulations.schema_packages.outputs import Outputs
-    from nomad_simulations.schema_packages.properties.energies import BaseEnergy
-    from nomad_parser_vasp.schema_packages.vasp_schema_extension.py import (
-        TotalEnergy,
+    from nomad_parser_vasp.schema_packages.vasp_schema import (
         HartreeDCEnergy,
-        XCdcEnergy
+        TotalEnergy,
+        XCdcEnergy,
     )
 
     class VasprunXMLParser(MatchingParser):
@@ -460,24 +575,275 @@ The normalization function within each schema section definition allows us to pe
             ...
             ...
 
-            total_energy = xml_get("i[@name='e_fr_energy']", slice(-2, -1))
-            hartreedc = xml_get("i[@name='hartreedc']", slice(-2, -1))
-            xcdc = xml_get("i[@name='XCdc']", slice(-2, -1))
-
-            output = Outputs()
-            archive.simulation.outputs.append(output)
-            output.total_energy.append(TotalEnergy())
-
-            output.total_energy[0].contributions.append(HartreeDCEnergy(value=total_energy * ureg.eV))
-            output.total_energy[0].contributions.append(XCdcEnergy(value=total_energy * ureg.eV))
+        ####################################################
+        # Create the outputs section, populate it with the #
+        # parsed energies, and add it to the archive       #
+        ####################################################
+        output = Outputs()
+        archive.data.outputs.append(output)
+        output.total_energy.append(TotalEnergy(value=total_energy))
+        output.total_energy[0].contributions.append(HartreeDCEnergy(value=hartreedc))
+        output.total_energy[0].contributions.append(XCdcEnergy(value=xcdc))
     ```
 
-    Notice that we do not need to import or set anything related to `UnknownEnergy`. This will be taken care of automatically by the normalizer that we have implemented in `TotalEnergy()`.
+    Notice that although `TotalEnergy()` exists within `nomad-simulations`, we need to import this class from the newly created schema to take advantage of our newly created normalization function.
+
+Let's see how to test our implementation within a Jupyter notebook, which will allow us to decouple the parsing from the normalization steps. You can find a prepared notebook within the `nomad-parser-vasp` branch under `tests/test_parser.ipynb`.
+
+First install the necessary packages in your environment to launch a notebook...
+
+Following the template provide in [Parser Plugins > Mainfile Interfacing > Running your parser](parser_plugins.md#mainfile-interfacing), add the following imports to your notebook:
+
+```python
+    from nomad_parser_vasp.parsers.xml_parser import VasprunXMLParser
+    from nomad.datamodel import EntryArchive
+    from nomad.normalizing.metainfo import MetainfoNormalizer
+    from nomad import utils
+    logger = utils.get_logger(__name__)
+```
+
+Now we can run the parser **without** executing normalization:
+
+```python
+path = './data/'
+p = VasprunXMLParser()
+a = EntryArchive()
+p.parse(path + 'vasprun.xml.relax', a, logger=logger)
+```
+
+??? note "Checking the populated archive"
+    ```python
+    total_energy = a.data.outputs[0].total_energy[0]
+    print(total_energy.name)
+    print(total_energy.value)
+    print(total_energy.contributions)
+    ```
+
+    ```
+    TotalEnergy
+    -1.1442321664199474e-18 joule
+    [HartreeDCEnergy:HartreeDCEnergy(name, value), XCdcEnergy:XCdcEnergy(name, value)]
+    ```
+
+    ```python
+    hartreedc = total_energy.contributions[0]
+    print(hartreedc.name)
+    print(hartreedc.value)
+    ```
+
+    ```
+    HartreeDCEnergy
+    -6.432015131607956e-17 joule
+    ```
+
+    ```python
+    xcdc = total_energy.contributions[1]
+    print(xcdc.name)
+    print(xcdc.value)
+    ```
+
+    ```
+    XCdcEnergy
+    -7.660195079365588e-18 joule
+    ```
+
+Now, rerun the parsing, followed by schema normalization (i.e., only normalization functions defined within the schema classes are being executed. Higher-level NOMAD normalization is ignored):
+
+```python
+path = './data/'
+p = VasprunXMLParser()
+a = EntryArchive()
+p.parse(path + 'vasprun.xml.relax', a, logger=logger)
+
+MetainfoNormalizer().normalize(archive=a)
+```
+
+NOTE: There will be some messages warning about certain sections not being normalized. This is simply because our parsing was incomplete. Please ignore these.
+
+??? note "Checking the populated archive"
+    ```python
+    total_energy = a.data.outputs[0].total_energy[0]
+    print(total_energy.name)
+    print(total_energy.value)
+    print(total_energy.contributions)
+    ```
+
+    ```
+    TotalEnergy
+    -1.1442321664199474e-18 joule
+    [HartreeDCEnergy:HartreeDCEnergy(name, type, is_derived, variables, value), XCdcEnergy:XCdcEnergy(name, type, is_derived, variables, value), UnknownEnergy:UnknownEnergy(name, is_derived, value)]
+
+    ```
+
+    ```python
+    hartreedc = total_energy.contributions[0]
+    print(hartreedc.name)
+    print(hartreedc.type)
+    print(hartreedc.value)
+    ```
+
+    ```
+    HartreeDCEnergy
+    double_counting
+    -6.432015131607956e-17 joule
+    ```
+
+    ```python
+    xcdc = total_energy.contributions[1]
+    print(xcdc.name)
+    print(xcdc.type)
+    print(xcdc.value)
+    ```
+
+    ```
+    XCdcEnergy
+    double_counting
+    -7.660195079365588e-18 joule
+    ```
+
+    ```python
+    unknown = total_energy.contributions[2]
+    print(unknown.name)
+    print(unknown.value)
+    ```
+
+    ```
+    UnknownEnergy
+    7.08361142290252e-17 joule
+    ```
+
+    Our normalizations worked! We now have additional quantities `type` defined under our double counting contributions, and we have the new `UnknownEnergy` contribution.
 
 
+To make sure that our implementation is robust, we should consider different possible use cases of `UnknownEnergy`. We have already verified that the normalization works properly if the parser writer does not know about this energy contribution. But what if they see this section in the schema and populate the archive with an instance of the class but no value:
 
+```python
+# Case 2: Add UnknownEnergy to contribution list in the parser but without a value
+from nomad_parser_vasp.schema_packages.vasp_schema import UnknownEnergy
 
+output.total_energy[0].contributions.append(UnknownEnergy(value=None))
+# Expected Results: UnknownEnergy value is calculated by the normalizer and placed into this section
+```
 
+??? note "Checking the populated archive"
+    After rerunning the parsing and normalization as before:
 
+    ```python
+    total_energy = a.data.outputs[0].total_energy[0]
+    print(total_energy.name)
+    print(total_energy.value)
+    print(total_energy.contributions)
+    ```
 
+    ```
+    TotalEnergy
+    -1.1442321664199474e-18 joule
+    [HartreeDCEnergy:HartreeDCEnergy(name, type, is_derived, variables, value), XCdcEnergy:XCdcEnergy(name, type, is_derived, variables, value), UnknownEnergy:UnknownEnergy(name, is_derived, variables, value)]
+    ```
 
+    **Actually this is not exactly the same, variables was missing before!!!**
+
+    ```python
+    hartreedc = total_energy.contributions[0]
+    print(hartreedc.name)
+    print(hartreedc.type)
+    print(hartreedc.value)
+    ```
+
+    ```
+    HartreeDCEnergy
+    double_counting
+    -6.432015131607956e-17 joule
+    ```
+
+    ```python
+    xcdc = total_energy.contributions[1]
+    print(xcdc.name)
+    print(xcdc.type)
+    print(xcdc.value)
+    ```
+
+    ```
+    XCdcEnergy
+    double_counting
+    -7.660195079365588e-18 joule
+    ```
+
+    ```python
+    unknown = total_energy.contributions[2]
+    print(unknown.name)
+    print(unknown.value)
+    ```
+
+    ```
+    UnknownEnergy
+    7.08361142290252e-17 joule
+    ```
+
+Finally, what about the case where the parser developer populates the unknown contribution manually:
+
+```python
+# Case 3: Add UnknownEnergy to contribution list in the parser with a value
+from nomad_parser_vasp.schema_packages.vasp_schema import UnknownEnergy
+
+output.total_energy[0].contributions.append(
+    UnknownEnergy(value=(total_energy - 2 * hartreedc - xcdc))
+)
+# Expected Results: normalizer does not change the value of UnknownEnergy
+# (for testing purposes we subtract double the hartreedc value)
+```
+
+??? note "Checking the populated archive"
+    After rerunning the parsing and normalization as before:
+
+    ```python
+    total_energy = a.data.outputs[0].total_energy[0]
+    print(total_energy.name)
+    print(total_energy.value)
+    print(total_energy.contributions)
+    ```
+
+    ```
+    TotalEnergy
+    -1.1442321664199474e-18 joule
+    [HartreeDCEnergy:HartreeDCEnergy(name, type, is_derived, variables, value), XCdcEnergy:XCdcEnergy(name, type, is_derived, variables, value), UnknownEnergy:UnknownEnergy(name, is_derived, variables, value)]
+    ```
+
+    **Actually this is not exactly the same, variables was missing before!!!**
+
+    ```python
+    hartreedc = total_energy.contributions[0]
+    print(hartreedc.name)
+    print(hartreedc.type)
+    print(hartreedc.value)
+    ```
+
+    ```
+    HartreeDCEnergy
+    double_counting
+    -6.432015131607956e-17 joule
+    ```
+
+    ```python
+    xcdc = total_energy.contributions[1]
+    print(xcdc.name)
+    print(xcdc.type)
+    print(xcdc.value)
+    ```
+
+    ```
+    XCdcEnergy
+    double_counting
+    -7.660195079365588e-18 joule
+    ```
+
+    ```python
+    unknown = total_energy.contributions[2]
+    print(unknown.name)
+    print(unknown.value)
+    ```
+
+    ```
+    UnknownEnergy
+    1.3515626554510475e-16 joule
+    ```
