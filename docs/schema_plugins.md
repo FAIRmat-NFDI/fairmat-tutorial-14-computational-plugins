@@ -335,42 +335,53 @@ Briefly examine the `VASPXMLPaser()` in `nomad_vasp_parser/parsers/xml_parser.py
 
 ??? note "Running the parser"
 
-    ```sh
-    nomad parse --show-archive `tests/data/vasprun.xml.relax` > archive.parser-test.json
+    Let's see how to test our implementation within a Jupyter notebook, which will allow us to decouple the parsing from the normalization steps. First, from the terminal, install ipykernel in your environment, create a corresponding Jupyter kernel, and lauch a notebook:
+
+    ```bash
+    pip install ipykernel
+    python -m ipykernel install --user --name=vasp-plugin --display-name "vasp-plugin"
+    jupyter notebook
     ```
 
-    The beginning of the archive file (after some log output) should be:
+    Open the notebook `tests/test_parse.ipynb` and select the `vasp-plugin` kernel in the top right.
 
-    ```json
-    {
-    "run": [
-        {
-        "program": {
-            "name": "VASP",
-            "version": "5.3.2 13Sep12 (build Mar 19 2013 10:46:17) complex serial LinuxIFC",
-            "compilation_datetime": 1386262891.0
-        },
-        "method": [
-            {
-            "x_vasp_incar_in": {
-                "ISTART": 0,
-                "PREC": "acc",
-                "ALGO": "FAST",
-                "ISPIN": 2,
-                "NELM": [
-                60,
-                60
-                ],
-                ...
-            }
-            }
-        ]
-        }
-    ]
-    }
+    Execute the first 2 cells which follow the template provide in [Parser Plugins > Mainfile Interfacing > Running your parser](parser_plugins.md#mainfile-interfacing) for parsing **without** normalization:
+
+    ```python
+    from nomad_parser_vasp.parsers.xml_parser import VasprunXMLParser
+    from nomad.datamodel import EntryArchive
+    from nomad.normalizing.metainfo import MetainfoNormalizer
+    from nomad import utils
+    logger = utils.get_logger(__name__)
     ```
 
-    Feel free to browse the other populated quantities to get a feel for the archive structure.
+    ```python
+    path = './data/'
+    p = VasprunXMLParser()
+    a = EntryArchive()
+    p.parse(path + 'vasprun.xml.relax', a, logger=logger)
+    ```
+
+    Execute the third cell to examine with:
+    ```python
+    a.m_to_dict()
+    ```
+
+    The output should be:
+    ```
+    {'data': {'m_def': 'nomad_simulations.schema_packages.general.Simulation',
+    'program': {'name': 'VASP', 'version': '5.3.2'},
+    'model_system': [{'datetime': '2024-08-15T15:55:41.135408+00:00',
+        'branch_depth': 0,
+        'cell': [{'m_def': 'nomad_simulations.schema_packages.model_system.AtomicCell',
+        'name': 'AtomicCell',
+        'positions': [[0.0, 0.0, 0.0], [0.500001, 0.500001, 0.500001]],
+        'periodic_boundary_conditions': [False, False, False]}]}],
+    'model_method': [{'m_def': 'nomad_simulations.schema_packages.model_method.DFT',
+        'xc_functionals': [{'libxc_name': 'PE'}]}]},
+    'results': {'eln': {'sections': ['ModelSystem']}}}
+    ```
+
 
 Now take another look at the next section of the `VASPXMLParser.parse()` code in your branch. You will find that 3 energy quantities have been extracted from the xml file and placed into variables with the appropriate units assigned:
 
@@ -435,7 +446,8 @@ The `BaseEnergy` section simply defines a `PhysicalProperty` with the appropriat
 ??? success "Solution 4.4"
 
     ```python
-    from nomad_simulations.schema_packages.outputs import Outputs
+    import nomad_simulations
+    from nomad.metainfo import MEnum, Quantity
     from nomad_simulations.schema_packages.properties.energies import EnergyContribution
 
     class DoubleCountingEnergy(EnergyContribution):
@@ -491,9 +503,6 @@ Before actually populating these new energy contributions in the parser, let's c
 ??? success "Solution 4.5"
 
     ```python
-    from nomad_simulations.schema_packages.outputs import Outputs
-    from nomad_simulations.schema_packages.properties.energies import EnergyContribution
-
     class UnknownEnergy(EnergyContribution):
         def __init__(
             self, m_def: 'Section' = None, m_context: 'Context' = None, **kwargs
@@ -588,28 +597,7 @@ Before actually populating these new energy contributions in the parser, let's c
 
     Notice that although `TotalEnergy()` exists within `nomad-simulations`, we need to import this class from the newly created schema to take advantage of our newly created normalization function.
 
-Let's see how to test our implementation within a Jupyter notebook, which will allow us to decouple the parsing from the normalization steps. You can find a prepared notebook within the `nomad-parser-vasp` branch under `tests/test_parser.ipynb`.
-
-First install the necessary packages in your environment to launch a notebook...
-
-Following the template provide in [Parser Plugins > Mainfile Interfacing > Running your parser](parser_plugins.md#mainfile-interfacing), add the following imports to your notebook:
-
-```python
-    from nomad_parser_vasp.parsers.xml_parser import VasprunXMLParser
-    from nomad.datamodel import EntryArchive
-    from nomad.normalizing.metainfo import MetainfoNormalizer
-    from nomad import utils
-    logger = utils.get_logger(__name__)
-```
-
-Now we can run the parser **without** executing normalization:
-
-```python
-path = './data/'
-p = VasprunXMLParser()
-a = EntryArchive()
-p.parse(path + 'vasprun.xml.relax', a, logger=logger)
-```
+Now let's test our implementation. Follow the steps under "Running your parser" above, using the test notebook provided (`tests/test_parser.ipynb`). **Note that you need to restart your kernel every time you make changes to the plugin code.** After successful parsing, check the energy entries within the archive.
 
 ??? note "Checking the populated archive"
     ```python
@@ -726,7 +714,7 @@ output.total_energy[0].contributions.append(UnknownEnergy(value=None))
 ```
 
 ??? note "Checking the populated archive"
-    After rerunning the parsing and normalization as before:
+    After restarting your notebook kernel and rerunning the parsing and normalization as before:
 
     ```python
     total_energy = a.data.outputs[0].total_energy[0]
@@ -794,7 +782,7 @@ output.total_energy[0].contributions.append(
 ```
 
 ??? note "Checking the populated archive"
-    After rerunning the parsing and normalization as before:
+    Make sure to comment out Case 2 and restart your notebook kernel. After rerunning the parsing and normalization as before:
 
     ```python
     total_energy = a.data.outputs[0].total_energy[0]
@@ -847,3 +835,6 @@ output.total_energy[0].contributions.append(
     UnknownEnergy
     1.3515626554510475e-16 joule
     ```
+
+
+Fully implemented solutions to these exercises and the corresponding results can be found in the plugin repo: `src/parsers/xml_parser_all_solutions.py`, `src/schema_packages/vasp_schema_all_solutions.py`, `tests/test_parse_all_solutions.pdf`.
