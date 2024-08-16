@@ -362,7 +362,7 @@ Briefly examine the `VASPXMLPaser()` in `nomad_vasp_parser/parsers/xml_parser.py
     p.parse(path + 'vasprun.xml.relax', a, logger=logger)
     ```
 
-    Execute the third cell to examine with:
+    Execute the third cell to examine the archive in dictionary format:
     ```python
     a.m_to_dict()
     ```
@@ -729,8 +729,6 @@ output.total_energy[0].contributions.append(UnknownEnergy(value=None))
     [HartreeDCEnergy:HartreeDCEnergy(name, type, is_derived, variables, value), XCdcEnergy:XCdcEnergy(name, type, is_derived, variables, value), UnknownEnergy:UnknownEnergy(name, is_derived, variables, value)]
     ```
 
-    **Actually this is not exactly the same, variables was missing before!!!**
-
     ```python
     hartreedc = total_energy.contributions[0]
     print(hartreedc.name)
@@ -796,8 +794,6 @@ output.total_energy[0].contributions.append(
     -1.1442321664199474e-18 joule
     [HartreeDCEnergy:HartreeDCEnergy(name, type, is_derived, variables, value), XCdcEnergy:XCdcEnergy(name, type, is_derived, variables, value), UnknownEnergy:UnknownEnergy(name, is_derived, variables, value)]
     ```
-
-    **Actually this is not exactly the same, variables was missing before!!!**
 
     ```python
     hartreedc = total_energy.contributions[0]
