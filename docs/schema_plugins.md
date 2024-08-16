@@ -647,6 +647,7 @@ MetainfoNormalizer().normalize(archive=a)
 ```
 
 NOTE: There will be some messages warning about certain sections not being normalized. This is simply because our parsing was incomplete. Please ignore these.
+<!-- TODO The following example output will need to be replaced eventually since currently variables is not populated when normalization occurs in the parent class -->
 
 ??? note "Checking the populated archive"
     ```python
@@ -660,8 +661,8 @@ NOTE: There will be some messages warning about certain sections not being norma
     TotalEnergy
     -1.1442321664199474e-18 joule
     [HartreeDCEnergy:HartreeDCEnergy(name, type, is_derived, variables, value), XCdcEnergy:XCdcEnergy(name, type, is_derived, variables, value), UnknownEnergy:UnknownEnergy(name, is_derived, value)]
-
     ```
+
 
     ```python
     hartreedc = total_energy.contributions[0]
