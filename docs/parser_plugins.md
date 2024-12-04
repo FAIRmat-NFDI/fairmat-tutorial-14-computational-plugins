@@ -22,7 +22,7 @@ In practice, however, parser developers have to manage discrepancies in semantic
 This has lead to five distinct categories of responsibility for the developer to manage.
 Here, they are ordered to match the parser's execution:
 
-1. **file selection** - navigate the upload's folder structure and select the relevant files.
+1. **file selection** - navigate the uploads folder structure and select the relevant files.
 2. **source extraction** - read the files into Python. This step may already include some level of data field filtering.
 3. **source to target** - map the data of interest with their counterparts in the target/NOMAD schema. This is where the bulk of the filtering happens.
 4. **data mangling** - manipulate the data to match the target/NOMAD `Quantity`s' specification, e.g. dimensionality, shape. This may include computing derived properties not present in the original source files.
@@ -156,7 +156,7 @@ xml_entry_point = VasprunXMLEntryPoint(
 )
 ```
 
-`load` comes from the entry point system and should just return our parser (see below).
+`load()` comes from the entry point system and should just return our parser (see below).
 The entry point itself specifies _parser data_ and the directives.
 There are three kinds of file aspects that can be targeted, all via _regular expressions_ (regex):
 
@@ -181,7 +181,7 @@ There are three kinds of file aspects that can be targeted, all via _regular exp
     ```
 <!-- TODO double-check -->
 
-#### Mainfile Interfacing
+#### Interfacing with NOMAD base
 
 Within the cascade, `MatchingParser`, acts as the connection point on the parser side.
 It plays less of a role in manipulating the directives, and more so in defining the _interface_ &mdash;a formalization of mutually agreed upon behavior&mdash; back to the parser.
@@ -209,7 +209,7 @@ class VasprunXMLParser(MatchingParser):
 
     ### Notebooks
     If you are using Jupyter Notebook, you can manipulate data in a head-on way without NOMAD base as an intermediary.
-    Note that this enntails providing the parsing input yourself, as well as manually triggering normalization.
+    Note that this entails providing the parsing input yourself, as well as manually triggering normalization.
     A template setup looks something like:
 
     ```python
@@ -536,6 +536,13 @@ Since all NOMAD sections are convertible to `dict`, one can generate a `get` cha
 ...
 
 class VasprunXMLParser(MatchingParser):
+    ...
+    convert_xc: dict[str, str] = {
+        '--': 'GGA_XC_PBE',
+        'PE': 'GGA_XC_PBE',
+        ...
+    }
+
     def parse(
     ...
     )
@@ -613,7 +620,7 @@ class VasprunXMLParser(MatchingParser):
         self, mainfile: str, archive: EntryArchive, logger: BoundLogger,
         child_archives: dict[str, EntryArchive] = None,
     ) -> None:
-        logger.info('VasprunXMLParser.parse', parameter=configuration.parameter)
+        ... #logging
         data_parser = MetainfoParser(annotation_key='xml', data_object=Simulation())
         XMLParser(filepath=mainfile).convert(data_parser)
         archive.data = data_parser.data_object
