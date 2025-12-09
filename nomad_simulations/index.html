@@ -1,0 +1,1172 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Developing schemas and parsers for FAIR computational data storage using NOMAD-Simulations
+">
+      
+      
+        <meta name="author" content="FAIRmat consortium">
+      
+      
+      
+        <link rel="prev" href="../intro/">
+      
+      
+        <link rel="next" href="../parser_plugins/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.0">
+    
+    
+      
+        <title>Part 2 - NOMAD-Simulations - FAIRmat Tutorial 14</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.618322db.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Titillium+Web:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Titillium Web";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../stylesheets/extra.css">
+    
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.7/katex.min.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#part-2-working-with-the-nomad-simulations-schema-plugin" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+      </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="FAIRmat Tutorial 14" class="md-header__button md-logo" aria-label="FAIRmat Tutorial 14" data-md-component="logo">
+      
+  <img src="../assets/nomad-logo.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            FAIRmat Tutorial 14
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Part 2 - NOMAD-Simulations
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-hidden="true"  type="radio" name="__palette" id="__palette_0">
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-hidden="true"  type="radio" name="__palette" id="__palette_1">
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="FAIRmat Tutorial 14" class="md-nav__button md-logo" aria-label="FAIRmat Tutorial 14" data-md-component="logo">
+      
+  <img src="../assets/nomad-logo.png" alt="logo">
+
+    </a>
+    FAIRmat Tutorial 14
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../intro/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part 1 - Intro to NOMAD
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part 2 - NOMAD-Simulations
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part 2 - NOMAD-Simulations
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#sub-sections-in-simulation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Main sub-sections in Simulation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#program" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Program
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#modelmethod" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ModelMethod
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ModelMethod">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#numericalsettings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        NumericalSettings
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#modelsystem" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ModelSystem
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ModelSystem">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#atomsstate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        AtomsState and other sub-sections
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#outputs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Outputs
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#normalize-function" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Extra: The normalize() class function
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../parser_plugins/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part 3 - Parser Plugins
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../schema_plugins/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part 4 - Schema Plugins
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../custom_workflows/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part 5 - Custom Workflows
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#sub-sections-in-simulation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Main sub-sections in Simulation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#program" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Program
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#modelmethod" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ModelMethod
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ModelMethod">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#numericalsettings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        NumericalSettings
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#modelsystem" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ModelSystem
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ModelSystem">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#atomsstate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        AtomsState and other sub-sections
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#outputs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Outputs
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#normalize-function" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Extra: The normalize() class function
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="part-2-working-with-the-nomad-simulations-schema-plugin">Part 2 - Working with the NOMAD-Simulations schema plugin<a class="headerlink" href="#part-2-working-with-the-nomad-simulations-schema-plugin" title="Permanent link">&para;</a></h1>
+<p>In NOMAD, all the simulation metadata is defined under the <code>Simulation</code> section. You can find its Python schema defined in the <a href="https://github.com/nomad-coe/nomad-simulations/"><code>nomad-simulations</code></a> repository. The <a href="../parser_plugins/">entry point</a> for the schema is defined in <a href="https://github.com/nomad-coe/nomad-simulations/blob/develop/src/nomad_simulations/schema_packages/__init__.py">src/nomad_simulations/schema_packages/__init__.py</a> module. This section will appear under the <code>data</code> section for each NOMAD <a href="https://nomad-lab.eu/prod/v1/staging/docs/reference/glossary.html#entry"><em>entry</em></a>. There is also a <a href="https://nomad-coe.github.io/nomad-simulations/">specialized documentation page</a> in the <code>nomad-simulations</code> repository.</p>
+<p>The <code>Simulation</code> section inherits from a more abstract section or concept called <code>BaseSimulation</code>, which at the same time inherits from another section, <code>Activity</code>.</p>
+<details class="note">
+<summary>Inheritance and composition</summary>
+<p>During this part, we will identify the <strong>is a</strong> concept with inheritance of one section into another (e.g., a <code>Simulation</code> <em>is an</em> <code>Activity</code>) and the <strong>has a</strong> concept with composition of one section under another (e.g., a <code>Simulation</code> <strong>has a</strong> <code>ModelSystem</code> sub-section). Strictly speaking, this equivalency is not entirely true, as we are loosing it in some cases. But for the purpose of learning the complicated rules of inheritance and composition, we will conceptually maintain this equivalency during this Tutorial.</p>
+</details>
+<p>A set of <a href="https://nomad-lab.eu/prod/v1/staging/docs/howto/customization/base_sections.html">base sections</a> derived from the <a href="https://basic-formal-ontology.org/">Basic Formal Ontology (BFO)</a> is used as the basis for our section definitions. The previous inheritance allows us to define <code>Simulation</code> at the same level of other activities in Materials Science, e.g., <code>Experiment</code>, <code>Measurement</code>, <code>Analysis</code>. We do this in order to achieve a common vocabulary and data standardization with the experimental community. The relationship tree from the most abstract sections upon reaching <code>Simulation</code> is thus:</p>
+<div class="click-zoom">
+    <label>
+        <input type="checkbox">
+        <img src="../assets/part2-nomad-simulations/simulation_base_details.png" alt="Simulation base section diagram." width="80%" title="Click to zoom in">
+    </label>
+</div>
+
+<p>Note that the white-headed arrow here indicates <em>inheritance</em> / <em>is a</em> relationship. <code>BaseSimulation</code> contains the general information about the <code>Program</code> used (see <a href="#program">Program</a>), as well as general time information about the simulation, e.g., the datetime at which it started (<code>datetime</code> is defined within <code>Activity</code> and is inherited by <code>BaseSimulation</code>) and ended (<code>datetime_end</code>). <code>Simulation</code> contains further information about the specific input and output sections (<a href="#sub-sections-in-simulation">see below</a>).</p>
+<details class="question">
+<summary>Notation for the section attributes in the UML diagram</summary>
+<p>Throughout this documentation page we will use UML diagrams to describe our section / class definitions, as well as to include the information abpit their attributes / quantities including their main definitions. The notation is:</p>
+<div class="highlight"><pre><span></span><code>&lt;name-of-quantity&gt;: &lt;type-of-quantity&gt;, &lt;(optional) units-of-quantity&gt;
+</code></pre></div>
+<p>Thus, <code>cpu1_start: np.float64, s</code> means that there is a quantity named <code>'cpu1_start'</code> of type <code>numpy.float64</code> and whose units are <code>'s'</code> (seconds).
+We also include the existence of sub-sections by bolding the name. For example, there is a sub-section under <code>Simulation</code> named <code>'model_method'</code> whose section defintion can be found in the <code>ModelMethod</code> section. We will represent this sub-section containment in more complex UML diagrams in the future using the containment arrow (see below for the specific ase of <a href="#program"><code>Program</code></a>).</p>
+</details>
+<p>We use double inheritance from <code>EntryData</code> in order to populate the <code>data</code> section in the NOMAD archive. All of the base sections discussed here are subject to the <a href="#normalize-function">public normalize function</a> in NOMAD. The private function <code>set_system_branch_depth()</code> is related with the <a href="#modelsystem">ModelSystem section</a>.</p>
+<p>Let's use this knowledge to see how to work with the schema in practice. If you have not already installed <code>nomad-simulations</code>, do so now following the instructions in the <a href="../#tutorial-information-and-preparation">Overview</a>.</p>
+<div class="admonition abstract">
+<p class="admonition-title">Assignment 2.1</p>
+<p>Create an instance of the <code>Simulation</code> section. Imagine you know that the CPU1 took 24 minutes and 30 seconds on finishing the simulation; can you populate the <code>Simulation</code> section with these times? What is the elapsed time in seconds? And in hours?</p>
+</div>
+<details class="success">
+<summary>Solution 2.1</summary>
+<p>We can open a Python console:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>python
+</code></pre></div></p>
+<p>And import and instantiate the <code>Simulation</code> section:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">nomad_simulations.schema_packages.general</span><span class="w"> </span><span class="kn">import</span> <span class="n">Simulation</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="n">simulation</span> <span class="o">=</span> <span class="n">Simulation</span><span class="p">()</span>
+</code></pre></div></p>
+<p>Now, we can assign the elapsed time of the CPU1 by defining the start and the end quantities, i.e., <code>cpu1_start</code> and <code>cpu1_end</code>. To assign the units, we also need to import the <a href="https://pint.readthedocs.io/en/stable/">Pint</a> utility class <code>ureg</code>:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">nomad.units</span><span class="w"> </span><span class="kn">import</span> <span class="n">ureg</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="n">simulation</span><span class="o">.</span><span class="n">cpu1_start</span> <span class="o">=</span> <span class="mi">0</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">second</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="n">simulation</span><span class="o">.</span><span class="n">cpu1_end</span> <span class="o">=</span> <span class="mi">30</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">second</span> <span class="o">+</span> <span class="mi">24</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">minute</span>
+</code></pre></div></p>
+<p>In seconds, the elapsed time can be printed by doing:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="n">simulation</span><span class="o">.</span><span class="n">cpu1_end</span> <span class="o">-</span> <span class="n">simulation</span><span class="o">.</span><span class="n">cpu1_start</span>
+</code></pre></div>
+which is 1470 seconds. In hours, we can use the method <code>to('hour')</code>:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="p">(</span><span class="n">simulation</span><span class="o">.</span><span class="n">cpu1_end</span> <span class="o">-</span> <span class="n">simulation</span><span class="o">.</span><span class="n">cpu1_start</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s1">&#39;hour&#39;</span><span class="p">)</span>
+</code></pre></div>
+which give us approximately 0.4083 hours.</p>
+</details>
+<h2 id="sub-sections-in-simulation">Main sub-sections in <code>Simulation</code><a class="headerlink" href="#sub-sections-in-simulation" title="Permanent link">&para;</a></h2>
+<p>The <code>Simulation</code> section is composed of 4 main sub-sections:</p>
+<ol>
+<li><a href="#program"><code>Program</code></a>: contains all the program metadata, e.g., <code>name</code> of the program, <code>version</code>, etc.</li>
+<li><a href="#modelsystem"><code>ModelSystem</code></a>: contains all the system metadata about geometrical positions of atoms, their states, simulation cells, symmetry information, etc.</li>
+<li><a href="#modelmethod"><code>ModelMethod</code></a>: contains all the methodological metadata, and is divided in two main aspects: the mathematical model or approximation used in the simulation (e.g., <code>DFT</code>, <code>GW</code>, <code>ForceFields</code>, etc.) and the numerical settings used to compute the properties (e.g., meshes, self-consistent parameters, basis sets settings, etc.).</li>
+<li><a href="#outputs"><code>Outputs</code></a>: contains all the output properties obtained during the simulation.</li>
+</ol>
+<div class="admonition note">
+<p class="admonition-title">Self-consistent steps, SinglePoint entries, and more complex workflows.</p>
+<p>The minimal unit for storing data in the NOMAD archive is an <a href="https://nomad-lab.eu/prod/v1/staging/docs/reference/glossary.html#entry"><em>entry</em></a>. In the context of simulation data, an entry may contain data from a calculation on an individual system configuration (e.g., a single-point DFT calculation) using <strong>only</strong> the above-mentioned sections of the <code>Simulation</code> section. Information from self-consistent iterations to converge properties for this configuration are also contained within these sections.</p>
+<p>More complex calculations that involve multiple configurations require the definition of a <em>workflow</em> section within the archive. Depending on the situation, the information from individual workflow steps may be stored within a single or multiple entries. For example, for efficiency, the data from workflows involving a large amount of configurations, e.g., molecular dynamics trajectories, are stored within a single entry. Other standard workflows store the single-point data in separate entries, e.g.,  a <code>GW</code> calculation is composed of a <code>DFT SinglePoint</code> entry and a <code>GW SinglePoint</code> entry. Higher-level workflows, which simply connect a series of standard or custom workflows, are typically stored as a separate entry. See <a href="../custom_workflows/">Part V - Custom Workflows</a> for more information.</p>
+</div>
+<!--Mention here Part V?-->
+
+<p>The following schematic represents a simplified representation of the <code>Simulation</code> section (note that the arrows here are a simple way of visually defining <em>inputs</em> and <em>outputs</em>):</p>
+<div class="click-zoom">
+    <label>
+        <input type="checkbox">
+        <img src="../assets/part2-nomad-simulations/simulation_composition.png" alt="Simulation composition diagram." width="80%" title="Click to zoom in">
+    </label>
+</div>
+
+<h2 id="program"><code>Program</code><a class="headerlink" href="#program" title="Permanent link">&para;</a></h2>
+<p>The <code>Program</code> section contains all the information about the program / software / code used to perform the simulation. The detailed relationship tree is:</p>
+<div class="click-zoom">
+    <label>
+        <input type="checkbox">
+        <img src="../assets/part2-nomad-simulations/program.png" alt="Program quantities and functions UML diagram." width="80%" title="Click to zoom in">
+    </label>
+</div>
+
+<p>Note that the rhombo-headed arrow here indicates a <em>composition</em> / <em>has a</em> relationship, so that <code>BaseSimulation</code> has a <code>Program</code> sub-section under it.</p>
+<div class="admonition abstract">
+<p class="admonition-title">Assignment 2.2</p>
+<p>Instantiate a <code>Program</code> section and directly assign the name <code>'VASP'</code> and the version <code>'5.0.0'</code> quantities. Add this sub-section to the <code>Simulation</code> section created in the Assignment 2.1. Can you re-assign the <code>Program.version</code> quantity to be an integer number, 5?</p>
+</div>
+<details class="success">
+<summary>Solution 2.2</summary>
+<p>We can import and assign directly quantities of sections by doing:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">nomad_simulations.schema_packages.general</span><span class="w"> </span><span class="kn">import</span> <span class="n">Program</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="n">program</span> <span class="o">=</span> <span class="n">Program</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;VASP&#39;</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="s1">&#39;5.0.0&#39;</span><span class="p">)</span>
+</code></pre></div></p>
+<p>And we can add it as a sub-section of <code>Simulation</code> by assigning the attribute of that class:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="n">simulation</span><span class="o">.</span><span class="n">program</span> <span class="o">=</span> <span class="n">program</span>
+</code></pre></div></p>
+<p>If we try to re-assign:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="n">program</span><span class="o">.</span><span class="n">version</span> <span class="o">=</span> <span class="mi">5</span>
+</code></pre></div>
+the code will complain with a <code>TypeError</code>:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>TypeError:<span class="w"> </span>The<span class="w"> </span>value<span class="w"> </span><span class="m">5</span><span class="w"> </span>with<span class="w"> </span><span class="nb">type</span><span class="w"> </span>&lt;class<span class="w"> </span><span class="s1">&#39;int&#39;</span>&gt;<span class="w"> </span><span class="k">for</span><span class="w"> </span>quantity<span class="w"> </span>nomad_simulations.schema_packages.general.Program.version:Quantity<span class="w"> </span>is<span class="w"> </span>not<span class="w"> </span>of<span class="w"> </span><span class="nb">type</span><span class="w"> </span>&lt;class<span class="w"> </span><span class="s1">&#39;str&#39;</span>&gt;
+</code></pre></div>
+This is because in the defintion of the <code>class Program</code> and the <code>Quantity:version</code>, we defined the type to be a string. So answering the question: no, it is not possible to re-assign <code>version</code> to be an integer due to the fact that is defined to be a string.</p>
+</details>
+<h2 id="modelmethod"><code>ModelMethod</code><a class="headerlink" href="#modelmethod" title="Permanent link">&para;</a></h2>
+<p>The <code>ModelMethod</code> section is an input section which contains all the information about the mathematical model used to perform the simulation. In NOMAD, we can extend the support of certain methods by inheriting from <code>ModelMethod</code> and extend the schema for the new methodology. <code>ModelMethod</code> also contains a specialized sub-section called <a href="#numericalsettings"><code>NumericalSettings</code></a>. The detailed relationship tree is:</p>
+<div class="click-zoom">
+    <label>
+        <input type="checkbox">
+        <img src="../assets/part2-nomad-simulations/model_method.png" alt="ModelMethod quantities and functions UML diagram." width="80%" title="Click to zoom in">
+    </label>
+</div>
+
+<p><code>ModelMethod</code> is thus a sub-section under <code>Simulation</code>. It inherits from an abstract section <code>BaseModelMethod</code>, as well as containing a sub-section called <code>contributions</code> of the same section. The underlying idea of <code>ModelMethod</code> is to parse the input parameters of the mathematical model, typically a Hamiltonian. This total Hamiltonian or model could be split into individual sub-terms or <code>contributions</code>. Each of the electronic-structure methodologies inherit from <code>ModelMethodElectronic</code>, which contains a boolean <code>is_spin_polarized</code> indicating if the <code>Simulation</code> is spin polarized or not. The different levels of abstractions are useful when dealing with commonalities amongst the methods.</p>
+<div class="admonition abstract">
+<p class="admonition-title">Assignment 2.3</p>
+<p>Instantiate a <code>DFT</code> section. For simplicity, you can also assign the <code>jacobs_ladder</code> quantity to be <code>'LDA'</code>. Add this sub-section to the <code>Simulation</code> section created in the Assignment 2.1. What is the underlying concept that allows you to add directly the <code>class DFT</code> under <code>Simulation.model_method</code>, provided that the definition of this attribute is a <code>ModelMethod</code> sub-section? Can you reason why the current schema (version 0.0.2) is inconsistent in handling the <code>xc_functionals</code> contributions?</p>
+</div>
+<details class="success">
+<summary>Solution 2.3</summary>
+<p>Similarly to Assignment 2.2, we can import and create the <code>DFT</code> section:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">nomad_simulations.schema_packages.model_method</span><span class="w"> </span><span class="kn">import</span> <span class="n">DFT</span>
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="n">dft</span> <span class="o">=</span> <span class="n">DFT</span><span class="p">(</span><span class="n">jacobs_ladder</span><span class="o">=</span><span class="s1">&#39;LDA&#39;</span><span class="p">)</span>
+</code></pre></div></p>
+<p>This time, due to the fact that <code>Simulation.model_method</code> is a repeating sub-section (i.e., a list of sub-sections), we need to append <code>dft</code> instead of directly assigning the attribute:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="n">simulation</span><span class="o">.</span><span class="n">model_method</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dft</span><span class="p">)</span>
+</code></pre></div></p>
+<p>Thanks to inheritance of <code>class DFT</code> with <code>ModelMethod</code> and polymorphism, we can directly append <code>dft</code> as a <code>model_method</code> sub-section.</p>
+<p>The current schema is also a bit inconsistent due to the fact that <code>BaseModelMethod</code> has a sub-section called <code>contributions</code>, while <code>DFT</code> has also a sub-section called <code>xc_functionals</code>, hence both sub-sections live at the same time under the section <code>DFT</code>. Conceptually, both sub-sections are the same: they refer to a sub-term or contribution of the total DFT Hamiltonian, thus, their definitions should be combined, and only one sub-section should be used. The best action here would be to open an issue in the <code>nomad-simulations</code> Github repository, or directly contact the maintainers.</p>
+</details>
+<h3 id="numericalsettings"><code>NumericalSettings</code><a class="headerlink" href="#numericalsettings" title="Permanent link">&para;</a></h3>
+<p>The <code>NumericalSettings</code> section is an abstract section used to define the numerical parameters set during the simulation, e.g., the plane-wave basis cutoff used, the k-mesh, etc. These parameters can be defined into specialized classes which inherit from <code>NumericalSettings</code> (similar to what happens with all the electronic-structure methodologies and <code>ModelMethod</code>). The detailed relationship tree is:</p>
+<div class="click-zoom">
+    <label>
+        <input type="checkbox">
+        <img src="../assets/part2-nomad-simulations/model_method_with_numerical_settings.png" alt="NumericalSettings quantities and functions UML diagram." width="80%" title="Click to zoom in">
+    </label>
+</div>
+
+<div class="admonition abstract">
+<p class="admonition-title">Assignment 2.4</p>
+<p>Instantiate a <code>SelfConsistency</code> section and assign the quantity <code>threshold_change</code> to be <code>1e-3</code> and the <code>threshold_change_unit</code> to be <code>'joule'</code>. Add this sub-section to the <code>DFT</code> section created in the Assignment 2.3. Is the new information also stored in the <code>Simulation</code> section created in Assignment 2.1? Can you access the information of the Jacobs ladder string used in this simulation <strong>starting</strong> from the newly instantiated class?</p>
+</div>
+<details class="success">
+<summary>Solution 2.4</summary>
+<p>We can import and create the class <code>SelfConsistency</code>, assign the specified quantities, and append it under <code>dft</code>:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">nomad_simulations.schema_packages.numerical_settings</span><span class="w"> </span><span class="kn">import</span> <span class="n">SelfConsistency</span>
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="n">scf</span> <span class="o">=</span> <span class="n">SelfConsistency</span><span class="p">(</span><span class="n">threshold_change</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">,</span> <span class="n">threshold_change_unit</span><span class="o">=</span><span class="s1">&#39;joule&#39;</span><span class="p">)</span>
+<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a><span class="n">dft</span><span class="o">.</span><span class="n">numerical_settings</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">scf</span><span class="p">)</span>
+</code></pre></div></p>
+<p>In order to see if <code>scf</code> is showing directly under <code>simulation</code>, we can:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="n">simulation</span><span class="o">.</span><span class="n">model_method</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">numerical_settings</span>
+</code></pre></div>
+which indeed returns:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="o">[</span>SelfConsistency:SelfConsistency<span class="o">(</span>name,<span class="w"> </span>threshold_change,<span class="w"> </span>threshold_change_unit<span class="o">)]</span>
+</code></pre></div></p>
+<p>In order to go from <code>scf</code> to the <code>dft.jacobs_ladder</code> information, we need to go one level up with respect to <code>scf</code>. In order to do this, we can use the method <code>m_parent</code>:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="n">scf</span><span class="o">.</span><span class="n">m_parent</span><span class="o">.</span><span class="n">jacobs_ladder</span>
+</code></pre></div>
+which will return:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="s1">&#39;LDA&#39;</span>
+</code></pre></div></p>
+</details>
+<h2 id="modelsystem"><code>ModelSystem</code><a class="headerlink" href="#modelsystem" title="Permanent link">&para;</a></h2>
+<p>The <code>ModelSystem</code> section is an input section which contains all the information about the geometrical space quantities (positions, lattice vectors, volumes, etc) of the simulated system. This section contains various quantities and sub-sections which aim to describe the system in the most complete way and in a variety of cases, from unit cells of crystals and molecules up to microstructures. In order to handle this <em>hierarchical</em> structure, <code>ModelSystem</code> is nested over itself, i.e., a <code>ModelSystem</code> can be composed of sub-systems, which at the same time could be composed of smaller sub-systems, and so on. This is done thanks to the (proxy) sub-section attribute called <code>model_system</code>.</p>
+<p>The <code>Cell</code> sub-section is an important section which contains information of the simulated cell, including the <code>lattice_vectors</code> and the <code>positions</code> of the particles within. However, it does not contain specific information about these particles, e.g., their chemical identity or electronic state, as this is the responsability of a more specialized section, the <code>AtomicCell</code>. This section stores the relevant information about each of the atoms constituting the material via the <a href="#atomsstate"><code>AtomsState</code></a> sub-section. The <code>Symmetry</code> sub-section contains standard symmetry classifications of the system, while the <code>ChemicalFormula</code> sub-section stores various strings that allow the system to be identified in a specific format of the chemical formulas (IUPAC, Hill, etc).</p>
+<p>The detailed relationship tree is:</p>
+<div class="click-zoom">
+    <label>
+        <input type="checkbox">
+        <img src="../assets/part2-nomad-simulations/model_system.png" alt="ModelSystem quantities and functions UML diagram." width="80%" title="Click to zoom in">
+    </label>
+</div>
+
+<p>The <code>Entity</code> abstract section is defined in the <a href="https://basic-formal-ontology.org/">Basic Formal Ontology (BFO)</a> similar to <code>Activity</code>, and we use it to abstract our <code>ModelSystem</code>. In fact, <code>ModelSystem</code> is inheriting from an intermediate abstract section called <code>System</code>. This base section, <code>System</code>, is also used by the experimental data models to define the composition and structure of the measured materials.</p>
+<details class="note">
+<summary>GeometricSpace and simulated cells.</summary>
+<p>The abstract section <code>GeometricSpace</code> is used to define more general real space quantities related with the system of reference used, areas, lengths, volumes, etc. However, this section and <code>Cell</code> are currently (version 0.0.2) under revision and will probably change in the near future.</p>
+</details>
+<h3 id="atomsstate"><code>AtomsState</code> and other sub-sections<a class="headerlink" href="#atomsstate" title="Permanent link">&para;</a></h3>
+<p>The <code>AtomsState</code> section is a list of sub-sections within <code>AtomicCell</code>, corresponding to the list of particles specified by the <code>positions</code> array defined under <code>Cell</code>. Each <code>AtomsState</code> section contains information about a specific chemical element used in the simulation, and may also contain additional <code>OrbitalsState</code>, <code>CoreHole</code>, or <code>HubbardInteractions</code> information. The detailed relationship tree is:</p>
+<div class="click-zoom">
+    <label>
+        <input type="checkbox">
+        <img src="../assets/part2-nomad-simulations/model_system_with_atoms_state.png" alt="AtomsState quantities and functions UML diagram." width="80%" title="Click to zoom in">
+    </label>
+</div>
+
+<div class="admonition abstract">
+<p class="admonition-title">Assignment 2.5</p>
+<p>Instantiate two <code>AtomsState</code> sections and assign the <code>chemical_symbol</code> to be <code>'Ga'</code> and <code>'As'</code> for each of these sections. For this assignment, we also need to define a <code>logger</code> object in order for the functionalities to work:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">nomad</span><span class="w"> </span><span class="kn">import</span> <span class="n">utils</span>
+<a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a><span class="n">logger</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">get_logger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+</code></pre></div>
+Using a method of <code>AtomsState</code>, what is the atomic number of Ga and of As?</p>
+</div>
+<details class="success">
+<summary>Solution 2.5</summary>
+<p>We can import and create two instances of <code>AtomsState</code> and assign <code>chemical_symbol</code> in a variety of ways. In this case, we used list comprehension:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">nomad_simulations.schema_packages.atoms_state</span><span class="w"> </span><span class="kn">import</span> <span class="n">AtomsState</span>
+<a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a><span class="n">atoms_states</span> <span class="o">=</span> <span class="p">[</span><span class="n">AtomsState</span><span class="p">(</span><span class="n">chemical_symbol</span><span class="o">=</span><span class="n">element</span><span class="p">)</span> <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;Ga&#39;</span><span class="p">,</span> <span class="s1">&#39;As&#39;</span><span class="p">]]</span>
+</code></pre></div></p>
+<p>For each of the atoms, we can use the class method <code>resolve_atomic_number(logger)</code> which will directly return the atomic number of each section:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a><span class="p">[</span><span class="n">atom</span><span class="o">.</span><span class="n">resolve_atomic_number</span><span class="p">(</span><span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">)</span> <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">atoms_states</span><span class="p">]</span>
+</code></pre></div>
+which returns:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a><span class="o">[</span><span class="m">31</span>,<span class="w"> </span><span class="m">33</span><span class="o">]</span>
+</code></pre></div>
+Hence, the atomic number of Ga is 31 and of As is 33.</p>
+</details>
+<div class="admonition abstract">
+<p class="admonition-title">Assignment 2.6</p>
+<p>Instantiate a <code>ModelSystem</code> section and a <code>AtomicCell</code> section. Assign the <code>positions</code> in the <code>AtomicCell</code> section to be <code>[[0, 0, 0], [1, 1, 1]]</code> in meters. Add the <code>atoms_states</code> defined in the Assignment 2.5 under the <code>AtomicCell</code> section. Append this <code>AtomicCell</code> section under <code>ModelSystem</code>, and append <code>ModelSystem</code> to the <code>Simulation</code> section created in Assignment 2.1.</p>
+<p>Now, we want to extract the different formats in which the chemical formulas of this system can be written. For that, instantiate directly the <code>ChemicalFormula</code> sub-section under <code>ModelSystem</code>. Note: you can use the <code>ChemicalFormula.normalize(archive, logger)</code> method, and pass <code>archive=None</code> to this function.</p>
+<p>What are the different formats of the chemical formula? What is the string of the <code>descriptive</code> format and why it coincides with other format(s) in the sub-section?</p>
+</div>
+<details class="success">
+<summary>Solution 2.6</summary>
+<p>We can import and create instances of <code>ModelSystem</code> and <code>AtomicCell</code> and assign the corresponding quantities directly:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">nomad_simulations.schema_packages.model_system</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModelSystem</span><span class="p">,</span> <span class="n">AtomicCell</span>
+<a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a><span class="n">model_system</span> <span class="o">=</span> <span class="n">ModelSystem</span><span class="p">()</span>
+<a id="__codelineno-20-3" name="__codelineno-20-3" href="#__codelineno-20-3"></a><span class="n">atomic_cell</span> <span class="o">=</span> <span class="n">AtomicCell</span><span class="p">(</span><span class="n">atoms_state</span><span class="o">=</span><span class="n">atoms_states</span><span class="p">,</span> <span class="n">positions</span><span class="o">=</span><span class="p">[[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]]</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">meter</span><span class="p">)</span>
+<a id="__codelineno-20-4" name="__codelineno-20-4" href="#__codelineno-20-4"></a><span class="n">model_system</span><span class="o">.</span><span class="n">cell</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">atomic_cell</span><span class="p">)</span>
+</code></pre></div></p>
+<p>We can append this section to <code>Simulation</code>:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a><span class="n">simulation</span><span class="o">.</span><span class="n">model_system</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">model_system</span><span class="p">)</span>
+</code></pre></div></p>
+<p>We can now assign directly an empty <code>ChemicalFormula</code> section to <code>ModelSystem</code>, in order to be able to call for the specific class method:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">nomad_simulations.schema_packages.model_system</span><span class="w"> </span><span class="kn">import</span> <span class="n">ChemicalFormula</span>
+<a id="__codelineno-22-2" name="__codelineno-22-2" href="#__codelineno-22-2"></a><span class="n">model_system</span><span class="o">.</span><span class="n">chemical_formula</span> <span class="o">=</span> <span class="n">ChemicalFormula</span><span class="p">()</span>
+</code></pre></div></p>
+<p>In order to extract the formulas and assign them to the quantities of the section <code>ChemicalFormula</code>, we can use the method <code>normalize()</code>. This class method takes two arguments as inputs: <code>archive</code> and <code>logger</code>. For the purpose of this tutorial, we can set <code>archive=None</code>:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a><span class="n">model_system</span><span class="o">.</span><span class="n">chemical_formula</span><span class="o">.</span><span class="n">normalize</span><span class="p">(</span><span class="n">archive</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">)</span>
+</code></pre></div></p>
+<p>Now, the <code>ChemicalFormula</code> sub-section contains the information of the different formats for the chemical formula: <code>reduced</code> and <code>hill</code> are both <code>'AsGa'</code>, while <code>iupac</code> is <code>'GaAs'</code>. The <code>descriptive</code> formula is set depending on the chemical elements present in the system, and because neither <code>'H'</code> nor <code>'O'</code> is present (i.e., no organic formulas), and gallium arsenide does not belong to any format exceptions, then it is set to the inorganic typical formula <code>'GaAs'</code>, coinciding with <code>iupac</code>. The <code>anonymous</code> formula is <code>'AB'</code>.</p>
+</details>
+<h2 id="outputs"><code>Outputs</code><a class="headerlink" href="#outputs" title="Permanent link">&para;</a></h2>
+<p>The <code>Outputs</code> section contains all the information about the properties computed by the simulations, as well as references to the relevant <code>ModelMethod</code> and <code>ModelSystem</code>. Each property is stored individually under <code>Outputs</code>, and inherits from an abstract section call <code>PhysicalProperty</code>. The <code>PhysicalProperty</code> base section contains the <code>value</code> of the property along with other relevant quantities. The <code>variables</code> sub-section enables the physical property to be stored as a function of a varying parameter. Accordingly, the shape of value is calculated in a dynamic way. This means that the same physical property (e.g., <code>ElectronicBandGap</code>) could have different shapes depending on the use-case being parsed (e.g., a single scalar number or a set of varying scalars with respect to a variable, e.g., <code>Temperature</code>).</p>
+<p>The <code>Outputs</code> section can be further specialized into <code>SCFOutputs</code> in case the properties are calculated in a series of self-consistent steps. The steps are stored under a sub-section called <code>scf_steps</code>, while the last step and other non-self-consistently calculated properties are stored directly under <code>SCFOutputs</code>. The reference to the <code>SelfConsistency</code> section (see <a href="#numericalsettings">NumericalSettings</a>) allows us to automatically determine if a self-consistently calculated property is converged or not.</p>
+<p>The detailed relationship tree is:</p>
+<div class="click-zoom">
+    <label>
+        <input type="checkbox">
+        <img src="../assets/part2-nomad-simulations/outputs.png" alt="Outputs quantities and functions UML diagram." width="80%" title="Click to zoom in">
+    </label>
+</div>
+
+<div class="admonition abstract">
+<p class="admonition-title">Assignment 2.7</p>
+<p>Instantiate an <code>SCFOutputs</code> section. We are going to store a self-consistently calculated <code>FermiLevel</code>, whose values at each step are <code>[1, 1.5, 2, 2.1, 2.101]</code> in eV. Add the appropiate references to the <code>ModelMethod</code> and <code>ModelSystem</code> sections created in Assignment 2.3 and Assignment 2.6, respectively. For the self-consistently calculated <code>FermiLevel</code> section, add the reference to the section <code>SelfConsistency</code> created in Assignment 2.4.</p>
+<p>Check if the <code>FermiLevel</code> is self-consistently converged or not by using a class method from <code>SCFOutputs</code>. What happens if the <code>SelfConsistency.threshold_change</code> is now <code>1e-24</code>?</p>
+</div>
+<details class="success">
+<summary>Solution 2.7</summary>
+<p>We can import and create an instance of <code>SCFOutputs</code> and append it to simulation:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">nomad_simulations.schema_packages.outputs</span><span class="w"> </span><span class="kn">import</span> <span class="n">SCFOutputs</span>
+<a id="__codelineno-24-2" name="__codelineno-24-2" href="#__codelineno-24-2"></a><span class="n">scf_outputs</span> <span class="o">=</span> <span class="n">SCFOutputs</span><span class="p">()</span>
+<a id="__codelineno-24-3" name="__codelineno-24-3" href="#__codelineno-24-3"></a><span class="n">simulation</span><span class="o">.</span><span class="n">outputs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">scf_outputs</span><span class="p">)</span>
+</code></pre></div></p>
+<p>We can add the references to the other <code>ModelMethod</code> and <code>ModelSystem</code> sections by doing:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a><span class="n">scf_outputs</span><span class="o">.</span><span class="n">model_method_ref</span> <span class="o">=</span> <span class="n">simulation</span><span class="o">.</span><span class="n">model_method</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<a id="__codelineno-25-2" name="__codelineno-25-2" href="#__codelineno-25-2"></a><span class="n">scf_outputs</span><span class="o">.</span><span class="n">model_system_ref</span> <span class="o">=</span> <span class="n">simulation</span><span class="o">.</span><span class="n">model_system</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+</code></pre></div></p>
+<p>Now, we need to create the <code>scf_steps</code> sub-sections with the information of the <code>FermiLevel</code> steps and their values. For that,
+<div class="highlight"><pre><span></span><code><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">nomad_simulations.schema_packages.outputs</span><span class="w"> </span><span class="kn">import</span> <span class="n">Outputs</span>
+<a id="__codelineno-26-2" name="__codelineno-26-2" href="#__codelineno-26-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">nomad_simulations.schema_packages.properties</span><span class="w"> </span><span class="kn">import</span> <span class="n">FermiLevel</span>
+<a id="__codelineno-26-3" name="__codelineno-26-3" href="#__codelineno-26-3"></a><span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mf">2.1</span><span class="p">,</span> <span class="mf">2.101</span><span class="p">]:</span>
+<a id="__codelineno-26-4" name="__codelineno-26-4" href="#__codelineno-26-4"></a>    <span class="n">fermi_level</span> <span class="o">=</span> <span class="n">FermiLevel</span><span class="p">()</span>
+<a id="__codelineno-26-5" name="__codelineno-26-5" href="#__codelineno-26-5"></a>    <span class="n">fermi_level</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">value</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">eV</span>
+<a id="__codelineno-26-6" name="__codelineno-26-6" href="#__codelineno-26-6"></a>    <span class="n">scf_outputs</span><span class="o">.</span><span class="n">scf_steps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Outputs</span><span class="p">(</span><span class="n">fermi_levels</span><span class="o">=</span><span class="p">[</span><span class="n">fermi_level</span><span class="p">]))</span>
+</code></pre></div>
+Note that:</p>
+<ol>
+<li>The properties like <code>fermi_levels</code> are repeated sub-sections under <code>Outputs</code>, so we need to assign a list.</li>
+<li>The <code>scf_steps</code> sub-sections are <code>Outputs</code>, hence we need to import the <code>Outputs</code> section and append it to that attribute.</li>
+</ol>
+<p>We also need to add the last step directly under <code>scf_outputs</code> and add the reference to the <code>SelfConsistency</code> section:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-27-1" name="__codelineno-27-1" href="#__codelineno-27-1"></a><span class="n">scf_outputs</span><span class="o">.</span><span class="n">fermi_levels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">FermiLevel</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="mf">2.101</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">eV</span><span class="p">,</span> <span class="n">self_consistency_ref</span><span class="o">=</span><span class="n">simulation</span><span class="o">.</span><span class="n">model_method</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">numerical_settings</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+</code></pre></div></p>
+<p>In order to check if the <code>FermiLevel</code> is converged or not, we can use the class method <code>resolve_is_scf_converged()</code>. This method has various inputs that are explained in the method itself. Here we will simply use the function like:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-28-1" name="__codelineno-28-1" href="#__codelineno-28-1"></a><span class="n">scf_outputs</span><span class="o">.</span><span class="n">resolve_is_scf_converged</span><span class="p">(</span><span class="n">property_name</span><span class="o">=</span><span class="s1">&#39;fermi_levels&#39;</span><span class="p">,</span> <span class="n">i_property</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">physical_property</span><span class="o">=</span><span class="n">scf_outputs</span><span class="o">.</span><span class="n">fermi_levels</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">)</span>
+</code></pre></div>
+which indeed returns
+<div class="highlight"><pre><span></span><code><a id="__codelineno-29-1" name="__codelineno-29-1" href="#__codelineno-29-1"></a>True
+</code></pre></div>
+So the <code>FermiLevel</code> is converged.</p>
+<p>Now, if we set:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-30-1" name="__codelineno-30-1" href="#__codelineno-30-1"></a><span class="n">scf</span><span class="o">.</span><span class="n">threshold_change</span> <span class="o">=</span> <span class="mf">1e-24</span>
+</code></pre></div>
+And re-run the <code>resolve_is_scf_converged()</code> method, we can see that the <code>FermiLevel</code> is not self-consistenly converged:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-31-1" name="__codelineno-31-1" href="#__codelineno-31-1"></a>False
+</code></pre></div></p>
+<p>The reason for this is that, in joules, the last two self-consistent steps (where the Fermi level is 2.1 and 2.101 eV) have a difference which can be also computed with another class method:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-32-1" name="__codelineno-32-1" href="#__codelineno-32-1"></a><span class="n">scf_values</span> <span class="o">=</span> <span class="n">scf_outputs</span><span class="o">.</span><span class="n">get_last_scf_steps_value</span><span class="p">(</span><span class="n">scf_last_steps</span><span class="o">=</span><span class="n">scf_outputs</span><span class="o">.</span><span class="n">scf_steps</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">:],</span> <span class="n">property_name</span><span class="o">=</span><span class="s1">&#39;fermi_levels&#39;</span><span class="p">,</span> <span class="n">i_property</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">scf_parameters</span><span class="o">=</span><span class="n">scf</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">)</span>
+<a id="__codelineno-32-2" name="__codelineno-32-2" href="#__codelineno-32-2"></a><span class="nb">abs</span><span class="p">(</span><span class="n">scf_values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">scf_values</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+</code></pre></div>
+which returns:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-33-1" name="__codelineno-33-1" href="#__codelineno-33-1"></a><span class="m">1</span>.6021766340002688e-22
+</code></pre></div>
+Then, a <code>threshold_change</code> of <code>1e-24</code> is smaller than the difference, so that the <code>FermiLevel</code> is not converged.</p>
+</details>
+<div class="admonition abstract">
+<p class="admonition-title">Assignment 2.8</p>
+<p>We are going to store two <code>ElectronicBandGap</code> property sections under the <code>SCFOutputs</code> section created in the Assignment 2.7:</p>
+<ul>
+<li>An <code>ElectronicBandGap</code> whose value is 2 eV.</li>
+<li>An <code>ElectronicBandGap</code> varying with <code>Temperature</code>, whose values are <code>[1, 1.5, 2]</code> in eV for <code>[100, 150, 200]</code> temperatures in Kelvin.</li>
+</ul>
+<p>In the second situation of an electronic band gap which varies with the <code>Temperature</code>, what happens if you directly assign <code>value</code> <strong>before</strong> defining the <code>Temperature</code> variables sub-section in <code>ElectronicBandGap</code>?</p>
+</div>
+<details class="success">
+<summary>Solution 2.8</summary>
+<p>We can import the <code>ElectronicBandGap</code> property and assign the first case of an electronic band gap which is 2 eV:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-34-1" name="__codelineno-34-1" href="#__codelineno-34-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">nomad_simulations.schema_packages.properties</span><span class="w"> </span><span class="kn">import</span> <span class="n">ElectronicBandGap</span>
+<a id="__codelineno-34-2" name="__codelineno-34-2" href="#__codelineno-34-2"></a><span class="n">band_gap</span> <span class="o">=</span> <span class="n">ElectronicBandGap</span><span class="p">()</span>
+<a id="__codelineno-34-3" name="__codelineno-34-3" href="#__codelineno-34-3"></a><span class="n">band_gap</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">eV</span>
+<a id="__codelineno-34-4" name="__codelineno-34-4" href="#__codelineno-34-4"></a><span class="n">scf_outputs</span><span class="o">.</span><span class="n">electronic_band_gaps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">band_gap</span><span class="p">)</span>
+</code></pre></div></p>
+<p>We can do the same for the temperature-dependent band gap by importing and defining the <code>Temperature</code> variable sub-section (note that <code>variables</code> is a repeated sub-section, thus we need to assign a list):
+<div class="highlight"><pre><span></span><code><a id="__codelineno-35-1" name="__codelineno-35-1" href="#__codelineno-35-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">nomad_simulations.schema_packages.variables</span><span class="w"> </span><span class="kn">import</span> <span class="n">Temperature</span>
+<a id="__codelineno-35-2" name="__codelineno-35-2" href="#__codelineno-35-2"></a><span class="n">band_gap_T</span> <span class="o">=</span> <span class="n">ElectronicBandGap</span><span class="p">(</span><span class="n">variables</span><span class="o">=</span><span class="p">[</span><span class="n">Temperature</span><span class="p">(</span><span class="n">points</span><span class="o">=</span><span class="p">[</span><span class="mi">100</span><span class="p">,</span> <span class="mi">150</span><span class="p">,</span> <span class="mi">200</span><span class="p">]</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">kelvin</span><span class="p">)])</span>
+<a id="__codelineno-35-3" name="__codelineno-35-3" href="#__codelineno-35-3"></a><span class="n">band_gap_T</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">eV</span>
+<a id="__codelineno-35-4" name="__codelineno-35-4" href="#__codelineno-35-4"></a><span class="n">scf_outputs</span><span class="o">.</span><span class="n">electronic_band_gaps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">band_gap_T</span><span class="p">)</span>
+</code></pre></div></p>
+<p>Here, we have assigned first <code>variables</code> before the <code>value</code> of the property. However, if we want to assign first the <code>value</code>:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-36-1" name="__codelineno-36-1" href="#__codelineno-36-1"></a><span class="n">band_gap_T</span> <span class="o">=</span> <span class="n">ElectronicBandGap</span><span class="p">()</span>
+<a id="__codelineno-36-2" name="__codelineno-36-2" href="#__codelineno-36-2"></a><span class="n">band_gap_T</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">eV</span>
+</code></pre></div>
+we will get a <code>ValueError</code> due to the fact that <code>variables</code> is not set and the shape of <code>value</code> is not empty:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-37-1" name="__codelineno-37-1" href="#__codelineno-37-1"></a>ValueError:<span class="w"> </span>The<span class="w"> </span>shape<span class="w"> </span>of<span class="w"> </span>the<span class="w"> </span>stored<span class="w"> </span><span class="sb">`</span>value<span class="sb">`</span><span class="w"> </span><span class="o">[</span><span class="m">3</span><span class="o">]</span><span class="w"> </span>does<span class="w"> </span>not<span class="w"> </span>match<span class="w"> </span>the<span class="w"> </span>full<span class="w"> </span>shape<span class="w"> </span><span class="o">[]</span><span class="w"> </span>extracted<span class="w"> </span>from<span class="w"> </span>the<span class="w"> </span>variables<span class="w"> </span><span class="sb">`</span>n_points<span class="sb">`</span><span class="w"> </span>and<span class="w"> </span>the<span class="w"> </span><span class="sb">`</span>shape<span class="sb">`</span><span class="w"> </span>defined<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="sb">`</span>PhysicalProperty<span class="sb">`</span>.
+</code></pre></div></p>
+<p>Thus, the <code>variables</code> sub-sections <strong>must</strong> be set before setting the <code>value</code> of a physical property. This is because the <code>class PhysicalProperty</code> is doing validations on the shape of the <code>variables</code> and <code>value</code>, and it only works if <code>variables</code> is set first. Only when the shape of <code>value</code> is empty and due to the fact that <code>variables</code> is set by default to an empty list, then we would not get any error.</p>
+</details>
+<h2 id="normalize-function">Extra: The <code>normalize()</code> class function<a class="headerlink" href="#normalize-function" title="Permanent link">&para;</a></h2>
+<p>Each base section defined using the NOMAD schema has a set of public functions which can be used at any moment when reading and parsing files in NOMAD. The <code>normalize(archive, logger)</code> function is a special case of such functions, which warrants an in-depth description.</p>
+<p>This function is run within the NOMAD infrastructure by the <a href="https://github.com/nomad-coe/nomad/blob/develop/nomad/normalizing/metainfo.py"><code>MetainfoNormalizer</code></a> in the following order:</p>
+<ol>
+<li>A child section's <code>normalize()</code> function is run before its parents' <code>normalize()</code> function.</li>
+<li>For sibling sections, the <code>normalize()</code> function is executed from the smaller to the larger <code>normalizer_level</code> attribute. If <code>normalizer_level</code> is not set or if they are the same for two different sections, the order is established by the attributes definition order in the parent section.</li>
+<li>Using <code>super().normalize(archive, logger)</code> runs the inherited section normalize function.</li>
+</ol>
+<p>Let's see some examples. Imagine having the following <code>Section</code> and <code>SubSection</code> structure:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-38-1" name="__codelineno-38-1" href="#__codelineno-38-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">nomad.datamodel.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">ArchiveSection</span>
+<a id="__codelineno-38-2" name="__codelineno-38-2" href="#__codelineno-38-2"></a>
+<a id="__codelineno-38-3" name="__codelineno-38-3" href="#__codelineno-38-3"></a>
+<a id="__codelineno-38-4" name="__codelineno-38-4" href="#__codelineno-38-4"></a><span class="k">class</span><span class="w"> </span><span class="nc">Section1</span><span class="p">(</span><span class="n">ArchiveSection</span><span class="p">):</span>
+<a id="__codelineno-38-5" name="__codelineno-38-5" href="#__codelineno-38-5"></a>    <span class="n">normalizer_level</span> <span class="o">=</span> <span class="mi">1</span>
+<a id="__codelineno-38-6" name="__codelineno-38-6" href="#__codelineno-38-6"></a>
+<a id="__codelineno-38-7" name="__codelineno-38-7" href="#__codelineno-38-7"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">normalize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">achive</span><span class="p">,</span> <span class="n">logger</span><span class="p">):</span>
+<a id="__codelineno-38-8" name="__codelineno-38-8" href="#__codelineno-38-8"></a>        <span class="c1"># some operations here</span>
+<a id="__codelineno-38-9" name="__codelineno-38-9" href="#__codelineno-38-9"></a>        <span class="k">pass</span>
+<a id="__codelineno-38-10" name="__codelineno-38-10" href="#__codelineno-38-10"></a>
+<a id="__codelineno-38-11" name="__codelineno-38-11" href="#__codelineno-38-11"></a>
+<a id="__codelineno-38-12" name="__codelineno-38-12" href="#__codelineno-38-12"></a><span class="k">class</span><span class="w"> </span><span class="nc">Section2</span><span class="p">(</span><span class="n">ArchiveSection</span><span class="p">):</span>
+<a id="__codelineno-38-13" name="__codelineno-38-13" href="#__codelineno-38-13"></a>    <span class="n">normalizer_level</span> <span class="o">=</span> <span class="mi">0</span>
+<a id="__codelineno-38-14" name="__codelineno-38-14" href="#__codelineno-38-14"></a>
+<a id="__codelineno-38-15" name="__codelineno-38-15" href="#__codelineno-38-15"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">normalize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">achive</span><span class="p">,</span> <span class="n">logger</span><span class="p">):</span>
+<a id="__codelineno-38-16" name="__codelineno-38-16" href="#__codelineno-38-16"></a>        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">normalize</span><span class="p">(</span><span class="n">archive</span><span class="p">,</span> <span class="n">logger</span><span class="p">)</span>
+<a id="__codelineno-38-17" name="__codelineno-38-17" href="#__codelineno-38-17"></a>        <span class="c1"># Some operations here or before `super().normalize(archive, logger)`</span>
+<a id="__codelineno-38-18" name="__codelineno-38-18" href="#__codelineno-38-18"></a>
+<a id="__codelineno-38-19" name="__codelineno-38-19" href="#__codelineno-38-19"></a>
+<a id="__codelineno-38-20" name="__codelineno-38-20" href="#__codelineno-38-20"></a><span class="k">class</span><span class="w"> </span><span class="nc">ParentSection</span><span class="p">(</span><span class="n">ArchiveSection</span><span class="p">):</span>
+<a id="__codelineno-38-21" name="__codelineno-38-21" href="#__codelineno-38-21"></a>
+<a id="__codelineno-38-22" name="__codelineno-38-22" href="#__codelineno-38-22"></a>    <span class="n">sub_section_1</span> <span class="o">=</span> <span class="n">SubSection</span><span class="p">(</span><span class="n">Section1</span><span class="o">.</span><span class="n">m_def</span><span class="p">,</span> <span class="n">repeats</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<a id="__codelineno-38-23" name="__codelineno-38-23" href="#__codelineno-38-23"></a>
+<a id="__codelineno-38-24" name="__codelineno-38-24" href="#__codelineno-38-24"></a>    <span class="n">sub_section_2</span> <span class="o">=</span> <span class="n">SubSection</span><span class="p">(</span><span class="n">Section2</span><span class="o">.</span><span class="n">m_def</span><span class="p">,</span> <span class="n">repeats</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<a id="__codelineno-38-25" name="__codelineno-38-25" href="#__codelineno-38-25"></a>
+<a id="__codelineno-38-26" name="__codelineno-38-26" href="#__codelineno-38-26"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">normalize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">achive</span><span class="p">,</span> <span class="n">logger</span><span class="p">):</span>
+<a id="__codelineno-38-27" name="__codelineno-38-27" href="#__codelineno-38-27"></a>        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">normalize</span><span class="p">(</span><span class="n">archive</span><span class="p">,</span> <span class="n">logger</span><span class="p">)</span>
+<a id="__codelineno-38-28" name="__codelineno-38-28" href="#__codelineno-38-28"></a>        <span class="c1"># Some operations here or before `super().normalize(archive, logger)`</span>
+</code></pre></div>
+<p>Now, <code>MetainfoNormalizer</code> will be run on the <code>ParentSection</code>. Applying <strong>rule 1</strong>, the <code>normalize()</code> functions of the <code>ParentSection</code>'s childs are executed first. The order of these functions is established by <strong>rule 2</strong> with the <code>normalizer_level</code> atrribute, i.e., all the <code>Section2</code> (note that <code>sub_section_2</code> is a list of sections) <code>normalize()</code> functions are run first, then <code>Section1.normalize()</code>. Then, the order of execution will be:</p>
+<ol>
+<li><code>Section2.normalize()</code></li>
+<li><code>Section1.normalize()</code></li>
+<li><code>ParentSection.normalize()</code></li>
+</ol>
+<p>In case we do not assign a value to <code>Section1.normalizer_level</code> and <code>Section2.normalizer_level</code>, <code>Section1.normalize()</code> will run first before <code>Section2.normalize()</code>, due to the order of <code>SubSection</code> attributes in <code>ParentSection</code>. Thus the order will be in this case:</p>
+<ol>
+<li><code>Section1.normalize()</code></li>
+<li><code>Section2.normalize()</code></li>
+<li><code>ParentSection.normalize()</code></li>
+</ol>
+<p>By checking on the <code>normalize()</code> functions and <strong>rule 3</strong>, we can establish whether <code>ArchiveSection.normalize()</code> will be run or not. In <code>Section1.normalize()</code>, it will not, while in the other sections, <code>Section2</code> and <code>ParentSection</code>, it will.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+        
+          
+          <a href="../intro/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Part 1 - Intro to NOMAD">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                Part 1 - Intro to NOMAD
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../parser_plugins/" class="md-footer__link md-footer__link--next" aria-label="Next: Part 3 - Parser Plugins">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                Part 3 - Parser Plugins
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.instant", "navigation.footer"], "search": "../assets/javascripts/workers/search.7a47a382.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": 0.1}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.e71a0d61.min.js"></script>
+      
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
+      
+        <script src="https://unpkg.com/cytoscape@3.19.1/dist/cytoscape.min.js"></script>
+      
+        <script src="../assets/custom.js"></script>
+      
+        <script src="../javascripts/katex.js"></script>
+      
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.7/katex.min.js"></script>
+      
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.7/contrib/auto-render.min.js"></script>
+      
+    
+  </body>
+</html>

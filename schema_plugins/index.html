@@ -1,0 +1,1326 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Developing schemas and parsers for FAIR computational data storage using NOMAD-Simulations
+">
+      
+      
+        <meta name="author" content="FAIRmat consortium">
+      
+      
+      
+        <link rel="prev" href="../parser_plugins/">
+      
+      
+        <link rel="next" href="../custom_workflows/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.0">
+    
+    
+      
+        <title>Part 4 - Schema Plugins - FAIRmat Tutorial 14</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.618322db.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Titillium+Web:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Titillium Web";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../stylesheets/extra.css">
+    
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.7/katex.min.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#part-4-extending-nomad-simulations-to-support-custom-methods-and-outputs" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+      </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="FAIRmat Tutorial 14" class="md-header__button md-logo" aria-label="FAIRmat Tutorial 14" data-md-component="logo">
+      
+  <img src="../assets/nomad-logo.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            FAIRmat Tutorial 14
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Part 4 - Schema Plugins
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-hidden="true"  type="radio" name="__palette" id="__palette_0">
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-hidden="true"  type="radio" name="__palette" id="__palette_1">
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="FAIRmat Tutorial 14" class="md-nav__button md-logo" aria-label="FAIRmat Tutorial 14" data-md-component="logo">
+      
+  <img src="../assets/nomad-logo.png" alt="logo">
+
+    </a>
+    FAIRmat Tutorial 14
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../intro/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part 1 - Intro to NOMAD
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../nomad_simulations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part 2 - NOMAD-Simulations
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../parser_plugins/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part 3 - Parser Plugins
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part 4 - Schema Plugins
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part 4 - Schema Plugins
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#extending-the-overarching-simulation-metadata" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Extending the overarching simulation metadata
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#extending-the-simulation-outputs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Extending the simulation outputs
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../custom_workflows/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part 5 - Custom Workflows
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#extending-the-overarching-simulation-metadata" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Extending the overarching simulation metadata
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#extending-the-simulation-outputs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Extending the simulation outputs
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="part-4-extending-nomad-simulations-to-support-custom-methods-and-outputs">Part 4 - Extending NOMAD-Simulations to support custom methods and outputs<a class="headerlink" href="#part-4-extending-nomad-simulations-to-support-custom-methods-and-outputs" title="Permanent link">&para;</a></h1>
+<p>As you develop your parser, you may find that the <code>nomad-simulations</code> package does not include some relevant quantities for your particular use case. You can easily extend upon the schema by adding your own custom schema under the <code>schema_packages/</code> directory in your parser plugin. For this, you should utilize and build upon <code>nomad-simulations</code> for consistency and future compatibility or integration. Below (click to zoom) is a decision tree which illustrates the schema development process:</p>
+<div class="click-zoom">
+    <label>
+        <input type="checkbox">
+        <img src="../assets/schema_plugins/decision_tree.png" alt="Schema extension decision tree." width="80%" title="Click to zoom in">
+    </label>
+</div>
+
+<p>From this schematic, we can identify 3 distinct uses or extensions of <code>nomad-simulations</code>:</p>
+<ol>
+<li>
+<p>direct use of existing schema section definitions (no extension)</p>
+<ul>
+<li>implementation already covered in <a href="../parser_plugins/">Parser Plugins</a></li>
+</ul>
+</li>
+<li>
+<p>semantic extension</p>
+<ul>
+<li>create classes or sections that refine the context through inheritance from existing sections</li>
+<li>create brand new sections that widen the scope of the overall schema</li>
+</ul>
+</li>
+<li>
+<p>normalization functionalities</p>
+<ul>
+<li>the schema normalization functions can be leveraged to perform various tasks, simplifying the code within individual parsers while ensuring consistency and, thus, interoperability</li>
+</ul>
+</li>
+</ol>
+<p>The following demonstrates some simple examples of extending the <code>nomad-simulations</code> schema. More detailed documentation about writing schemas packages can be found in <a href="https://nomad-lab.eu/prod/v1/docs/howto/plugins/schema_packages.html" target="_blank">How to write a schema package</a> within the general NOMAD documentation.</p>
+<p>To start developing a custom schema, create a python file for your schema, e.g., <code>&lt;parser_name&gt;_schema.py</code>, within your parser plugin project, under <code>schema_packages/</code>.</p>
+<p>Add the following imports to this file:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="kn">import</span><span class="w"> </span><span class="nn">nomad_simulations</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="kn">from</span><span class="w"> </span><span class="nn">nomad.metainfo</span><span class="w"> </span><span class="kn">import</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">SubSection</span>
+</code></pre></div>
+<p><a href="https://nomad-lab.eu/prod/v1/docs/reference/glossary.html#section-and-subsection" target="_blank"><code>SubSection</code></a> and <a href="https://nomad-lab.eu/prod/v1/docs/reference/glossary.html#quantity" target="_blank"><code>Quantity</code></a> are classes used to populate each section with specific metadata as demonstrated below.</p>
+<details class="note">
+<summary>ArchiveSection</summary>
+<p>All classes in <code>NOMAD</code> and <code>nomad-simulations</code> inherit from the most abstract class, <code>ArchiveSection</code>. This class is using the functionalities defined for a section in NOMAD, which is defined in <code>MSection</code>, as well as adding the <code>normalize()</code> function. This class function or method is important, as it is executed after parsing and allows to leverage several tasks out of parsing (as explained in point 3. above, and in <a href="../nomad_simulations/#normalize-function">Part II - Extra: The <code>normalize()</code> class function</a>).</p>
+</details>
+<h2 id="extending-the-overarching-simulation-metadata">Extending the overarching simulation metadata<a class="headerlink" href="#extending-the-overarching-simulation-metadata" title="Permanent link">&para;</a></h2>
+<p>Suppose you are developing a parser for a well-defined schema specified within the HDF5 file format. Importantly, the simulation data is harvested from the original simulation files and mapped into this schema/file format by some researcher. The overarching metadata in this file can be represented as</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>hdf5_schema
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>    +-- version: Integer[3]
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>    \-- hdf5_generator
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>    |    +-- name: String[]
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>    |    +-- version: String[]
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>    \-- program
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>        +-- name: String[]
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>        +-- version: String[]
+</code></pre></div>
+<details class="note">
+<summary>HDF5 schema syntax</summary>
+<p><code>\-- item</code> &ndash;
+An object within a group, that is either a dataset or a group. If it is a group itself, the objects within the group are indented by five spaces with respect to the group name.</p>
+<p><code>+-- attribute:</code> &ndash;
+An attribute, that relates either to a group or a dataset.</p>
+<p><code>\-- data: &lt;type&gt;[dim1][dim2]</code> &ndash;
+A dataset with array dimensions dim1 by dim2 and of type <type>, following the HDF5 Datatype classes.</p>
+</details>
+<div class="admonition abstract">
+<p class="admonition-title">Assignment 4.1</p>
+<p>Which quantities within this HDF5 schema can we store using existing sections within <code>nomad-simulations</code> and which require the creation of new schema sections? For the quantities that directly use the existing schema, write some code to demonstrate how your parser would populate the archive with this information.</p>
+</div>
+<details class="success">
+<summary>Solution 4.1</summary>
+<p>The program information can be stored under the existing <code>Program()</code> sections within <code>Simulation()</code>. However the HDF5 schema <code>version</code> and <code>hdf5_generator</code> information require some extensions to the schema.</p>
+<p>For populating the program information, the parser code would look something like this (NOTE: the specifics of how to access the HDF5 file is not essential to understand for the purposes here):</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">h5py</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">nomad_simulations.schema_packages.general</span><span class="w"> </span><span class="kn">import</span> <span class="n">Simulation</span><span class="p">,</span> <span class="n">Program</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="k">class</span><span class="w"> </span><span class="nc">ParserName</span><span class="p">(</span><span class="n">MatchingParser</span><span class="p">):</span>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">parse</span><span class="p">(</span>
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>        <span class="bp">self</span><span class="p">,</span>
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>        <span class="n">mainfile</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>        <span class="n">archive</span><span class="p">:</span> <span class="n">EntryArchive</span><span class="p">,</span>
+<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>        <span class="n">logger</span><span class="p">:</span> <span class="n">BoundLogger</span><span class="p">,</span>
+<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>        <span class="n">child_archives</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">EntryArchive</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a>
+<a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a>        <span class="n">h5_data</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">mainfile</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span>
+<a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a>
+<a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a>        <span class="n">simulation</span> <span class="o">=</span> <span class="n">Simulation</span><span class="p">()</span>
+<a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a>        <span class="n">simulation</span><span class="o">.</span><span class="n">program</span> <span class="o">=</span> <span class="n">Program</span><span class="p">(</span>
+<a id="__codelineno-2-18" name="__codelineno-2-18" href="#__codelineno-2-18"></a>            <span class="n">name</span><span class="o">=</span><span class="n">h5_data</span><span class="p">[</span><span class="s1">&#39;program&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">],</span>
+<a id="__codelineno-2-19" name="__codelineno-2-19" href="#__codelineno-2-19"></a>            <span class="n">version</span><span class="o">=</span><span class="n">h5_data</span><span class="p">[</span><span class="s1">&#39;program&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;version&#39;</span><span class="p">]</span>
+<a id="__codelineno-2-20" name="__codelineno-2-20" href="#__codelineno-2-20"></a>        <span class="p">)</span>
+<a id="__codelineno-2-21" name="__codelineno-2-21" href="#__codelineno-2-21"></a>
+<a id="__codelineno-2-22" name="__codelineno-2-22" href="#__codelineno-2-22"></a>        <span class="n">archive</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">simulation</span>
+</code></pre></div>
+</details>
+<p>The <code>hdf_generator</code> information is referring to a secondary software used to create the HDF5 file, so it makes sense to store this in a section very similar to <code>Program()</code>. Let's first take a look at the current <code>Program()</code> schema:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">nomad_simulations.general</span><span class="w"> </span><span class="kn">import</span> <span class="n">Program</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="n">program</span> <span class="o">=</span> <span class="n">Program</span><span class="p">()</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="nb">print</span><span class="p">(</span><span class="n">program</span><span class="o">.</span><span class="n">m_def</span><span class="o">.</span><span class="n">all_quantities</span><span class="p">)</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>{&#39;name&#39;: nomad_simulations.general.Program.name:Quantity,
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a> &#39;datetime&#39;: nomad.datamodel.metainfo.basesections.BaseSection.datetime:Quantity,
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a> &#39;lab_id&#39;: nomad.datamodel.metainfo.basesections.BaseSection.lab_id:Quantity,
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a> &#39;description&#39;: nomad.datamodel.metainfo.basesections.BaseSection.description:Quantity,
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a> &#39;version&#39;: nomad_simulations.general.Program.version:Quantity,
+<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a> &#39;link&#39;: nomad_simulations.general.Program.link:Quantity,
+<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a> &#39;version_internal&#39;: nomad_simulations.general.Program.version_internal:Quantity,
+<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a> &#39;compilation_host&#39;: nomad_simulations.general.Program.compilation_host:Quantity}
+</code></pre></div>
+<p>Indeed, this section contains <code>name</code> and <code>version</code> information, along with other quantities that make sense in the context of a software which generates HDF5 files. So, in this case we can simply reuse this section and add a new subsection to <code>Simulation()</code>.</p>
+<div class="admonition abstract">
+<p class="admonition-title">Assignment 4.2</p>
+<p>Write down a new section that extends <code>Simulation()</code> to include a subsection <code>hdf_generator</code> of type <code>Program()</code>.</p>
+<p>HINT: Here is how the <code>program</code> section is defined within the <code>BaseSimulation()</code> section (parent of <code>Simulation()</code>) within the <code>nomad-simulations</code> package:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="k">class</span><span class="w"> </span><span class="nc">BaseSimulation</span><span class="p">(</span><span class="n">Activity</span><span class="p">):</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>    <span class="o">...</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>    <span class="n">program</span> <span class="o">=</span> <span class="n">SubSection</span><span class="p">(</span><span class="n">sub_section</span><span class="o">=</span><span class="n">Program</span><span class="o">.</span><span class="n">m_def</span><span class="p">,</span> <span class="n">repeats</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</code></pre></div>
+</div>
+<details class="success">
+<summary>Solution 4.2</summary>
+<p>We need to add a <code>Simulation()</code> section to <code>schema_packages/&lt;parser_name&gt;_schema.py</code> that inherits all the quantities and subsections from <code>nomad-simulation</code>'s <code>Simulation()</code> section, and additionally defines a subsection <code>hdf_generator</code>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">nomad_simulations</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="k">class</span><span class="w"> </span><span class="nc">Simulation</span><span class="p">(</span><span class="n">nomad_simulations</span><span class="o">.</span><span class="n">schema_packages</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">Simulation</span><span class="p">):</span>
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>    <span class="n">hdf5_generator</span> <span class="o">=</span> <span class="n">SubSection</span><span class="p">(</span>
+<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>        <span class="n">sub_section</span><span class="o">=</span><span class="n">nomad_simulations</span><span class="o">.</span><span class="n">schema_packages</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">Program</span><span class="o">.</span><span class="n">m_def</span>
+<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a>    <span class="p">)</span>
+</code></pre></div>
+<p>The <code>sub_section</code> argument of <code>SubSection</code> specifies that this new section under <code>Simulation()</code> is of type <code>Program()</code> and will thus inherit all of its attributes.</p>
+<p>Now we can use this new section within our parser to store the hdf generator information:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">nomad_simulations.schema_packages.general</span><span class="w"> </span><span class="kn">import</span> <span class="n">Program</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="kn">from</span><span class="w"> </span><span class="o">&lt;</span><span class="n">parse_plugin</span><span class="o">&gt;.</span><span class="n">schema_packages</span><span class="o">.&lt;</span><span class="n">parser_name</span><span class="o">&gt;</span><span class="n">_schema</span><span class="o">.</span><span class="n">py</span> <span class="kn">import</span><span class="w"> </span><span class="nn">Simulation</span>
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="k">class</span><span class="w"> </span><span class="nc">ParserName</span><span class="p">(</span><span class="n">MatchingParser</span><span class="p">):</span>
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>
+<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">parse</span><span class="p">(</span>
+<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a>        <span class="bp">self</span><span class="p">,</span>
+<a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a>        <span class="n">mainfile</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+<a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a>        <span class="n">archive</span><span class="p">:</span> <span class="n">EntryArchive</span><span class="p">,</span>
+<a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a>        <span class="n">logger</span><span class="p">:</span> <span class="n">BoundLogger</span><span class="p">,</span>
+<a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a>        <span class="n">child_archives</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">EntryArchive</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-7-12" name="__codelineno-7-12" href="#__codelineno-7-12"></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-7-13" name="__codelineno-7-13" href="#__codelineno-7-13"></a>
+<a id="__codelineno-7-14" name="__codelineno-7-14" href="#__codelineno-7-14"></a>        <span class="n">h5_data</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">mainfile</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span>
+<a id="__codelineno-7-15" name="__codelineno-7-15" href="#__codelineno-7-15"></a>
+<a id="__codelineno-7-16" name="__codelineno-7-16" href="#__codelineno-7-16"></a>        <span class="n">simulation</span> <span class="o">=</span> <span class="n">Simulation</span><span class="p">()</span>
+<a id="__codelineno-7-17" name="__codelineno-7-17" href="#__codelineno-7-17"></a>        <span class="n">simulation</span><span class="o">.</span><span class="n">hdf5_generator</span> <span class="o">=</span> <span class="n">Program</span><span class="p">(</span>
+<a id="__codelineno-7-18" name="__codelineno-7-18" href="#__codelineno-7-18"></a>            <span class="n">name</span><span class="o">=</span><span class="n">h5_data</span><span class="p">[</span><span class="s1">&#39;hdf_generator&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">],</span>
+<a id="__codelineno-7-19" name="__codelineno-7-19" href="#__codelineno-7-19"></a>            <span class="n">version</span><span class="o">=</span><span class="n">h5_data</span><span class="p">[</span><span class="s1">&#39;hdf_generator&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;version&#39;</span><span class="p">]</span>
+<a id="__codelineno-7-20" name="__codelineno-7-20" href="#__codelineno-7-20"></a>        <span class="p">)</span>
+<a id="__codelineno-7-21" name="__codelineno-7-21" href="#__codelineno-7-21"></a>
+<a id="__codelineno-7-22" name="__codelineno-7-22" href="#__codelineno-7-22"></a>        <span class="n">archive</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">simulation</span>
+</code></pre></div>
+</details>
+<p>Finally, we need to store the hdf5 schema version.</p>
+<div class="admonition abstract">
+<p class="admonition-title">Assignment 4.3</p>
+<p>Add a quantity <code>hdf5_schema_verion</code> with the appropriate <code>type</code>, <code>shape</code>, and <code>description</code> to your <code>Simulation()</code> class in <code>schema_packages/&lt;parser_name&gt;_schema.py</code>.</p>
+<p>HINT: You can browse some existing examples of quantity definitions in the <a href="https://github.com/nomad-coe/nomad-simulations/blob/develop/src/nomad_simulations/schema_packages/numerical_settings.py" target="_blank"><code>nomad-simulations</code> source code</a>.</p>
+</div>
+<details class="success">
+<summary>Solution 4.3</summary>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">nomad_simulations</span>
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="k">class</span><span class="w"> </span><span class="nc">Simulation</span><span class="p">(</span><span class="n">nomad_simulations</span><span class="o">.</span><span class="n">schema_packages</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">Simulation</span><span class="p">):</span>
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>    <span class="n">hdf5_schema_version</span> <span class="o">=</span> <span class="n">Quantity</span><span class="p">(</span>
+<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>        <span class="nb">type</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">,</span>
+<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a>        <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span>
+<a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a>        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;&quot;&quot;</span>
+<a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a><span class="s2">        Specifies the version of the HDF5 schema being followed, using sematic versioning.</span>
+<a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a><span class="s2">        &quot;&quot;&quot;</span><span class="p">,</span>
+<a id="__codelineno-8-11" name="__codelineno-8-11" href="#__codelineno-8-11"></a>    <span class="p">)</span>
+</code></pre></div>
+<p>Since the HDF5 schema apparently uses <a href="https://semver.org/" target="_blank">semantic versioning</a>, we define the <code>hdf5_schema_version</code> quantity as a list of 3 integers to ensure that the user provides the relevant information for this quantity.</p>
+<p>And in the parser:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="kn">from</span><span class="w"> </span><span class="o">&lt;</span><span class="n">parse_plugin</span><span class="o">&gt;.</span><span class="n">schema_packages</span><span class="o">.&lt;</span><span class="n">parser_name</span><span class="o">&gt;</span><span class="n">_schema</span><span class="o">.</span><span class="n">py</span> <span class="kn">import</span><span class="w"> </span><span class="nn">Simulation</span>
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="k">class</span><span class="w"> </span><span class="nc">ParserName</span><span class="p">(</span><span class="n">MatchingParser</span><span class="p">):</span>
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>
+<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">parse</span><span class="p">(</span>
+<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a>        <span class="bp">self</span><span class="p">,</span>
+<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a>        <span class="n">mainfile</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+<a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a>        <span class="n">archive</span><span class="p">:</span> <span class="n">EntryArchive</span><span class="p">,</span>
+<a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a>        <span class="n">logger</span><span class="p">:</span> <span class="n">BoundLogger</span><span class="p">,</span>
+<a id="__codelineno-9-10" name="__codelineno-9-10" href="#__codelineno-9-10"></a>        <span class="n">child_archives</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">EntryArchive</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-9-11" name="__codelineno-9-11" href="#__codelineno-9-11"></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-9-12" name="__codelineno-9-12" href="#__codelineno-9-12"></a>
+<a id="__codelineno-9-13" name="__codelineno-9-13" href="#__codelineno-9-13"></a>        <span class="n">h5_data</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">mainfile</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span>
+<a id="__codelineno-9-14" name="__codelineno-9-14" href="#__codelineno-9-14"></a>
+<a id="__codelineno-9-15" name="__codelineno-9-15" href="#__codelineno-9-15"></a>        <span class="n">simulation</span> <span class="o">=</span> <span class="n">Simulation</span><span class="p">()</span>
+<a id="__codelineno-9-16" name="__codelineno-9-16" href="#__codelineno-9-16"></a>        <span class="n">simulation</span><span class="o">.</span><span class="n">hdf5_schema_version</span> <span class="o">=</span> <span class="n">h5_data</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;version&#39;</span><span class="p">]</span>
+<a id="__codelineno-9-17" name="__codelineno-9-17" href="#__codelineno-9-17"></a>
+<a id="__codelineno-9-18" name="__codelineno-9-18" href="#__codelineno-9-18"></a>        <span class="n">archive</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">simulation</span>
+</code></pre></div>
+</details>
+<h2 id="extending-the-simulation-outputs">Extending the simulation outputs<a class="headerlink" href="#extending-the-simulation-outputs" title="Permanent link">&para;</a></h2>
+<p>For this example, we will use the <a href="https://github.com/FAIRmat-NFDI/nomad-parser-vasp" target="_blank"><code>nomad-vasp-parser</code></a> plugin that was referenced in the <a href="../parser_plugins/">Parser Plugins</a>. This plugin is currently under preliminary development. However we have prepared a branch with a minimal implementation for demonstration purposes. This branch follows the method of parsing described in <a href="../parser_plugins/#via-instantiation">Parser Plugins &gt; Via Instantiation</a>.</p>
+<p>If you would like to get hands-on experience with the schema extension and parser execution, following the installation instructions below. Otherwise, you can read through the example below for a conceptual understanding.</p>
+<details class="note">
+<summary><code>nomad-vasp-parser</code> installation instructions</summary>
+<p>To get started, clone the <a href="https://github.com/FAIRmat-NFDI/nomad-parser-vasp" target="_blank"><code>nomad-vasp-parser</code></a> repository and checkout the branch <code>fairmat-tutorial-14</code> while creating your own local branch:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/FAIRmat-NFDI/nomad-parser-vasp.git
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="nb">cd</span><span class="w"> </span>nomad-parser-vasp/
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>git<span class="w"> </span>checkout<span class="w"> </span>origin/fairmat-tutorial-14<span class="w"> </span>-b<span class="w"> </span>fairmat-tutorial-14
+</code></pre></div>
+<p>Now create a virtual environment and install the plugin (see the <code>READ.md</code> for full instructions):</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>python3<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span>.pyenv
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="nb">source</span><span class="w"> </span>.pyenv/bin/activate
+<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>pip
+<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a>pip<span class="w"> </span>install<span class="w"> </span>uv
+<a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a>uv<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span><span class="s1">&#39;.[dev]&#39;</span><span class="w"> </span>--index-url<span class="w"> </span>https://gitlab.mpcdf.mpg.de/api/v4/projects/2187/packages/pypi/simple
+</code></pre></div>
+<p>Open <code>pyproject.toml</code> within the root directory and confirm that you have the following dependencies:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>dependencies = [&quot;nomad-lab&gt;=1.3.0&quot;, &quot;nomad-simulations==0.0.3&quot;]
+</code></pre></div>
+<p>Now install the plugin:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>uv<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span><span class="s1">&#39;.[dev]&#39;</span><span class="w"> </span>--index-url<span class="w"> </span>https://gitlab.mpcdf.mpg.de/api/v4/projects/2187/packages/pypi/simple
+</code></pre></div>
+</details>
+<p>Briefly examine the <code>VASPXMLPaser()</code> in <code>nomad_vasp_parser/parsers/xml_parser.py</code> or below:</p>
+<details class="note">
+<summary><code>VASPXMLParser.parse()</code> snippet</summary>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">parse</span><span class="p">(</span>
+<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>    <span class="bp">self</span><span class="p">,</span>
+<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a>    <span class="n">mainfile</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+<a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a>    <span class="n">archive</span><span class="p">:</span> <span class="n">EntryArchive</span><span class="p">,</span>
+<a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a>    <span class="n">logger</span><span class="p">:</span> <span class="n">BoundLogger</span><span class="p">,</span>
+<a id="__codelineno-14-6" name="__codelineno-14-6" href="#__codelineno-14-6"></a>    <span class="n">child_archives</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">EntryArchive</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-14-7" name="__codelineno-14-7" href="#__codelineno-14-7"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-14-8" name="__codelineno-14-8" href="#__codelineno-14-8"></a>    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;VasprunXMLParser.parse&#39;</span><span class="p">,</span> <span class="n">parameter</span><span class="o">=</span><span class="n">configuration</span><span class="o">.</span><span class="n">parameter</span><span class="p">)</span>
+<a id="__codelineno-14-9" name="__codelineno-14-9" href="#__codelineno-14-9"></a>    <span class="n">xml_reader</span> <span class="o">=</span> <span class="n">XMLParser</span><span class="p">(</span><span class="n">mainfile</span><span class="o">=</span><span class="n">mainfile</span><span class="p">)</span>  <span class="c1"># XPath syntax</span>
+<a id="__codelineno-14-10" name="__codelineno-14-10" href="#__codelineno-14-10"></a>
+<a id="__codelineno-14-11" name="__codelineno-14-11" href="#__codelineno-14-11"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">xml_get</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">slicer</span><span class="o">=</span><span class="nb">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">fallback</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<a id="__codelineno-14-12" name="__codelineno-14-12" href="#__codelineno-14-12"></a>        <span class="k">try</span><span class="p">:</span>
+<a id="__codelineno-14-13" name="__codelineno-14-13" href="#__codelineno-14-13"></a>            <span class="k">return</span> <span class="n">xml_reader</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="n">path</span><span class="p">][</span><span class="n">slicer</span><span class="p">]</span>
+<a id="__codelineno-14-14" name="__codelineno-14-14" href="#__codelineno-14-14"></a>        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+<a id="__codelineno-14-15" name="__codelineno-14-15" href="#__codelineno-14-15"></a>            <span class="k">return</span> <span class="n">fallback</span>
+<a id="__codelineno-14-16" name="__codelineno-14-16" href="#__codelineno-14-16"></a>
+<a id="__codelineno-14-17" name="__codelineno-14-17" href="#__codelineno-14-17"></a>    <span class="c1">####################################################</span>
+<a id="__codelineno-14-18" name="__codelineno-14-18" href="#__codelineno-14-18"></a>    <span class="c1"># Parse the basic program, method, and system data #</span>
+<a id="__codelineno-14-19" name="__codelineno-14-19" href="#__codelineno-14-19"></a>    <span class="c1">####################################################</span>
+<a id="__codelineno-14-20" name="__codelineno-14-20" href="#__codelineno-14-20"></a>    <span class="n">archive</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">Simulation</span><span class="p">(</span>
+<a id="__codelineno-14-21" name="__codelineno-14-21" href="#__codelineno-14-21"></a>        <span class="n">program</span><span class="o">=</span><span class="n">Program</span><span class="p">(</span>
+<a id="__codelineno-14-22" name="__codelineno-14-22" href="#__codelineno-14-22"></a>            <span class="n">name</span><span class="o">=</span><span class="s1">&#39;VASP&#39;</span><span class="p">,</span>
+<a id="__codelineno-14-23" name="__codelineno-14-23" href="#__codelineno-14-23"></a>            <span class="n">version</span><span class="o">=</span><span class="n">xml_get</span><span class="p">(</span><span class="s2">&quot;//generator/i&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span>
+<a id="__codelineno-14-24" name="__codelineno-14-24" href="#__codelineno-14-24"></a>        <span class="p">),</span>
+<a id="__codelineno-14-25" name="__codelineno-14-25" href="#__codelineno-14-25"></a>        <span class="n">model_method</span><span class="o">=</span><span class="p">[</span>
+<a id="__codelineno-14-26" name="__codelineno-14-26" href="#__codelineno-14-26"></a>            <span class="n">DFT</span><span class="p">(</span>
+<a id="__codelineno-14-27" name="__codelineno-14-27" href="#__codelineno-14-27"></a>                <span class="n">xc_functionals</span><span class="o">=</span><span class="p">[</span>
+<a id="__codelineno-14-28" name="__codelineno-14-28" href="#__codelineno-14-28"></a>                    <span class="n">XCFunctional</span><span class="p">(</span>
+<a id="__codelineno-14-29" name="__codelineno-14-29" href="#__codelineno-14-29"></a>                        <span class="n">libxc_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">convert_xc</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+<a id="__codelineno-14-30" name="__codelineno-14-30" href="#__codelineno-14-30"></a>                            <span class="n">xml_get</span><span class="p">(</span>
+<a id="__codelineno-14-31" name="__codelineno-14-31" href="#__codelineno-14-31"></a>                                <span class="s2">&quot;///separator/i&quot;</span>
+<a id="__codelineno-14-32" name="__codelineno-14-32" href="#__codelineno-14-32"></a>                            <span class="p">),</span>
+<a id="__codelineno-14-33" name="__codelineno-14-33" href="#__codelineno-14-33"></a>                            <span class="p">{},</span>
+<a id="__codelineno-14-34" name="__codelineno-14-34" href="#__codelineno-14-34"></a>                        <span class="p">)</span>
+<a id="__codelineno-14-35" name="__codelineno-14-35" href="#__codelineno-14-35"></a>                        <span class="o">.</span><span class="n">get</span><span class="p">(</span>
+<a id="__codelineno-14-36" name="__codelineno-14-36" href="#__codelineno-14-36"></a>                            <span class="n">xml_get</span><span class="p">(</span>
+<a id="__codelineno-14-37" name="__codelineno-14-37" href="#__codelineno-14-37"></a>                                <span class="s2">&quot;///separator/i&quot;</span>
+<a id="__codelineno-14-38" name="__codelineno-14-38" href="#__codelineno-14-38"></a>                            <span class="p">),</span>
+<a id="__codelineno-14-39" name="__codelineno-14-39" href="#__codelineno-14-39"></a>                            <span class="p">{},</span>
+<a id="__codelineno-14-40" name="__codelineno-14-40" href="#__codelineno-14-40"></a>                        <span class="p">)</span>
+<a id="__codelineno-14-41" name="__codelineno-14-41" href="#__codelineno-14-41"></a>                        <span class="o">.</span><span class="n">get</span><span class="p">(</span>
+<a id="__codelineno-14-42" name="__codelineno-14-42" href="#__codelineno-14-42"></a>                            <span class="n">xml_get</span><span class="p">(</span>
+<a id="__codelineno-14-43" name="__codelineno-14-43" href="#__codelineno-14-43"></a>                                <span class="s2">&quot;///separator/i&quot;</span>
+<a id="__codelineno-14-44" name="__codelineno-14-44" href="#__codelineno-14-44"></a>                            <span class="p">),</span>
+<a id="__codelineno-14-45" name="__codelineno-14-45" href="#__codelineno-14-45"></a>                            <span class="s1">&#39;PE&#39;</span><span class="p">,</span>
+<a id="__codelineno-14-46" name="__codelineno-14-46" href="#__codelineno-14-46"></a>                        <span class="p">),</span>
+<a id="__codelineno-14-47" name="__codelineno-14-47" href="#__codelineno-14-47"></a>                    <span class="p">),</span>
+<a id="__codelineno-14-48" name="__codelineno-14-48" href="#__codelineno-14-48"></a>                <span class="p">],</span>
+<a id="__codelineno-14-49" name="__codelineno-14-49" href="#__codelineno-14-49"></a>            <span class="p">),</span>
+<a id="__codelineno-14-50" name="__codelineno-14-50" href="#__codelineno-14-50"></a>        <span class="p">],</span>
+<a id="__codelineno-14-51" name="__codelineno-14-51" href="#__codelineno-14-51"></a>    <span class="p">)</span>
+<a id="__codelineno-14-52" name="__codelineno-14-52" href="#__codelineno-14-52"></a>
+<a id="__codelineno-14-53" name="__codelineno-14-53" href="#__codelineno-14-53"></a>    <span class="k">if</span> <span class="p">(</span>
+<a id="__codelineno-14-54" name="__codelineno-14-54" href="#__codelineno-14-54"></a>        <span class="n">positions</span> <span class="o">:=</span> <span class="n">xml_get</span><span class="p">(</span>
+<a id="__codelineno-14-55" name="__codelineno-14-55" href="#__codelineno-14-55"></a>            <span class="s2">&quot;structure/./varray/v&quot;</span><span class="p">,</span>
+<a id="__codelineno-14-56" name="__codelineno-14-56" href="#__codelineno-14-56"></a>            <span class="nb">slice</span><span class="p">(</span><span class="kc">None</span><span class="p">),</span>
+<a id="__codelineno-14-57" name="__codelineno-14-57" href="#__codelineno-14-57"></a>            <span class="n">fallback</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([]),</span>
+<a id="__codelineno-14-58" name="__codelineno-14-58" href="#__codelineno-14-58"></a>        <span class="p">)</span>
+<a id="__codelineno-14-59" name="__codelineno-14-59" href="#__codelineno-14-59"></a>    <span class="p">)</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
+<a id="__codelineno-14-60" name="__codelineno-14-60" href="#__codelineno-14-60"></a>        <span class="n">archive</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">model_system</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+<a id="__codelineno-14-61" name="__codelineno-14-61" href="#__codelineno-14-61"></a>            <span class="n">ModelSystem</span><span class="p">(</span><span class="n">cell</span><span class="o">=</span><span class="p">[</span><span class="n">AtomicCell</span><span class="p">(</span><span class="n">positions</span><span class="o">=</span><span class="n">positions</span><span class="p">)])</span>
+<a id="__codelineno-14-62" name="__codelineno-14-62" href="#__codelineno-14-62"></a>        <span class="p">)</span>
+</code></pre></div>
+</details>
+<p>The current <code>VASPXMLParser.parse()</code> function populates the archive with a range of metadata including the program, method, and system data. We can view an example archive by running the parser in the terminal with some test data:</p>
+<details class="note">
+<summary>Running the parser</summary>
+<p>Let's see how to test our implementation within a Jupyter notebook, which will allow us to decouple the parsing from the normalization steps. First, from the terminal, install ipykernel in your environment, create a corresponding Jupyter kernel, and lauch a notebook:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>pip<span class="w"> </span>install<span class="w"> </span>ipykernel
+<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>python<span class="w"> </span>-m<span class="w"> </span>ipykernel<span class="w"> </span>install<span class="w"> </span>--user<span class="w"> </span>--name<span class="o">=</span>vasp-plugin<span class="w"> </span>--display-name<span class="w"> </span><span class="s2">&quot;vasp-plugin&quot;</span>
+<a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a>jupyter<span class="w"> </span>notebook
+</code></pre></div>
+<p>Open the notebook <code>tests/test_parse.ipynb</code> and select the <code>vasp-plugin</code> kernel in the top right.</p>
+<p>Execute the first 2 cells which follow the template provide in <a href="../parser_plugins/#mainfile-interfacing">Parser Plugins &gt; Mainfile Interfacing &gt; Running your parser</a> for parsing <strong>without</strong> normalization:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">nomad_parser_vasp.parsers.xml_parser</span><span class="w"> </span><span class="kn">import</span> <span class="n">VasprunXMLParser</span>
+<a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">nomad.datamodel</span><span class="w"> </span><span class="kn">import</span> <span class="n">EntryArchive</span>
+<a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a><span class="kn">from</span><span class="w"> </span><span class="nn">nomad.normalizing.metainfo</span><span class="w"> </span><span class="kn">import</span> <span class="n">MetainfoNormalizer</span>
+<a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a><span class="kn">from</span><span class="w"> </span><span class="nn">nomad</span><span class="w"> </span><span class="kn">import</span> <span class="n">utils</span>
+<a id="__codelineno-16-5" name="__codelineno-16-5" href="#__codelineno-16-5"></a><span class="n">logger</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">get_logger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="n">path</span> <span class="o">=</span> <span class="s1">&#39;./data/&#39;</span>
+<a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a><span class="n">p</span> <span class="o">=</span> <span class="n">VasprunXMLParser</span><span class="p">()</span>
+<a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a><span class="n">a</span> <span class="o">=</span> <span class="n">EntryArchive</span><span class="p">()</span>
+<a id="__codelineno-17-4" name="__codelineno-17-4" href="#__codelineno-17-4"></a><span class="n">p</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">path</span> <span class="o">+</span> <span class="s1">&#39;vasprun.xml.relax&#39;</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">)</span>
+</code></pre></div>
+<p>Execute the third cell to examine the archive in dictionary format:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a><span class="n">a</span><span class="o">.</span><span class="n">m_to_dict</span><span class="p">()</span>
+</code></pre></div></p>
+<p>The output should be:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a>{&#39;data&#39;: {&#39;m_def&#39;: &#39;nomad_simulations.schema_packages.general.Simulation&#39;,
+<a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a>&#39;program&#39;: {&#39;name&#39;: &#39;VASP&#39;, &#39;version&#39;: &#39;5.3.2&#39;},
+<a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a>&#39;model_system&#39;: [{&#39;datetime&#39;: &#39;2024-08-15T15:55:41.135408+00:00&#39;,
+<a id="__codelineno-19-4" name="__codelineno-19-4" href="#__codelineno-19-4"></a>    &#39;branch_depth&#39;: 0,
+<a id="__codelineno-19-5" name="__codelineno-19-5" href="#__codelineno-19-5"></a>    &#39;cell&#39;: [{&#39;m_def&#39;: &#39;nomad_simulations.schema_packages.model_system.AtomicCell&#39;,
+<a id="__codelineno-19-6" name="__codelineno-19-6" href="#__codelineno-19-6"></a>    &#39;name&#39;: &#39;AtomicCell&#39;,
+<a id="__codelineno-19-7" name="__codelineno-19-7" href="#__codelineno-19-7"></a>    &#39;positions&#39;: [[0.0, 0.0, 0.0], [0.500001, 0.500001, 0.500001]],
+<a id="__codelineno-19-8" name="__codelineno-19-8" href="#__codelineno-19-8"></a>    &#39;periodic_boundary_conditions&#39;: [False, False, False]}]}],
+<a id="__codelineno-19-9" name="__codelineno-19-9" href="#__codelineno-19-9"></a>&#39;model_method&#39;: [{&#39;m_def&#39;: &#39;nomad_simulations.schema_packages.model_method.DFT&#39;,
+<a id="__codelineno-19-10" name="__codelineno-19-10" href="#__codelineno-19-10"></a>    &#39;xc_functionals&#39;: [{&#39;libxc_name&#39;: &#39;PE&#39;}]}]},
+<a id="__codelineno-19-11" name="__codelineno-19-11" href="#__codelineno-19-11"></a>&#39;results&#39;: {&#39;eln&#39;: {&#39;sections&#39;: [&#39;ModelSystem&#39;]}}}
+</code></pre></div></p>
+</details>
+<p>Now take another look at the next section of the <code>VASPXMLParser.parse()</code> code in your branch. You will find that 3 energy quantities have been extracted from the xml file and placed into variables with the appropriate units assigned:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a><span class="c1">#####################################################</span>
+<a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a><span class="c1"># Get the energy data from the raw simulation files #</span>
+<a id="__codelineno-20-3" name="__codelineno-20-3" href="#__codelineno-20-3"></a><span class="c1">#####################################################</span>
+<a id="__codelineno-20-4" name="__codelineno-20-4" href="#__codelineno-20-4"></a><span class="n">total_energy</span> <span class="o">=</span> <span class="n">xml_get</span><span class="p">(</span><span class="s2">&quot;i&quot;</span><span class="p">,</span> <span class="nb">slice</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+<a id="__codelineno-20-5" name="__codelineno-20-5" href="#__codelineno-20-5"></a><span class="n">total_energy</span> <span class="o">=</span> <span class="n">total_energy</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">eV</span> <span class="k">if</span> <span class="n">total_energy</span> <span class="k">else</span> <span class="kc">None</span>
+<a id="__codelineno-20-6" name="__codelineno-20-6" href="#__codelineno-20-6"></a><span class="n">hartreedc</span> <span class="o">=</span> <span class="n">xml_get</span><span class="p">(</span><span class="s2">&quot;i&quot;</span><span class="p">,</span> <span class="nb">slice</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+<a id="__codelineno-20-7" name="__codelineno-20-7" href="#__codelineno-20-7"></a><span class="n">hartreedc</span> <span class="o">=</span> <span class="n">hartreedc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">eV</span> <span class="k">if</span> <span class="n">hartreedc</span> <span class="k">else</span> <span class="kc">None</span>
+<a id="__codelineno-20-8" name="__codelineno-20-8" href="#__codelineno-20-8"></a><span class="n">xcdc</span> <span class="o">=</span> <span class="n">xml_get</span><span class="p">(</span><span class="s2">&quot;i&quot;</span><span class="p">,</span> <span class="nb">slice</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+<a id="__codelineno-20-9" name="__codelineno-20-9" href="#__codelineno-20-9"></a><span class="n">xcdc</span> <span class="o">=</span> <span class="n">xcdc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">eV</span> <span class="k">if</span> <span class="n">xcdc</span> <span class="k">else</span> <span class="kc">None</span>
+</code></pre></div>
+<p>There already exists a section for total energy within <code>nomad-simulations</code>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a><span class="k">class</span><span class="w"> </span><span class="nc">BaseEnergy</span><span class="p">(</span><span class="n">PhysicalProperty</span><span class="p">):</span>
+<a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<a id="__codelineno-21-3" name="__codelineno-21-3" href="#__codelineno-21-3"></a><span class="sd">    Abstract class used to define a common `value` quantity with the appropriate units</span>
+<a id="__codelineno-21-4" name="__codelineno-21-4" href="#__codelineno-21-4"></a><span class="sd">    for different types of energies, which avoids repeating the definitions for each</span>
+<a id="__codelineno-21-5" name="__codelineno-21-5" href="#__codelineno-21-5"></a><span class="sd">    energy class.</span>
+<a id="__codelineno-21-6" name="__codelineno-21-6" href="#__codelineno-21-6"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-21-7" name="__codelineno-21-7" href="#__codelineno-21-7"></a>
+<a id="__codelineno-21-8" name="__codelineno-21-8" href="#__codelineno-21-8"></a>    <span class="n">value</span> <span class="o">=</span> <span class="n">Quantity</span><span class="p">(</span>
+<a id="__codelineno-21-9" name="__codelineno-21-9" href="#__codelineno-21-9"></a>        <span class="nb">type</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">,</span>
+<a id="__codelineno-21-10" name="__codelineno-21-10" href="#__codelineno-21-10"></a>        <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;joule&#39;</span><span class="p">,</span>
+<a id="__codelineno-21-11" name="__codelineno-21-11" href="#__codelineno-21-11"></a>        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;&quot;&quot;</span>
+<a id="__codelineno-21-12" name="__codelineno-21-12" href="#__codelineno-21-12"></a><span class="s2">        &quot;&quot;&quot;</span><span class="p">,</span>
+<a id="__codelineno-21-13" name="__codelineno-21-13" href="#__codelineno-21-13"></a>    <span class="p">)</span>
+<a id="__codelineno-21-14" name="__codelineno-21-14" href="#__codelineno-21-14"></a>
+<a id="__codelineno-21-15" name="__codelineno-21-15" href="#__codelineno-21-15"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">normalize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">archive</span><span class="p">:</span> <span class="s1">&#39;EntryArchive&#39;</span><span class="p">,</span> <span class="n">logger</span><span class="p">:</span> <span class="s1">&#39;BoundLogger&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-21-16" name="__codelineno-21-16" href="#__codelineno-21-16"></a>        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">normalize</span><span class="p">(</span><span class="n">archive</span><span class="p">,</span> <span class="n">logger</span><span class="p">)</span>
+<a id="__codelineno-21-17" name="__codelineno-21-17" href="#__codelineno-21-17"></a>
+<a id="__codelineno-21-18" name="__codelineno-21-18" href="#__codelineno-21-18"></a><span class="k">class</span><span class="w"> </span><span class="nc">EnergyContribution</span><span class="p">(</span><span class="n">BaseEnergy</span><span class="p">,</span> <span class="n">PropertyContribution</span><span class="p">):</span>
+<a id="__codelineno-21-19" name="__codelineno-21-19" href="#__codelineno-21-19"></a>    <span class="o">...</span>
+<a id="__codelineno-21-20" name="__codelineno-21-20" href="#__codelineno-21-20"></a>
+<a id="__codelineno-21-21" name="__codelineno-21-21" href="#__codelineno-21-21"></a><span class="k">class</span><span class="w"> </span><span class="nc">TotalEnergy</span><span class="p">(</span><span class="n">BaseEnergy</span><span class="p">):</span>
+<a id="__codelineno-21-22" name="__codelineno-21-22" href="#__codelineno-21-22"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<a id="__codelineno-21-23" name="__codelineno-21-23" href="#__codelineno-21-23"></a><span class="sd">    The total energy of a system. `contributions` specify individual energetic</span>
+<a id="__codelineno-21-24" name="__codelineno-21-24" href="#__codelineno-21-24"></a><span class="sd">    contributions to the `TotalEnergy`.</span>
+<a id="__codelineno-21-25" name="__codelineno-21-25" href="#__codelineno-21-25"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-21-26" name="__codelineno-21-26" href="#__codelineno-21-26"></a>
+<a id="__codelineno-21-27" name="__codelineno-21-27" href="#__codelineno-21-27"></a>    <span class="n">contributions</span> <span class="o">=</span> <span class="n">SubSection</span><span class="p">(</span><span class="n">sub_section</span><span class="o">=</span><span class="n">EnergyContribution</span><span class="o">.</span><span class="n">m_def</span><span class="p">,</span> <span class="n">repeats</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<a id="__codelineno-21-28" name="__codelineno-21-28" href="#__codelineno-21-28"></a>
+<a id="__codelineno-21-29" name="__codelineno-21-29" href="#__codelineno-21-29"></a>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<a id="__codelineno-21-30" name="__codelineno-21-30" href="#__codelineno-21-30"></a>        <span class="bp">self</span><span class="p">,</span> <span class="n">m_def</span><span class="p">:</span> <span class="s1">&#39;Section&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">m_context</span><span class="p">:</span> <span class="s1">&#39;Context&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+<a id="__codelineno-21-31" name="__codelineno-21-31" href="#__codelineno-21-31"></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-21-32" name="__codelineno-21-32" href="#__codelineno-21-32"></a>        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">m_def</span><span class="p">,</span> <span class="n">m_context</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+<a id="__codelineno-21-33" name="__codelineno-21-33" href="#__codelineno-21-33"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">m_def</span><span class="o">.</span><span class="n">name</span>
+<a id="__codelineno-21-34" name="__codelineno-21-34" href="#__codelineno-21-34"></a>
+<a id="__codelineno-21-35" name="__codelineno-21-35" href="#__codelineno-21-35"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">normalize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">archive</span><span class="p">:</span> <span class="s1">&#39;EntryArchive&#39;</span><span class="p">,</span> <span class="n">logger</span><span class="p">:</span> <span class="s1">&#39;BoundLogger&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-21-36" name="__codelineno-21-36" href="#__codelineno-21-36"></a>        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">normalize</span><span class="p">(</span><span class="n">archive</span><span class="p">,</span> <span class="n">logger</span><span class="p">)</span>
+</code></pre></div>
+<p>The <code>BaseEnergy</code> section simply defines a <code>PhysicalProperty</code> with the appropriate units for its <code>value</code>. Total energy also contains a subsection <code>contributions</code> where other energies contributing to the total energy can be stored. These contribution are of type <code>EnergyContributions</code>. In short, this is a section that enables the linking of these energy contributions to specific components of the corresponding method. However, this is not important for the present example.</p>
+<div class="admonition abstract">
+<p class="admonition-title">Assignment 4.4</p>
+<p>The parsed hartreedc and xcdc energies are both classified as "double-counting energies". Add 3 new sections in <code>schema_packages/vasp_parser_schema.py</code>: one for each of the parsed energies and then an additional abstract class that each of these energy sections inherits from.</p>
+</div>
+<details class="success">
+<summary>Solution 4.4</summary>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">nomad_simulations</span>
+<a id="__codelineno-22-2" name="__codelineno-22-2" href="#__codelineno-22-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">nomad.metainfo</span><span class="w"> </span><span class="kn">import</span> <span class="n">MEnum</span><span class="p">,</span> <span class="n">Quantity</span>
+<a id="__codelineno-22-3" name="__codelineno-22-3" href="#__codelineno-22-3"></a><span class="kn">from</span><span class="w"> </span><span class="nn">nomad_simulations.schema_packages.properties.energies</span><span class="w"> </span><span class="kn">import</span> <span class="n">EnergyContribution</span>
+<a id="__codelineno-22-4" name="__codelineno-22-4" href="#__codelineno-22-4"></a>
+<a id="__codelineno-22-5" name="__codelineno-22-5" href="#__codelineno-22-5"></a><span class="k">class</span><span class="w"> </span><span class="nc">DoubleCountingEnergy</span><span class="p">(</span><span class="n">EnergyContribution</span><span class="p">):</span>
+<a id="__codelineno-22-6" name="__codelineno-22-6" href="#__codelineno-22-6"></a>    <span class="nb">type</span> <span class="o">=</span> <span class="n">Quantity</span><span class="p">(</span>
+<a id="__codelineno-22-7" name="__codelineno-22-7" href="#__codelineno-22-7"></a>        <span class="nb">type</span><span class="o">=</span><span class="n">MEnum</span><span class="p">(</span><span class="s1">&#39;double_counting&#39;</span><span class="p">),</span>
+<a id="__codelineno-22-8" name="__codelineno-22-8" href="#__codelineno-22-8"></a>    <span class="p">)</span>
+<a id="__codelineno-22-9" name="__codelineno-22-9" href="#__codelineno-22-9"></a>
+<a id="__codelineno-22-10" name="__codelineno-22-10" href="#__codelineno-22-10"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">normalize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">archive</span><span class="p">:</span> <span class="s1">&#39;EntryArchive&#39;</span><span class="p">,</span> <span class="n">logger</span><span class="p">:</span> <span class="s1">&#39;BoundLogger&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-22-11" name="__codelineno-22-11" href="#__codelineno-22-11"></a>        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">normalize</span><span class="p">(</span><span class="n">archive</span><span class="p">,</span> <span class="n">logger</span><span class="p">)</span>
+<a id="__codelineno-22-12" name="__codelineno-22-12" href="#__codelineno-22-12"></a>
+<a id="__codelineno-22-13" name="__codelineno-22-13" href="#__codelineno-22-13"></a>        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="p">:</span>
+<a id="__codelineno-22-14" name="__codelineno-22-14" href="#__codelineno-22-14"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="s1">&#39;double_counting&#39;</span>
+<a id="__codelineno-22-15" name="__codelineno-22-15" href="#__codelineno-22-15"></a>
+<a id="__codelineno-22-16" name="__codelineno-22-16" href="#__codelineno-22-16"></a>
+<a id="__codelineno-22-17" name="__codelineno-22-17" href="#__codelineno-22-17"></a><span class="k">class</span><span class="w"> </span><span class="nc">HartreeDCEnergy</span><span class="p">(</span><span class="n">DoubleCountingEnergy</span><span class="p">):</span>
+<a id="__codelineno-22-18" name="__codelineno-22-18" href="#__codelineno-22-18"></a>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<a id="__codelineno-22-19" name="__codelineno-22-19" href="#__codelineno-22-19"></a>        <span class="bp">self</span><span class="p">,</span> <span class="n">m_def</span><span class="p">:</span> <span class="s1">&#39;Section&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">m_context</span><span class="p">:</span> <span class="s1">&#39;Context&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+<a id="__codelineno-22-20" name="__codelineno-22-20" href="#__codelineno-22-20"></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-22-21" name="__codelineno-22-21" href="#__codelineno-22-21"></a>        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">m_def</span><span class="p">,</span> <span class="n">m_context</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+<a id="__codelineno-22-22" name="__codelineno-22-22" href="#__codelineno-22-22"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">m_def</span><span class="o">.</span><span class="n">name</span>
+<a id="__codelineno-22-23" name="__codelineno-22-23" href="#__codelineno-22-23"></a>
+<a id="__codelineno-22-24" name="__codelineno-22-24" href="#__codelineno-22-24"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">normalize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">archive</span><span class="p">:</span> <span class="s1">&#39;EntryArchive&#39;</span><span class="p">,</span> <span class="n">logger</span><span class="p">:</span> <span class="s1">&#39;BoundLogger&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-22-25" name="__codelineno-22-25" href="#__codelineno-22-25"></a>        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">normalize</span><span class="p">(</span><span class="n">archive</span><span class="p">,</span> <span class="n">logger</span><span class="p">)</span>
+<a id="__codelineno-22-26" name="__codelineno-22-26" href="#__codelineno-22-26"></a>
+<a id="__codelineno-22-27" name="__codelineno-22-27" href="#__codelineno-22-27"></a>
+<a id="__codelineno-22-28" name="__codelineno-22-28" href="#__codelineno-22-28"></a><span class="k">class</span><span class="w"> </span><span class="nc">XCdcEnergy</span><span class="p">(</span><span class="n">DoubleCountingEnergy</span><span class="p">):</span>
+<a id="__codelineno-22-29" name="__codelineno-22-29" href="#__codelineno-22-29"></a>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<a id="__codelineno-22-30" name="__codelineno-22-30" href="#__codelineno-22-30"></a>        <span class="bp">self</span><span class="p">,</span> <span class="n">m_def</span><span class="p">:</span> <span class="s1">&#39;Section&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">m_context</span><span class="p">:</span> <span class="s1">&#39;Context&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+<a id="__codelineno-22-31" name="__codelineno-22-31" href="#__codelineno-22-31"></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-22-32" name="__codelineno-22-32" href="#__codelineno-22-32"></a>        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">m_def</span><span class="p">,</span> <span class="n">m_context</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+<a id="__codelineno-22-33" name="__codelineno-22-33" href="#__codelineno-22-33"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">m_def</span><span class="o">.</span><span class="n">name</span>
+<a id="__codelineno-22-34" name="__codelineno-22-34" href="#__codelineno-22-34"></a>
+<a id="__codelineno-22-35" name="__codelineno-22-35" href="#__codelineno-22-35"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">normalize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">archive</span><span class="p">:</span> <span class="s1">&#39;EntryArchive&#39;</span><span class="p">,</span> <span class="n">logger</span><span class="p">:</span> <span class="s1">&#39;BoundLogger&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-22-36" name="__codelineno-22-36" href="#__codelineno-22-36"></a>        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">normalize</span><span class="p">(</span><span class="n">archive</span><span class="p">,</span> <span class="n">logger</span><span class="p">)</span>
+</code></pre></div>
+<p><code>DoubleCountingEnergy</code> inherits from <code>EnergyContribution</code> so that we can add each of the parsed energies to <code>total_energy.contributions</code>. Then each of the newly defined specific energy sections inherits from <code>DoubleCountingEnergy</code>. The <code>__init__</code> function sets the name of each contribution section to the name of the corresponding class.</p>
+<p>We can go one step further and utilize the normalization function of the <code>DoubleCountingEnergy</code> section to set the <code>type</code> quantity of the <code>PhysicalProperty()</code> section as a characterization for each of the child sections. We have also overwritten the <code>type</code> quantity to be an <code>MEnum('double_counting')</code>, which will trigger an error to be thrown if the parser sets <code>energy_class.type</code> to anything other than <code>double_counting</code> for any section that inherits from <code>DoubleCountingEnergy</code>.</p>
+<p>NOTE: In practice we also need to add detailed descriptions for each section!</p>
+</details>
+<p>The normalization function within each schema section definition allows us to perform consistent operations when particular sections are instantiated or particular quantities are set. This removes complexity from individual parsers and ensures consistency and, thus, interoperability.</p>
+<p>Before actually populating these new energy contributions in the parser, let's consider one additional normalization functionality.</p>
+<div class="admonition abstract">
+<p class="admonition-title">Assignment 4.5</p>
+<p>Implement a new section for total energy that extends the <code>nomad-simulations</code>' <code>TotalEnergy()</code> section to include a normalization function that: 1. calculates the difference between the total energy and each of its contributions, and 2. stores this remainder contribution as an additional contribution to the total energy called <code>UnknownEnergy</code>. Don't forget to create the appropriate section for this new type of energy contribution.</p>
+<p>Challenge: Make sure your function covers the following 3 cases: 1. the <code>UnknownEnergy</code> contribution is instantiated and its value populated within the parser, 2. the <code>UnknownEnergy</code> class is instantiated in the parser but no value is give, and 3. no <code>UnknownEnergy</code> contribution is instantiated during parsing.</p>
+</div>
+<details class="success">
+<summary>Solution 4.5</summary>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a><span class="k">class</span><span class="w"> </span><span class="nc">UnknownEnergy</span><span class="p">(</span><span class="n">EnergyContribution</span><span class="p">):</span>
+<a id="__codelineno-23-2" name="__codelineno-23-2" href="#__codelineno-23-2"></a>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<a id="__codelineno-23-3" name="__codelineno-23-3" href="#__codelineno-23-3"></a>        <span class="bp">self</span><span class="p">,</span> <span class="n">m_def</span><span class="p">:</span> <span class="s1">&#39;Section&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">m_context</span><span class="p">:</span> <span class="s1">&#39;Context&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+<a id="__codelineno-23-4" name="__codelineno-23-4" href="#__codelineno-23-4"></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-23-5" name="__codelineno-23-5" href="#__codelineno-23-5"></a>        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">m_def</span><span class="p">,</span> <span class="n">m_context</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+<a id="__codelineno-23-6" name="__codelineno-23-6" href="#__codelineno-23-6"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">m_def</span><span class="o">.</span><span class="n">name</span>
+<a id="__codelineno-23-7" name="__codelineno-23-7" href="#__codelineno-23-7"></a>
+<a id="__codelineno-23-8" name="__codelineno-23-8" href="#__codelineno-23-8"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">normalize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">archive</span><span class="p">:</span> <span class="s1">&#39;EntryArchive&#39;</span><span class="p">,</span> <span class="n">logger</span><span class="p">:</span> <span class="s1">&#39;BoundLogger&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-23-9" name="__codelineno-23-9" href="#__codelineno-23-9"></a>        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">normalize</span><span class="p">(</span><span class="n">archive</span><span class="p">,</span> <span class="n">logger</span><span class="p">)</span>
+<a id="__codelineno-23-10" name="__codelineno-23-10" href="#__codelineno-23-10"></a>
+<a id="__codelineno-23-11" name="__codelineno-23-11" href="#__codelineno-23-11"></a>
+<a id="__codelineno-23-12" name="__codelineno-23-12" href="#__codelineno-23-12"></a><span class="k">class</span><span class="w"> </span><span class="nc">TotalEnergy</span><span class="p">(</span><span class="n">nomad_simulations</span><span class="o">.</span><span class="n">schema_packages</span><span class="o">.</span><span class="n">properties</span><span class="o">.</span><span class="n">TotalEnergy</span><span class="p">):</span>
+<a id="__codelineno-23-13" name="__codelineno-23-13" href="#__codelineno-23-13"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">normalize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">archive</span><span class="p">:</span> <span class="s1">&#39;EntryArchive&#39;</span><span class="p">,</span> <span class="n">logger</span><span class="p">:</span> <span class="s1">&#39;BoundLogger&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-23-14" name="__codelineno-23-14" href="#__codelineno-23-14"></a>        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">normalize</span><span class="p">(</span><span class="n">archive</span><span class="p">,</span> <span class="n">logger</span><span class="p">)</span>
+<a id="__codelineno-23-15" name="__codelineno-23-15" href="#__codelineno-23-15"></a>
+<a id="__codelineno-23-16" name="__codelineno-23-16" href="#__codelineno-23-16"></a>        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+<a id="__codelineno-23-17" name="__codelineno-23-17" href="#__codelineno-23-17"></a>            <span class="k">return</span>
+<a id="__codelineno-23-18" name="__codelineno-23-18" href="#__codelineno-23-18"></a>        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">contributions</span><span class="p">:</span>
+<a id="__codelineno-23-19" name="__codelineno-23-19" href="#__codelineno-23-19"></a>            <span class="k">return</span>
+<a id="__codelineno-23-20" name="__codelineno-23-20" href="#__codelineno-23-20"></a>
+<a id="__codelineno-23-21" name="__codelineno-23-21" href="#__codelineno-23-21"></a>        <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span>
+<a id="__codelineno-23-22" name="__codelineno-23-22" href="#__codelineno-23-22"></a>        <span class="n">unknown_exists</span> <span class="o">=</span> <span class="kc">False</span>
+<a id="__codelineno-23-23" name="__codelineno-23-23" href="#__codelineno-23-23"></a>        <span class="n">unknown_has_value</span> <span class="o">=</span> <span class="kc">False</span>
+<a id="__codelineno-23-24" name="__codelineno-23-24" href="#__codelineno-23-24"></a>        <span class="n">i_unknown</span> <span class="o">=</span> <span class="kc">None</span>
+<a id="__codelineno-23-25" name="__codelineno-23-25" href="#__codelineno-23-25"></a>        <span class="k">for</span> <span class="n">i_cont</span><span class="p">,</span> <span class="n">contribution</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">contributions</span><span class="p">):</span>
+<a id="__codelineno-23-26" name="__codelineno-23-26" href="#__codelineno-23-26"></a>            <span class="k">if</span> <span class="n">contribution</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;UnknownEnergy&#39;</span><span class="p">:</span>
+<a id="__codelineno-23-27" name="__codelineno-23-27" href="#__codelineno-23-27"></a>                <span class="n">unknown_exists</span> <span class="o">=</span> <span class="kc">True</span>
+<a id="__codelineno-23-28" name="__codelineno-23-28" href="#__codelineno-23-28"></a>                <span class="n">i_unknown</span> <span class="o">=</span> <span class="n">i_cont</span>
+<a id="__codelineno-23-29" name="__codelineno-23-29" href="#__codelineno-23-29"></a>                <span class="n">unknown_has_value</span> <span class="o">=</span> <span class="kc">True</span> <span class="k">if</span> <span class="n">contribution</span><span class="o">.</span><span class="n">value</span> <span class="k">else</span> <span class="kc">False</span>
+<a id="__codelineno-23-30" name="__codelineno-23-30" href="#__codelineno-23-30"></a>
+<a id="__codelineno-23-31" name="__codelineno-23-31" href="#__codelineno-23-31"></a>            <span class="k">if</span> <span class="ow">not</span> <span class="n">contribution</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+<a id="__codelineno-23-32" name="__codelineno-23-32" href="#__codelineno-23-32"></a>                <span class="k">continue</span>
+<a id="__codelineno-23-33" name="__codelineno-23-33" href="#__codelineno-23-33"></a>
+<a id="__codelineno-23-34" name="__codelineno-23-34" href="#__codelineno-23-34"></a>            <span class="n">value</span> <span class="o">-=</span> <span class="n">contribution</span><span class="o">.</span><span class="n">value</span>
+<a id="__codelineno-23-35" name="__codelineno-23-35" href="#__codelineno-23-35"></a>
+<a id="__codelineno-23-36" name="__codelineno-23-36" href="#__codelineno-23-36"></a>        <span class="k">if</span> <span class="n">unknown_exists</span><span class="p">:</span>
+<a id="__codelineno-23-37" name="__codelineno-23-37" href="#__codelineno-23-37"></a>            <span class="k">if</span> <span class="ow">not</span> <span class="n">unknown_has_value</span><span class="p">:</span>
+<a id="__codelineno-23-38" name="__codelineno-23-38" href="#__codelineno-23-38"></a>                <span class="bp">self</span><span class="o">.</span><span class="n">contributions</span><span class="p">[</span><span class="n">i_unknown</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">value</span>
+<a id="__codelineno-23-39" name="__codelineno-23-39" href="#__codelineno-23-39"></a>        <span class="k">else</span><span class="p">:</span>
+<a id="__codelineno-23-40" name="__codelineno-23-40" href="#__codelineno-23-40"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">contributions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">UnknownEnergy</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="n">value</span><span class="p">))</span>
+<a id="__codelineno-23-41" name="__codelineno-23-41" href="#__codelineno-23-41"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">contributions</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">normalize</span><span class="p">(</span><span class="n">archive</span><span class="p">,</span> <span class="n">logger</span><span class="p">)</span>
+</code></pre></div>
+</details>
+<div class="admonition abstract">
+<p class="admonition-title">Assignment 4.6</p>
+<p>Now write the appropriate code for the <code>VasprunXMLParser()</code> to populate the energies.</p>
+</div>
+<details class="success">
+<summary>Solution 4.6</summary>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">nomad_simulations.schema_packages.outputs</span><span class="w"> </span><span class="kn">import</span> <span class="n">Outputs</span>
+<a id="__codelineno-24-2" name="__codelineno-24-2" href="#__codelineno-24-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">nomad_parser_vasp.schema_packages.vasp_schema</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+<a id="__codelineno-24-3" name="__codelineno-24-3" href="#__codelineno-24-3"></a>    <span class="n">HartreeDCEnergy</span><span class="p">,</span>
+<a id="__codelineno-24-4" name="__codelineno-24-4" href="#__codelineno-24-4"></a>    <span class="n">TotalEnergy</span><span class="p">,</span>
+<a id="__codelineno-24-5" name="__codelineno-24-5" href="#__codelineno-24-5"></a>    <span class="n">XCdcEnergy</span><span class="p">,</span>
+<a id="__codelineno-24-6" name="__codelineno-24-6" href="#__codelineno-24-6"></a><span class="p">)</span>
+<a id="__codelineno-24-7" name="__codelineno-24-7" href="#__codelineno-24-7"></a>
+<a id="__codelineno-24-8" name="__codelineno-24-8" href="#__codelineno-24-8"></a><span class="k">class</span><span class="w"> </span><span class="nc">VasprunXMLParser</span><span class="p">(</span><span class="n">MatchingParser</span><span class="p">):</span>
+<a id="__codelineno-24-9" name="__codelineno-24-9" href="#__codelineno-24-9"></a>    <span class="n">convert_xc</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+<a id="__codelineno-24-10" name="__codelineno-24-10" href="#__codelineno-24-10"></a>        <span class="s1">&#39;--&#39;</span><span class="p">:</span> <span class="s1">&#39;GGA_XC_PBE&#39;</span><span class="p">,</span>
+<a id="__codelineno-24-11" name="__codelineno-24-11" href="#__codelineno-24-11"></a>        <span class="s1">&#39;PE&#39;</span><span class="p">:</span> <span class="s1">&#39;GGA_XC_PBE&#39;</span><span class="p">,</span>
+<a id="__codelineno-24-12" name="__codelineno-24-12" href="#__codelineno-24-12"></a>    <span class="p">}</span>
+<a id="__codelineno-24-13" name="__codelineno-24-13" href="#__codelineno-24-13"></a>
+<a id="__codelineno-24-14" name="__codelineno-24-14" href="#__codelineno-24-14"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">parse</span><span class="p">(</span>
+<a id="__codelineno-24-15" name="__codelineno-24-15" href="#__codelineno-24-15"></a>        <span class="bp">self</span><span class="p">,</span>
+<a id="__codelineno-24-16" name="__codelineno-24-16" href="#__codelineno-24-16"></a>        <span class="n">mainfile</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+<a id="__codelineno-24-17" name="__codelineno-24-17" href="#__codelineno-24-17"></a>        <span class="n">archive</span><span class="p">:</span> <span class="n">EntryArchive</span><span class="p">,</span>
+<a id="__codelineno-24-18" name="__codelineno-24-18" href="#__codelineno-24-18"></a>        <span class="n">logger</span><span class="p">:</span> <span class="n">BoundLogger</span><span class="p">,</span>
+<a id="__codelineno-24-19" name="__codelineno-24-19" href="#__codelineno-24-19"></a>        <span class="n">child_archives</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">EntryArchive</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-24-20" name="__codelineno-24-20" href="#__codelineno-24-20"></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-24-21" name="__codelineno-24-21" href="#__codelineno-24-21"></a>        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;VasprunXMLParser.parse&#39;</span><span class="p">,</span> <span class="n">parameter</span><span class="o">=</span><span class="n">configuration</span><span class="o">.</span><span class="n">parameter</span><span class="p">)</span>
+<a id="__codelineno-24-22" name="__codelineno-24-22" href="#__codelineno-24-22"></a>        <span class="n">xml_reader</span> <span class="o">=</span> <span class="n">XMLParser</span><span class="p">(</span><span class="n">mainfile</span><span class="o">=</span><span class="n">mainfile</span><span class="p">)</span>  <span class="c1"># XPath syntax</span>
+<a id="__codelineno-24-23" name="__codelineno-24-23" href="#__codelineno-24-23"></a>
+<a id="__codelineno-24-24" name="__codelineno-24-24" href="#__codelineno-24-24"></a>        <span class="k">def</span><span class="w"> </span><span class="nf">xml_get</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">slicer</span><span class="o">=</span><span class="nb">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">fallback</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<a id="__codelineno-24-25" name="__codelineno-24-25" href="#__codelineno-24-25"></a>            <span class="k">try</span><span class="p">:</span>
+<a id="__codelineno-24-26" name="__codelineno-24-26" href="#__codelineno-24-26"></a>                <span class="k">return</span> <span class="n">xml_reader</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="n">path</span><span class="p">][</span><span class="n">slicer</span><span class="p">]</span>
+<a id="__codelineno-24-27" name="__codelineno-24-27" href="#__codelineno-24-27"></a>            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+<a id="__codelineno-24-28" name="__codelineno-24-28" href="#__codelineno-24-28"></a>                <span class="k">return</span> <span class="n">fallback</span>
+<a id="__codelineno-24-29" name="__codelineno-24-29" href="#__codelineno-24-29"></a>
+<a id="__codelineno-24-30" name="__codelineno-24-30" href="#__codelineno-24-30"></a>        <span class="o">...</span>
+<a id="__codelineno-24-31" name="__codelineno-24-31" href="#__codelineno-24-31"></a>        <span class="o">...</span>
+<a id="__codelineno-24-32" name="__codelineno-24-32" href="#__codelineno-24-32"></a>
+<a id="__codelineno-24-33" name="__codelineno-24-33" href="#__codelineno-24-33"></a>    <span class="c1">####################################################</span>
+<a id="__codelineno-24-34" name="__codelineno-24-34" href="#__codelineno-24-34"></a>    <span class="c1"># Create the outputs section, populate it with the #</span>
+<a id="__codelineno-24-35" name="__codelineno-24-35" href="#__codelineno-24-35"></a>    <span class="c1"># parsed energies, and add it to the archive       #</span>
+<a id="__codelineno-24-36" name="__codelineno-24-36" href="#__codelineno-24-36"></a>    <span class="c1">####################################################</span>
+<a id="__codelineno-24-37" name="__codelineno-24-37" href="#__codelineno-24-37"></a>    <span class="n">output</span> <span class="o">=</span> <span class="n">Outputs</span><span class="p">()</span>
+<a id="__codelineno-24-38" name="__codelineno-24-38" href="#__codelineno-24-38"></a>    <span class="n">archive</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">outputs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">output</span><span class="p">)</span>
+<a id="__codelineno-24-39" name="__codelineno-24-39" href="#__codelineno-24-39"></a>    <span class="n">output</span><span class="o">.</span><span class="n">total_energy</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">TotalEnergy</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="n">total_energy</span><span class="p">))</span>
+<a id="__codelineno-24-40" name="__codelineno-24-40" href="#__codelineno-24-40"></a>    <span class="n">output</span><span class="o">.</span><span class="n">total_energy</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">contributions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">HartreeDCEnergy</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="n">hartreedc</span><span class="p">))</span>
+<a id="__codelineno-24-41" name="__codelineno-24-41" href="#__codelineno-24-41"></a>    <span class="n">output</span><span class="o">.</span><span class="n">total_energy</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">contributions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">XCdcEnergy</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="n">xcdc</span><span class="p">))</span>
+</code></pre></div>
+<p>Notice that although <code>TotalEnergy()</code> exists within <code>nomad-simulations</code>, we need to import this class from the newly created schema to take advantage of our newly created normalization function.</p>
+</details>
+<p>Now let's test our implementation. Follow the steps under "Running your parser" above, using the test notebook provided (<code>tests/test_parser.ipynb</code>). <strong>Note that you need to restart your kernel every time you make changes to the plugin code.</strong> After successful parsing, check the energy entries within the archive.</p>
+<details class="note">
+<summary>Checking the populated archive</summary>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a><span class="n">total_energy</span> <span class="o">=</span> <span class="n">a</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">outputs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">total_energy</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<a id="__codelineno-25-2" name="__codelineno-25-2" href="#__codelineno-25-2"></a><span class="nb">print</span><span class="p">(</span><span class="n">total_energy</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+<a id="__codelineno-25-3" name="__codelineno-25-3" href="#__codelineno-25-3"></a><span class="nb">print</span><span class="p">(</span><span class="n">total_energy</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+<a id="__codelineno-25-4" name="__codelineno-25-4" href="#__codelineno-25-4"></a><span class="nb">print</span><span class="p">(</span><span class="n">total_energy</span><span class="o">.</span><span class="n">contributions</span><span class="p">)</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a>TotalEnergy
+<a id="__codelineno-26-2" name="__codelineno-26-2" href="#__codelineno-26-2"></a>-1.1442321664199474e-18 joule
+<a id="__codelineno-26-3" name="__codelineno-26-3" href="#__codelineno-26-3"></a>[HartreeDCEnergy:HartreeDCEnergy(name, value), XCdcEnergy:XCdcEnergy(name, value)]
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-27-1" name="__codelineno-27-1" href="#__codelineno-27-1"></a><span class="n">hartreedc</span> <span class="o">=</span> <span class="n">total_energy</span><span class="o">.</span><span class="n">contributions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<a id="__codelineno-27-2" name="__codelineno-27-2" href="#__codelineno-27-2"></a><span class="nb">print</span><span class="p">(</span><span class="n">hartreedc</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+<a id="__codelineno-27-3" name="__codelineno-27-3" href="#__codelineno-27-3"></a><span class="nb">print</span><span class="p">(</span><span class="n">hartreedc</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-28-1" name="__codelineno-28-1" href="#__codelineno-28-1"></a>HartreeDCEnergy
+<a id="__codelineno-28-2" name="__codelineno-28-2" href="#__codelineno-28-2"></a>-6.432015131607956e-17 joule
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-29-1" name="__codelineno-29-1" href="#__codelineno-29-1"></a><span class="n">xcdc</span> <span class="o">=</span> <span class="n">total_energy</span><span class="o">.</span><span class="n">contributions</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+<a id="__codelineno-29-2" name="__codelineno-29-2" href="#__codelineno-29-2"></a><span class="nb">print</span><span class="p">(</span><span class="n">xcdc</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+<a id="__codelineno-29-3" name="__codelineno-29-3" href="#__codelineno-29-3"></a><span class="nb">print</span><span class="p">(</span><span class="n">xcdc</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-30-1" name="__codelineno-30-1" href="#__codelineno-30-1"></a>XCdcEnergy
+<a id="__codelineno-30-2" name="__codelineno-30-2" href="#__codelineno-30-2"></a>-7.660195079365588e-18 joule
+</code></pre></div>
+</details>
+<p>Now, rerun the parsing, followed by schema normalization (i.e., only normalization functions defined within the schema classes are being executed. Higher-level NOMAD normalization is ignored):</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-31-1" name="__codelineno-31-1" href="#__codelineno-31-1"></a><span class="n">path</span> <span class="o">=</span> <span class="s1">&#39;./data/&#39;</span>
+<a id="__codelineno-31-2" name="__codelineno-31-2" href="#__codelineno-31-2"></a><span class="n">p</span> <span class="o">=</span> <span class="n">VasprunXMLParser</span><span class="p">()</span>
+<a id="__codelineno-31-3" name="__codelineno-31-3" href="#__codelineno-31-3"></a><span class="n">a</span> <span class="o">=</span> <span class="n">EntryArchive</span><span class="p">()</span>
+<a id="__codelineno-31-4" name="__codelineno-31-4" href="#__codelineno-31-4"></a><span class="n">p</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">path</span> <span class="o">+</span> <span class="s1">&#39;vasprun.xml.relax&#39;</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">)</span>
+<a id="__codelineno-31-5" name="__codelineno-31-5" href="#__codelineno-31-5"></a>
+<a id="__codelineno-31-6" name="__codelineno-31-6" href="#__codelineno-31-6"></a><span class="n">MetainfoNormalizer</span><span class="p">()</span><span class="o">.</span><span class="n">normalize</span><span class="p">(</span><span class="n">archive</span><span class="o">=</span><span class="n">a</span><span class="p">)</span>
+</code></pre></div>
+<p>NOTE: There will be some messages warning about certain sections not being normalized. This is simply because our parsing was incomplete. Please ignore these.</p>
+<!-- TODO The following example output will need to be replaced eventually since currently variables is not populated when normalization occurs in the parent class -->
+
+<details class="note">
+<summary>Checking the populated archive</summary>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-32-1" name="__codelineno-32-1" href="#__codelineno-32-1"></a><span class="n">total_energy</span> <span class="o">=</span> <span class="n">a</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">outputs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">total_energy</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<a id="__codelineno-32-2" name="__codelineno-32-2" href="#__codelineno-32-2"></a><span class="nb">print</span><span class="p">(</span><span class="n">total_energy</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+<a id="__codelineno-32-3" name="__codelineno-32-3" href="#__codelineno-32-3"></a><span class="nb">print</span><span class="p">(</span><span class="n">total_energy</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+<a id="__codelineno-32-4" name="__codelineno-32-4" href="#__codelineno-32-4"></a><span class="nb">print</span><span class="p">(</span><span class="n">total_energy</span><span class="o">.</span><span class="n">contributions</span><span class="p">)</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-33-1" name="__codelineno-33-1" href="#__codelineno-33-1"></a>TotalEnergy
+<a id="__codelineno-33-2" name="__codelineno-33-2" href="#__codelineno-33-2"></a>-1.1442321664199474e-18 joule
+<a id="__codelineno-33-3" name="__codelineno-33-3" href="#__codelineno-33-3"></a>[HartreeDCEnergy:HartreeDCEnergy(name, type, is_derived, variables, value), XCdcEnergy:XCdcEnergy(name, type, is_derived, variables, value), UnknownEnergy:UnknownEnergy(name, is_derived, value)]
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-34-1" name="__codelineno-34-1" href="#__codelineno-34-1"></a><span class="n">hartreedc</span> <span class="o">=</span> <span class="n">total_energy</span><span class="o">.</span><span class="n">contributions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<a id="__codelineno-34-2" name="__codelineno-34-2" href="#__codelineno-34-2"></a><span class="nb">print</span><span class="p">(</span><span class="n">hartreedc</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+<a id="__codelineno-34-3" name="__codelineno-34-3" href="#__codelineno-34-3"></a><span class="nb">print</span><span class="p">(</span><span class="n">hartreedc</span><span class="o">.</span><span class="n">type</span><span class="p">)</span>
+<a id="__codelineno-34-4" name="__codelineno-34-4" href="#__codelineno-34-4"></a><span class="nb">print</span><span class="p">(</span><span class="n">hartreedc</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-35-1" name="__codelineno-35-1" href="#__codelineno-35-1"></a>HartreeDCEnergy
+<a id="__codelineno-35-2" name="__codelineno-35-2" href="#__codelineno-35-2"></a>double_counting
+<a id="__codelineno-35-3" name="__codelineno-35-3" href="#__codelineno-35-3"></a>-6.432015131607956e-17 joule
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-36-1" name="__codelineno-36-1" href="#__codelineno-36-1"></a><span class="n">xcdc</span> <span class="o">=</span> <span class="n">total_energy</span><span class="o">.</span><span class="n">contributions</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+<a id="__codelineno-36-2" name="__codelineno-36-2" href="#__codelineno-36-2"></a><span class="nb">print</span><span class="p">(</span><span class="n">xcdc</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+<a id="__codelineno-36-3" name="__codelineno-36-3" href="#__codelineno-36-3"></a><span class="nb">print</span><span class="p">(</span><span class="n">xcdc</span><span class="o">.</span><span class="n">type</span><span class="p">)</span>
+<a id="__codelineno-36-4" name="__codelineno-36-4" href="#__codelineno-36-4"></a><span class="nb">print</span><span class="p">(</span><span class="n">xcdc</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-37-1" name="__codelineno-37-1" href="#__codelineno-37-1"></a>XCdcEnergy
+<a id="__codelineno-37-2" name="__codelineno-37-2" href="#__codelineno-37-2"></a>double_counting
+<a id="__codelineno-37-3" name="__codelineno-37-3" href="#__codelineno-37-3"></a>-7.660195079365588e-18 joule
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-38-1" name="__codelineno-38-1" href="#__codelineno-38-1"></a><span class="n">unknown</span> <span class="o">=</span> <span class="n">total_energy</span><span class="o">.</span><span class="n">contributions</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+<a id="__codelineno-38-2" name="__codelineno-38-2" href="#__codelineno-38-2"></a><span class="nb">print</span><span class="p">(</span><span class="n">unknown</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+<a id="__codelineno-38-3" name="__codelineno-38-3" href="#__codelineno-38-3"></a><span class="nb">print</span><span class="p">(</span><span class="n">unknown</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-39-1" name="__codelineno-39-1" href="#__codelineno-39-1"></a>UnknownEnergy
+<a id="__codelineno-39-2" name="__codelineno-39-2" href="#__codelineno-39-2"></a>7.08361142290252e-17 joule
+</code></pre></div>
+<p>Our normalizations worked! We now have additional quantities <code>type</code> defined under our double counting contributions, and we have the new <code>UnknownEnergy</code> contribution.</p>
+</details>
+<p>To make sure that our implementation is robust, we should consider different possible use cases of <code>UnknownEnergy</code>. We have already verified that the normalization works properly if the parser writer does not know about this energy contribution. But what if they see this section in the schema and populate the archive with an instance of the class but no value:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-40-1" name="__codelineno-40-1" href="#__codelineno-40-1"></a><span class="c1"># Case 2: Add UnknownEnergy to contribution list in the parser but without a value</span>
+<a id="__codelineno-40-2" name="__codelineno-40-2" href="#__codelineno-40-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">nomad_parser_vasp.schema_packages.vasp_schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">UnknownEnergy</span>
+<a id="__codelineno-40-3" name="__codelineno-40-3" href="#__codelineno-40-3"></a>
+<a id="__codelineno-40-4" name="__codelineno-40-4" href="#__codelineno-40-4"></a><span class="n">output</span><span class="o">.</span><span class="n">total_energy</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">contributions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">UnknownEnergy</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="kc">None</span><span class="p">))</span>
+<a id="__codelineno-40-5" name="__codelineno-40-5" href="#__codelineno-40-5"></a><span class="c1"># Expected Results: UnknownEnergy value is calculated by the normalizer and placed into this section</span>
+</code></pre></div>
+<details class="note">
+<summary>Checking the populated archive</summary>
+<p>After restarting your notebook kernel and rerunning the parsing and normalization as before:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-41-1" name="__codelineno-41-1" href="#__codelineno-41-1"></a><span class="n">total_energy</span> <span class="o">=</span> <span class="n">a</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">outputs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">total_energy</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<a id="__codelineno-41-2" name="__codelineno-41-2" href="#__codelineno-41-2"></a><span class="nb">print</span><span class="p">(</span><span class="n">total_energy</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+<a id="__codelineno-41-3" name="__codelineno-41-3" href="#__codelineno-41-3"></a><span class="nb">print</span><span class="p">(</span><span class="n">total_energy</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+<a id="__codelineno-41-4" name="__codelineno-41-4" href="#__codelineno-41-4"></a><span class="nb">print</span><span class="p">(</span><span class="n">total_energy</span><span class="o">.</span><span class="n">contributions</span><span class="p">)</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-42-1" name="__codelineno-42-1" href="#__codelineno-42-1"></a>TotalEnergy
+<a id="__codelineno-42-2" name="__codelineno-42-2" href="#__codelineno-42-2"></a>-1.1442321664199474e-18 joule
+<a id="__codelineno-42-3" name="__codelineno-42-3" href="#__codelineno-42-3"></a>[HartreeDCEnergy:HartreeDCEnergy(name, type, is_derived, variables, value), XCdcEnergy:XCdcEnergy(name, type, is_derived, variables, value), UnknownEnergy:UnknownEnergy(name, is_derived, variables, value)]
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-43-1" name="__codelineno-43-1" href="#__codelineno-43-1"></a><span class="n">hartreedc</span> <span class="o">=</span> <span class="n">total_energy</span><span class="o">.</span><span class="n">contributions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<a id="__codelineno-43-2" name="__codelineno-43-2" href="#__codelineno-43-2"></a><span class="nb">print</span><span class="p">(</span><span class="n">hartreedc</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+<a id="__codelineno-43-3" name="__codelineno-43-3" href="#__codelineno-43-3"></a><span class="nb">print</span><span class="p">(</span><span class="n">hartreedc</span><span class="o">.</span><span class="n">type</span><span class="p">)</span>
+<a id="__codelineno-43-4" name="__codelineno-43-4" href="#__codelineno-43-4"></a><span class="nb">print</span><span class="p">(</span><span class="n">hartreedc</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-44-1" name="__codelineno-44-1" href="#__codelineno-44-1"></a>HartreeDCEnergy
+<a id="__codelineno-44-2" name="__codelineno-44-2" href="#__codelineno-44-2"></a>double_counting
+<a id="__codelineno-44-3" name="__codelineno-44-3" href="#__codelineno-44-3"></a>-6.432015131607956e-17 joule
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-45-1" name="__codelineno-45-1" href="#__codelineno-45-1"></a><span class="n">xcdc</span> <span class="o">=</span> <span class="n">total_energy</span><span class="o">.</span><span class="n">contributions</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+<a id="__codelineno-45-2" name="__codelineno-45-2" href="#__codelineno-45-2"></a><span class="nb">print</span><span class="p">(</span><span class="n">xcdc</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+<a id="__codelineno-45-3" name="__codelineno-45-3" href="#__codelineno-45-3"></a><span class="nb">print</span><span class="p">(</span><span class="n">xcdc</span><span class="o">.</span><span class="n">type</span><span class="p">)</span>
+<a id="__codelineno-45-4" name="__codelineno-45-4" href="#__codelineno-45-4"></a><span class="nb">print</span><span class="p">(</span><span class="n">xcdc</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-46-1" name="__codelineno-46-1" href="#__codelineno-46-1"></a>XCdcEnergy
+<a id="__codelineno-46-2" name="__codelineno-46-2" href="#__codelineno-46-2"></a>double_counting
+<a id="__codelineno-46-3" name="__codelineno-46-3" href="#__codelineno-46-3"></a>-7.660195079365588e-18 joule
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-47-1" name="__codelineno-47-1" href="#__codelineno-47-1"></a><span class="n">unknown</span> <span class="o">=</span> <span class="n">total_energy</span><span class="o">.</span><span class="n">contributions</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+<a id="__codelineno-47-2" name="__codelineno-47-2" href="#__codelineno-47-2"></a><span class="nb">print</span><span class="p">(</span><span class="n">unknown</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+<a id="__codelineno-47-3" name="__codelineno-47-3" href="#__codelineno-47-3"></a><span class="nb">print</span><span class="p">(</span><span class="n">unknown</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-48-1" name="__codelineno-48-1" href="#__codelineno-48-1"></a>UnknownEnergy
+<a id="__codelineno-48-2" name="__codelineno-48-2" href="#__codelineno-48-2"></a>7.08361142290252e-17 joule
+</code></pre></div>
+</details>
+<p>Finally, what about the case where the parser developer populates the unknown contribution manually:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-49-1" name="__codelineno-49-1" href="#__codelineno-49-1"></a><span class="c1"># Case 3: Add UnknownEnergy to contribution list in the parser with a value</span>
+<a id="__codelineno-49-2" name="__codelineno-49-2" href="#__codelineno-49-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">nomad_parser_vasp.schema_packages.vasp_schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">UnknownEnergy</span>
+<a id="__codelineno-49-3" name="__codelineno-49-3" href="#__codelineno-49-3"></a>
+<a id="__codelineno-49-4" name="__codelineno-49-4" href="#__codelineno-49-4"></a><span class="n">output</span><span class="o">.</span><span class="n">total_energy</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">contributions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+<a id="__codelineno-49-5" name="__codelineno-49-5" href="#__codelineno-49-5"></a>    <span class="n">UnknownEnergy</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="p">(</span><span class="n">total_energy</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">hartreedc</span> <span class="o">-</span> <span class="n">xcdc</span><span class="p">))</span>
+<a id="__codelineno-49-6" name="__codelineno-49-6" href="#__codelineno-49-6"></a><span class="p">)</span>
+<a id="__codelineno-49-7" name="__codelineno-49-7" href="#__codelineno-49-7"></a><span class="c1"># Expected Results: normalizer does not change the value of UnknownEnergy</span>
+<a id="__codelineno-49-8" name="__codelineno-49-8" href="#__codelineno-49-8"></a><span class="c1"># (for testing purposes we subtract double the hartreedc value)</span>
+</code></pre></div>
+<details class="note">
+<summary>Checking the populated archive</summary>
+<p>Make sure to comment out Case 2 and restart your notebook kernel. After rerunning the parsing and normalization as before:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-50-1" name="__codelineno-50-1" href="#__codelineno-50-1"></a><span class="n">total_energy</span> <span class="o">=</span> <span class="n">a</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">outputs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">total_energy</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<a id="__codelineno-50-2" name="__codelineno-50-2" href="#__codelineno-50-2"></a><span class="nb">print</span><span class="p">(</span><span class="n">total_energy</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+<a id="__codelineno-50-3" name="__codelineno-50-3" href="#__codelineno-50-3"></a><span class="nb">print</span><span class="p">(</span><span class="n">total_energy</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+<a id="__codelineno-50-4" name="__codelineno-50-4" href="#__codelineno-50-4"></a><span class="nb">print</span><span class="p">(</span><span class="n">total_energy</span><span class="o">.</span><span class="n">contributions</span><span class="p">)</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-51-1" name="__codelineno-51-1" href="#__codelineno-51-1"></a>TotalEnergy
+<a id="__codelineno-51-2" name="__codelineno-51-2" href="#__codelineno-51-2"></a>-1.1442321664199474e-18 joule
+<a id="__codelineno-51-3" name="__codelineno-51-3" href="#__codelineno-51-3"></a>[HartreeDCEnergy:HartreeDCEnergy(name, type, is_derived, variables, value), XCdcEnergy:XCdcEnergy(name, type, is_derived, variables, value), UnknownEnergy:UnknownEnergy(name, is_derived, variables, value)]
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-52-1" name="__codelineno-52-1" href="#__codelineno-52-1"></a><span class="n">hartreedc</span> <span class="o">=</span> <span class="n">total_energy</span><span class="o">.</span><span class="n">contributions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<a id="__codelineno-52-2" name="__codelineno-52-2" href="#__codelineno-52-2"></a><span class="nb">print</span><span class="p">(</span><span class="n">hartreedc</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+<a id="__codelineno-52-3" name="__codelineno-52-3" href="#__codelineno-52-3"></a><span class="nb">print</span><span class="p">(</span><span class="n">hartreedc</span><span class="o">.</span><span class="n">type</span><span class="p">)</span>
+<a id="__codelineno-52-4" name="__codelineno-52-4" href="#__codelineno-52-4"></a><span class="nb">print</span><span class="p">(</span><span class="n">hartreedc</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-53-1" name="__codelineno-53-1" href="#__codelineno-53-1"></a>HartreeDCEnergy
+<a id="__codelineno-53-2" name="__codelineno-53-2" href="#__codelineno-53-2"></a>double_counting
+<a id="__codelineno-53-3" name="__codelineno-53-3" href="#__codelineno-53-3"></a>-6.432015131607956e-17 joule
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-54-1" name="__codelineno-54-1" href="#__codelineno-54-1"></a><span class="n">xcdc</span> <span class="o">=</span> <span class="n">total_energy</span><span class="o">.</span><span class="n">contributions</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+<a id="__codelineno-54-2" name="__codelineno-54-2" href="#__codelineno-54-2"></a><span class="nb">print</span><span class="p">(</span><span class="n">xcdc</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+<a id="__codelineno-54-3" name="__codelineno-54-3" href="#__codelineno-54-3"></a><span class="nb">print</span><span class="p">(</span><span class="n">xcdc</span><span class="o">.</span><span class="n">type</span><span class="p">)</span>
+<a id="__codelineno-54-4" name="__codelineno-54-4" href="#__codelineno-54-4"></a><span class="nb">print</span><span class="p">(</span><span class="n">xcdc</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-55-1" name="__codelineno-55-1" href="#__codelineno-55-1"></a>XCdcEnergy
+<a id="__codelineno-55-2" name="__codelineno-55-2" href="#__codelineno-55-2"></a>double_counting
+<a id="__codelineno-55-3" name="__codelineno-55-3" href="#__codelineno-55-3"></a>-7.660195079365588e-18 joule
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-56-1" name="__codelineno-56-1" href="#__codelineno-56-1"></a><span class="n">unknown</span> <span class="o">=</span> <span class="n">total_energy</span><span class="o">.</span><span class="n">contributions</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+<a id="__codelineno-56-2" name="__codelineno-56-2" href="#__codelineno-56-2"></a><span class="nb">print</span><span class="p">(</span><span class="n">unknown</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+<a id="__codelineno-56-3" name="__codelineno-56-3" href="#__codelineno-56-3"></a><span class="nb">print</span><span class="p">(</span><span class="n">unknown</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-57-1" name="__codelineno-57-1" href="#__codelineno-57-1"></a>UnknownEnergy
+<a id="__codelineno-57-2" name="__codelineno-57-2" href="#__codelineno-57-2"></a>1.3515626554510475e-16 joule
+</code></pre></div>
+</details>
+<p>Fully implemented solutions to these exercises and the corresponding results can be found in the plugin repo: <code>src/parsers/xml_parser_all_solutions.py</code>, <code>src/schema_packages/vasp_schema_all_solutions.py</code>, <code>tests/test_parse_all_solutions.pdf</code>.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+        
+          
+          <a href="../parser_plugins/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Part 3 - Parser Plugins">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                Part 3 - Parser Plugins
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../custom_workflows/" class="md-footer__link md-footer__link--next" aria-label="Next: Part 5 - Custom Workflows">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                Part 5 - Custom Workflows
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.instant", "navigation.footer"], "search": "../assets/javascripts/workers/search.7a47a382.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": 0.1}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.e71a0d61.min.js"></script>
+      
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
+      
+        <script src="https://unpkg.com/cytoscape@3.19.1/dist/cytoscape.min.js"></script>
+      
+        <script src="../assets/custom.js"></script>
+      
+        <script src="../javascripts/katex.js"></script>
+      
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.7/katex.min.js"></script>
+      
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.7/contrib/auto-render.min.js"></script>
+      
+    
+  </body>
+</html>

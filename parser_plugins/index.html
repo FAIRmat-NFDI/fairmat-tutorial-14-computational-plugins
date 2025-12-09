@@ -1,0 +1,1606 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Developing schemas and parsers for FAIR computational data storage using NOMAD-Simulations
+">
+      
+      
+        <meta name="author" content="FAIRmat consortium">
+      
+      
+      
+        <link rel="prev" href="../nomad_simulations/">
+      
+      
+        <link rel="next" href="../schema_plugins/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.0">
+    
+    
+      
+        <title>Part 3 - Parser Plugins - FAIRmat Tutorial 14</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.618322db.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Titillium+Web:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Titillium Web";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../stylesheets/extra.css">
+    
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.7/katex.min.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#part-3-creating-parser-plugins-from-scratch" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+      </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="FAIRmat Tutorial 14" class="md-header__button md-logo" aria-label="FAIRmat Tutorial 14" data-md-component="logo">
+      
+  <img src="../assets/nomad-logo.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            FAIRmat Tutorial 14
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Part 3 - Parser Plugins
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-hidden="true"  type="radio" name="__palette" id="__palette_0">
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-hidden="true"  type="radio" name="__palette" id="__palette_1">
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="FAIRmat Tutorial 14" class="md-nav__button md-logo" aria-label="FAIRmat Tutorial 14" data-md-component="logo">
+      
+  <img src="../assets/nomad-logo.png" alt="logo">
+
+    </a>
+    FAIRmat Tutorial 14
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../intro/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part 1 - Intro to NOMAD
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../nomad_simulations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part 2 - NOMAD-Simulations
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part 3 - Parser Plugins
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part 3 - Parser Plugins
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#fundamentals-of-parsing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fundamentals of Parsing
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#starting-a-plugin-project" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Starting a Plugin Project
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Starting a Plugin Project">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-are-they" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What are they?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#relation-with-the-python-environment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Relation with the Python Environment
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#key-players" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Players
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#assembling-a-parser-class" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Assembling a Parser Class
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Assembling a Parser Class">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#hooking-up-a-parser" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Hooking up a Parser
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#front-end" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Front-end
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#command-line" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Command-line
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#notebooks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Notebooks
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#getting-the-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Getting the Data
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#from-parser-to-nomad" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        From Parser to NOMAD
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="From Parser to NOMAD">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#via-instantiation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Via Instantiation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#via-mapping" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Via Mapping
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mapping-annotations-on-the-schema-side" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Mapping Annotations on the Schema side
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#from-text-to-hierarchies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        From Text to Hierarchies
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../schema_plugins/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part 4 - Schema Plugins
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../custom_workflows/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part 5 - Custom Workflows
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#fundamentals-of-parsing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fundamentals of Parsing
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#starting-a-plugin-project" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Starting a Plugin Project
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Starting a Plugin Project">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-are-they" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What are they?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#relation-with-the-python-environment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Relation with the Python Environment
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#key-players" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Players
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#assembling-a-parser-class" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Assembling a Parser Class
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Assembling a Parser Class">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#hooking-up-a-parser" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Hooking up a Parser
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#front-end" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Front-end
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#command-line" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Command-line
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#notebooks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Notebooks
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#getting-the-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Getting the Data
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#from-parser-to-nomad" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        From Parser to NOMAD
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="From Parser to NOMAD">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#via-instantiation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Via Instantiation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#via-mapping" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Via Mapping
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mapping-annotations-on-the-schema-side" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Mapping Annotations on the Schema side
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#from-text-to-hierarchies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        From Text to Hierarchies
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="part-3-creating-parser-plugins-from-scratch">Part 3 - Creating Parser Plugins from Scratch<a class="headerlink" href="#part-3-creating-parser-plugins-from-scratch" title="Permanent link">&para;</a></h1>
+<p>One of NOMAD's most recognized features is drag-and-drop parsing.
+The NOMAD parsers, which automate the conversion of raw simulation files into the standardized NOMAD format, significantly offload the burden of data annotation from researchers, reducing their data management responsibilities while also improving the accessibility of their data.</p>
+<p>Behind the scenes, parsing beings with looking through the upload folder and selecting relevant files.
+These files are then read in and their data extracted.
+Lastly, the semantics of the file format are clarified and specified as its data is mapped into the NOMAD schema.
+The data is now ready to interact with the NOMAD ecosystem and apps.</p>
+<div class="click-zoom">
+    <label>
+        <input type="checkbox">
+        <img src="../assets/parsing_illustration.png" alt="Symbolic, 3-step representation of the parsing process: 1. SELECT FILES; 2. EXTRACT DATA;  3. SCHEMA" width="80%" title="Click to zoom in">
+    </label>
+</div>
+
+<h2 id="fundamentals-of-parsing">Fundamentals of Parsing<a class="headerlink" href="#fundamentals-of-parsing" title="Permanent link">&para;</a></h2>
+<p>As parsing involves the mapping between two well-defined formats, one could expect it to be trivial.
+In practice, however, parser developers have to manage discrepancies in semantics, shape, data type or units.
+This has lead to five distinct categories of responsibility for the developer to manage.
+Here, they are ordered to match the parser's execution:</p>
+<ol>
+<li><strong>file selection</strong> - navigate the upload's folder structure and select the relevant files.</li>
+<li><strong>source extraction</strong> - read the files into Python. This step may already include some level of data field filtering.</li>
+<li><strong>source to target</strong> - map the data of interest with their counterparts in the target/NOMAD schema. This is where the bulk of the filtering happens.</li>
+<li><strong>data mangling</strong> - manipulate the data to match the target/NOMAD <code>Quantity</code>s' specification, e.g. dimensionality, shape. This may include computing derived properties not present in the original source files.</li>
+<li><strong>archive construction</strong> - build up a Python <code>EntryArchive</code> object using the classes provided by the target/NOMAD schema. NOMAD will automatically write and commit it to the database as an <code>archive.json</code></li>
+</ol>
+<p>Blurring these responsibilities leads to a wild-growth in parser design and added complexity, especially in larger, more feature-rich parsers.
+NOMAD therefore offers powerful <em>tools</em> and documentation on <em>best practices</em> to help the parser developer manage each distinct responsibility.
+The exact solutions are, in the same order:</p>
+<ol>
+<li><code>MatchingParser</code> - This class selects the file to be parsed. Since it interfaces with the NOMAD base directly, it will read in most of the settings automatically from there.</li>
+<li><code>XMLParser</code> and co. / <code>TextParser</code> - There are several <em>reader classes</em> for loading common source formats into Python data types. Examples include the <code>XMLParser</code> and <code>HDF5Parser</code>. We will demonstrate <code>XMLParser</code> in <a href="#getting-the-data">Parsing Hierarchical Tree Formats</a>. Plain text files, meanwhile, involve an additional <em>matching step</em> via the <code>TextParser</code>. More on this in <a href="#from-text-to-hierarchies">From Text to Hierarchies</a>.</li>
+<li><code>MappingAnnotationModel</code> - This is arguably the most involved part for the parser developer, as this is where the external data gets further semantically enriched and standardized. It requires domain expertise to understand the relationship between the data fields in the source file and the <a href="../nomad_simulations/">NOMAD-Simulations schema</a>. If step 2 went well, step 3 could just involve <em>annotating</em> the target/NOMAD schema. We show how this is conceptually possible with <code>MappingAnnotationModel</code> in <a href="#mapping-a-to-schema">Mapping a to Schema</a>, but note that it still at the prototype stage.</li>
+<li><a href="../nomad_simulations/">NOMAD-Simulations schema</a> / <code>MappingAnnotationModel</code> - The <code>MSection</code>s and <code>utils.py</code> in the schema provide <em>normalizers</em> and <em>helper functions</em> to alleviate most of the data mangling. For small amendments, use the mapping approach described in <a href="#via-mapping">Via Mapping</a>. For larger ones, consider extending the schema as covered in <a href="../schema_plugins/">Extending NOMAD-Simulations</a>.</li>
+<li><code>MetainfoParser</code> - this <em>converter</em> bridges the annotated schema from step 3 with the reader classes in step 2. <code>MetainfoParser.data_object</code> contains the final <code>ArchiveSection</code> that is stored under <code>archive.data</code>.</li>
+</ol>
+<p>In the next section, we will briefly illustrate how <code>MatchingParser</code>, <code>XMLParser</code>, and <code>MetainfoParser</code> interconnect, as well as flesh out some setup details.</p>
+<h2 id="starting-a-plugin-project">Starting a Plugin Project<a class="headerlink" href="#starting-a-plugin-project" title="Permanent link">&para;</a></h2>
+<p>To create your own parser plugin, visit our <a href="https://github.com/FAIRmat-NFDI/nomad-plugin-template">plugin template</a> and click the “Use this template” button.
+Follow the <a href="https://nomad-lab.eu/prod/v1/staging/docs/howto/plugins/plugins.html">How to get started with plugins</a> documentation for detailed setup instructions.
+The template will appear bare-bones at the start.
+Following the instructions in the <code>README.md</code>  and the <code>cruft</code> setup will allow you to tune the project to your needs.</p>
+<div class="click-zoom">
+    <label>
+        <input type="checkbox">
+        <img src="../assets/github_plugin_template.png" alt="Overview of the GitHub repository page `nomad-plugin-template` with the 'Use this template' button highlighted in red." width="80%" title="Click to zoom in">
+    </label>
+</div>
+
+<p>By the end, your repository should look like the example below.
+Make sure to include both a <code>parsers</code> and a <code>schema_packages</code> folder.
+Each file parser under <code>parsers</code> gets its own <code>.py</code> file.
+For schemas, one file typically suffices, unless you want to heavily extend them (see <a href="../schema_plugins/">Extending NOMAD-Simulations</a>).
+Note that <code>myparser.py</code> and <code>mypackage.py</code> just act as a blueprints.
+They should not be edited or exposed directly.</p>
+<p>The <code>README.md</code> should remain a copy of the template, in case anyone wants to fork the project.
+Instead, place plugin descriptions in the entry points or GitHub repository metadata.
+More elaborate explanations should go under <code>docs</code>.
+You can deploy them on GitHub or locally via <code>mkdocs</code>.
+Lastly, NOMAD uses the Apache 2.0 license (option 4 in the <code>cruft</code> setup).
+Please select the same license for maximal legal compatibility.</p>
+<!-- TODO remove explanation once resolved on template's end -->
+
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>.
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>└── nomad-plugin-parser/
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    ├── src/
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    │   └── nomad_plugin_parser/
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    │       ├── __init__.py
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>    │       ├── parsers/
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>    │       │   ├── __init__.py     (entry point)
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>    │       │   └── myparser.py     (target functionality)
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>    │       └── schema_packages/
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>    │           ├── __init__.py
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>    │           └── mypackage.py    (extending the schema)
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>    ├── docs/
+<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>    ├── tests/
+<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>    ├── pyproject.toml              (publication specifications)
+<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>    ├── README.md
+<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>    └── LICENSE.txt
+<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>
+<a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a>---------------------------------------------------------------
+<a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a>├── nomad.yaml                      (NOMAD configurations)
+</code></pre></div>
+<p>This examples also highlights the files containing <em>entry point</em> information between parentheses.
+Entry points are the official mechanism for <code>pip</code> installing modules.
+Just note that their referencing runs bottom up, i.e. from the <code>publication specifications</code> to the <code>entry point</code> itself, and from thereon to the <code>target functionality</code>.</p>
+<p>Once the plugin is ready, you can add it to your local NOMAD deployment. We recommend you to read the details in the NOMAD documentation page regarding <a href="https://nomad-lab.eu/prod/v1/staging/docs/howto/oasis/plugins_install.html">installing plugins in NOMAD Oasis</a>. The <code>NOMAD configurations</code> refers back to the <code>publication specifications</code> to load plugins in your local NOMAD installation. It allows you to control the loading of plugins and their options, however, normally you don't have to touch anything there for NOMAD to pick up on your parser.</p>
+<details class="tip">
+<summary>Managing Entry Points</summary>
+<h3 id="what-are-they">What are they?<a class="headerlink" href="#what-are-they" title="Permanent link">&para;</a></h3>
+<p>The plugin setup follows the common <a href="https://setuptools.pypa.io/en/latest/userguide/entry_point.html">entry-points</a> Python standard from <code>importlib.metadata</code>.
+It works in tandem with <code>pip</code> install to allow for a more elegant and controlled way of exposing and loading (specific functionalities in) modules.
+Entry points also provide the module developer tools for controlling how it ought to be exposed to the environment, e.g. name, description, configuration.</p>
+<h3 id="relation-with-the-python-environment">Relation with the Python Environment<a class="headerlink" href="#relation-with-the-python-environment" title="Permanent link">&para;</a></h3>
+<p>Contrary to regular dependencies, entry points are visible at a system-wide level, even when installed in a local environment.
+You can therefore choose whether to install plugins in their own environment, or construct a shared one (with the NOMAD base).
+We recommend the former to prevent dependency clashing.</p>
+<h3 id="key-players">Key Players<a class="headerlink" href="#key-players" title="Permanent link">&para;</a></h3>
+<p>Conceptually, there are five roles to keep track off:</p>
+<ul>
+<li><strong>target functionality</strong>: the entity that we want to <em>expose</em> to the NOMAD base installation. In our case, this will amount to our parser class, which typically is a child class of <code>MatchingParser</code>. It may use <code>configurations</code> parameters passed along via the nomad settings.</li>
+<li><strong>entry point</strong>: instance of <code>EntryPoint</code>, responsible for <em>registering</em> the target functionality. It therefore also retains metadata like its name, a description and most importantly, the file matching directives. It is typically located in the <code>__init__.py</code> of the relevant functionality folder (see folder structure).<ul>
+<li><strong>entry point group</strong>: bundles several entry points together. By default, NOMAD scans all plugins under the group name <code>project.entry-points.'nomad.plugin'</code>.</li>
+</ul>
+</li>
+<li><strong>publication specifications</strong>: <em>exposes</em> the entry point (and its group) under the format of <code>&lt;module_name&gt;.&lt;object_name&gt;:&lt;entry_point_name&gt;</code>. This is the name by which you should refer to it within the entry point system. For importing the within a Python script, use only <code>&lt;module_name&gt;.&lt;object_name&gt;</code>. In NOMAD we use the <code>pyproject.toml</code> setup file under the module's root folder.</li>
+<li><strong>NOMAD configurations</strong>: called in <code>nomad.yaml</code>, controls which entry points are <em>included</em> or <em>excluded</em>, as well as their <em>configuration parameters</em>.</li>
+</ul>
+</details>
+<h2 id="assembling-a-parser-class">Assembling a Parser Class<a class="headerlink" href="#assembling-a-parser-class" title="Permanent link">&para;</a></h2>
+<p>Throughout this subsection, we will provide a step-by-step guide of the process for building out a parser using the VASP XML output format as an example.
+For an overview of the code in its complete form, you can check out the <a href="https://github.com/FAIRmat-NFDI/nomad-parser-vasp/tree/older_alt">official repository</a>.
+Make sure to fork it in case you want to track your modifications.
+The code snippets provided below should are located under <code>src/nomad_parser_vasp/parsers/</code>, in a file clarifying the intended extension, <code>xml_parser.py</code>.</p>
+<h3 id="hooking-up-a-parser">Hooking up a Parser<a class="headerlink" href="#hooking-up-a-parser" title="Permanent link">&para;</a></h3>
+<p>As denoted in step 1, the parser first has to read in the file contents as passed through by the NOMAD base.
+The directives for selecting <em>mainfiles</em> are passed on via an interaction cascade from <code>nomad.yaml</code> &gt; <code>ParserEntryPoint</code> &gt; <code>MatchingParser</code>.</p>
+<details class="note">
+<summary>What are mainfiles?</summary>
+<p>Mainfiles are files by which an expert / program can determine the code used / the parser to use.
+The selection directives (see below) target these files specifically.
+Their file paths are passed on to the parser, which can either process them or navigate the folder for other, auxiliary files.</p>
+</details>
+<h4 id="mainfile-matching">Mainfile Matching<a class="headerlink" href="#mainfile-matching" title="Permanent link">&para;</a></h4>
+<p>Since mainfiles are intrinsically connected to the scripts that parse them, the directives should be set via <code>ParserEntryPoint</code>.
+In rare cases, however, an Oasis admin may decide to override these selection directives via the <code>nomad.yaml</code>.
+We publish our VASP XML parser in <code>src/nomad_parser_vasp/parsers/__init__.py</code> as</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">nomad.config.models.plugins</span><span class="w"> </span><span class="kn">import</span> <span class="n">ParserEntryPoint</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="k">class</span><span class="w"> </span><span class="nc">VasprunXMLEntryPoint</span><span class="p">(</span><span class="n">ParserEntryPoint</span><span class="p">):</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">load</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>        <span class="kn">from</span><span class="w"> </span><span class="nn">nomad_parser_vasp.parsers.xml_parser</span><span class="w"> </span><span class="kn">import</span> <span class="n">VasprunXMLParser</span>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>        <span class="k">return</span> <span class="n">VasprunXMLParser</span><span class="p">(</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">dict</span><span class="p">())</span>
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="n">xml_entry_point</span> <span class="o">=</span> <span class="n">VasprunXMLEntryPoint</span><span class="p">(</span>
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>    <span class="n">name</span><span class="o">=</span><span class="s1">&#39;VasprunXML Parser&#39;</span><span class="p">,</span>
+<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>    <span class="n">description</span><span class="o">=</span><span class="s1">&#39;Parser for VASP output in XML format.&#39;</span><span class="p">,</span>
+<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>    <span class="n">mainfile_name_re</span><span class="o">=</span><span class="s1">&#39;.*vasprun\.xml.*&#39;</span><span class="p">,</span>
+<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="p">)</span>
+</code></pre></div>
+<p><code>load</code> comes from the entry point system and should just return our parser (see below).
+The entry point itself specifies <em>parser data</em> and the directives.
+There are three kinds of file aspects that can be targeted, all via <em>regular expressions</em> (regex):</p>
+<ul>
+<li><code>mainfile_name_re</code> - the filename itself.</li>
+<li><code>mainfile_contents_re</code>, <code>mainfile_contents_dict</code> - the file contents. It is by default restricted to the first 1024 bytes, i.e. the file header.</li>
+<li><code>mainfile_mime_re</code> - the file mime.  <!-- TODO define file mime --></li>
+</ul>
+<div class="admonition abstract">
+<p class="admonition-title">Assignment 3.1</p>
+<p>XML is a common file extension, and the user may remove <code>vasprun</code> from the name.
+Swap out <code>mainfile_name_re</code> for a different selection directive.</p>
+</div>
+<!-- TODO research how multiple directives combine -->
+
+<details class="success">
+<summary>Solution 3.1</summary>
+<p>VASP XML typically starts with the tags
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="cp">&lt;?xml version=&quot;1.0&quot; encoding=&quot;ISO-8859-1&quot;?&gt;</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="nt">&lt;modeling&gt;</span>
+</code></pre></div>
+You can capture this via <code>mainfile_contents_re</code> in a regex like
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="sa">r</span><span class="s1">&#39;&lt;\?xml version=&quot;1\.0&quot; encoding=&quot;ISO\-8859\-1&quot;?&gt;\n&lt;modeling&gt;</span>
+</code></pre></div></p>
+</details>
+<!-- TODO double-check -->
+
+<h4 id="mainfile-interfacing">Mainfile Interfacing<a class="headerlink" href="#mainfile-interfacing" title="Permanent link">&para;</a></h4>
+<p>Within the cascade, <code>MatchingParser</code>, acts as the connection point on the parser side.
+It plays less of a role in manipulating the directives, and more so in defining the <em>interface</em> &mdash;a formalization of mutually agreed upon behavior&mdash; back to the parser.
+The two main specifications are instantiation and <code>parse</code>.
+Since <code>MatchingParser</code> already defines both, parsers may simply <em>inherit</em> therefrom.
+The most rudimentary parser, thus looks as follows:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">nomad.parsing</span><span class="w"> </span><span class="kn">import</span> <span class="n">MatchingParser</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="k">class</span><span class="w"> </span><span class="nc">VasprunXMLParser</span><span class="p">(</span><span class="n">MatchingParser</span><span class="p">):</span>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>    <span class="k">pass</span>
+</code></pre></div>
+<details class="tip">
+<summary>Running your Parser</summary>
+<h3 id="front-end">Front-end<a class="headerlink" href="#front-end" title="Permanent link">&para;</a></h3>
+<p>In everyday NOMAD use, the user only interacts with NOMAD via the GUI or API.
+NOMAD will regulate parsing as the user uploads via these channels.</p>
+<h3 id="command-line">Command-line<a class="headerlink" href="#command-line" title="Permanent link">&para;</a></h3>
+<p>During development, the command line is probably the preferable option, as you can load changes faster and incorporate it into your favorite test setups.
+To print the archive to the terminal, use <code>nomad parse --show-archive &lt;mainfile&gt;</code>.
+If you already know which parser to use, add the <code>--parser 'parser/&lt;parser or entry point name&gt;'</code> flag.
+To list all options, type <code>nomad parse --help</code>.
+Note that even the command line passes through the NOMAD base, so make sure to have it installed and set up correctly.</p>
+<h3 id="notebooks">Notebooks<a class="headerlink" href="#notebooks" title="Permanent link">&para;</a></h3>
+<p>If you are using Jupyter Notebook, you can manipulate data in a head-on way without NOMAD base as an intermediary.
+Note that this enntails providing the parsing input yourself, as well as manually triggering normalization.
+A template setup looks something like:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">nomad.datamodel</span><span class="w"> </span><span class="kn">import</span> <span class="n">EntryArchive</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">nomad.client.processing</span><span class="w"> </span><span class="kn">import</span> <span class="n">parse</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="kn">from</span><span class="w"> </span><span class="nn">nomad.client</span><span class="w"> </span><span class="kn">import</span> <span class="n">normalize_all</span>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="kn">from</span><span class="w"> </span><span class="nn">nomad.normalizing.metainfo</span><span class="w"> </span><span class="kn">import</span> <span class="n">MetainfoNormalizer</span>
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="kn">from</span><span class="w"> </span><span class="o">&lt;</span><span class="n">parser_plugin</span><span class="o">&gt;.</span><span class="n">parser</span> <span class="kn">import</span><span class="w"> </span><span class="o">&lt;</span><span class="n">ParserPlugin</span><span class="o">&gt;</span>
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>
+<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="n">p</span> <span class="o">=</span> <span class="n">ParserPlugin</span><span class="p">()</span>
+<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a><span class="n">a</span> <span class="o">=</span> <span class="n">EntryArchive</span><span class="p">()</span>
+<a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a>
+<a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a><span class="c1"># parsing ONLY</span>
+<a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a><span class="n">p</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="o">&lt;</span><span class="n">mainfile</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+<a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a>
+<a id="__codelineno-5-13" name="__codelineno-5-13" href="#__codelineno-5-13"></a><span class="c1"># parsing + full normalization</span>
+<a id="__codelineno-5-14" name="__codelineno-5-14" href="#__codelineno-5-14"></a><span class="n">a</span> <span class="o">=</span> <span class="n">parse</span><span class="p">(</span><span class="o">&lt;</span><span class="n">mainfile</span><span class="o">&gt;</span><span class="p">)</span>
+<a id="__codelineno-5-15" name="__codelineno-5-15" href="#__codelineno-5-15"></a><span class="n">normalize_all</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<a id="__codelineno-5-16" name="__codelineno-5-16" href="#__codelineno-5-16"></a>
+<a id="__codelineno-5-17" name="__codelineno-5-17" href="#__codelineno-5-17"></a><span class="c1"># parsing + schema-only normalization</span>
+<a id="__codelineno-5-18" name="__codelineno-5-18" href="#__codelineno-5-18"></a><span class="n">p</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="o">&lt;</span><span class="n">mainfile</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+<a id="__codelineno-5-19" name="__codelineno-5-19" href="#__codelineno-5-19"></a><span class="n">MetainfoNormalizer</span><span class="p">()</span><span class="o">.</span><span class="n">normalize</span><span class="p">(</span><span class="n">archive</span><span class="o">=</span><span class="n">a</span><span class="p">)</span>
+</code></pre></div>
+</details>
+<p>NOMAD can already run this parser, but will raise a <code>NotImplementedError</code>.
+The interface may be defined, but we still need to fill in the actual parsing by overwriting the default <code>parse(...)</code> function.
+That is for the next section.</p>
+<h3 id="getting-the-data">Getting the Data<a class="headerlink" href="#getting-the-data" title="Permanent link">&para;</a></h3>
+<p>Where <code>MatchingParser</code> provides a path to the mainfiles, a separate parser is needed for actually reading the <em>file contents</em>.
+NOMAD already provides several parsers for popular, general-purpose formats like JSON, HDF5, and XML. <!-- TODO verify JSON -->
+Plain text is also supported, but a bit more involved.
+We cover it in section <a href="#from-text-to-hierarchies">From Text to Hierarchies</a>.</p>
+<p>Contrary to <code>MatchingParser</code>, none of these parsers interface directly with the NOMAD base.
+For example, they do not support the <code>parse(...)</code> function.
+Therefore, our parser has to call <code>XMLParser</code>.
+The typical strategy here is to save the <em>reader object</em> for later manipulation.
+In the example below, we read in the whole file.
+The <a href="https://www.w3schools.com/xml/xpath_syntax.asp">XPath syntax</a> also supports subbranch extraction, which can be incrementally added to the reader object.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">structlog.stdlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">BoundLogger</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">nomad.datamodel.datamodel</span><span class="w"> </span><span class="kn">import</span> <span class="n">EntryArchive</span>
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="kn">from</span><span class="w"> </span><span class="nn">nomad.parsing.file_parser.xml_parser</span><span class="w"> </span><span class="kn">import</span> <span class="n">XMLParser</span>
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="k">class</span><span class="w"> </span><span class="nc">VasprunXMLParser</span><span class="p">(</span><span class="n">MatchingParser</span><span class="p">):</span>
+<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">parse</span><span class="p">(</span>
+<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a>        <span class="bp">self</span><span class="p">,</span> <span class="n">mainfile</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">archive</span><span class="p">:</span> <span class="n">EntryArchive</span><span class="p">,</span> <span class="n">logger</span><span class="p">:</span> <span class="n">BoundLogger</span><span class="p">,</span>
+<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>        <span class="n">child_archives</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">EntryArchive</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a>        <span class="n">xml_reader</span> <span class="o">=</span> <span class="n">XMLParser</span><span class="p">(</span><span class="n">mainfile</span><span class="o">=</span><span class="n">mainfile</span><span class="p">)</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="s1">&#39;/*&#39;</span><span class="p">)</span>  <span class="c1"># XPath syntax</span>
+<a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a>        <span class="n">archive</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">xml_reader</span><span class="o">.</span><span class="n">_results</span>
+</code></pre></div>
+<!-- note that this XMLParser does not have a universal interface -->
+
+<details class="note">
+<summary>To Return or not to Return</summary>
+<p>Should <code>parse(...)</code> return a filled out <code>EntryArchive</code> object to the NOMAD base or rather overwrite <code>archive</code>?
+Its <em>type signature</em>, i.e. <code>-&gt; None</code>, denotes that it should in fact <strong>not</strong> return any output.</p>
+<p>In NOMAD, we use type signatures as much as possible.
+They are also tested in our CI/CD, which might request adding them in cases where types cannot be inferred.</p>
+</details>
+<p>The <code>NotImplementedError</code> is now resolved.
+Running the parser results in a new error, however, <code>AttributeError: 'dict' object has no attribute 'm_parent'</code>.
+This may look discouraging, but progress was made!
+The data has been successfully extracted: check <code>xml_reader._results</code>.
+The issue stems from data not yet meeting the high-quality standards of the NOMAD schema.
+In the next section, we convert it.</p>
+<details class="info">
+<summary>What is the Archive?</summary>
+<p>An archive is a (typically empty) storage object for an entry.
+It is populated by the parser and later on serialized into an <code>archive.json</code> file by NOMAD for permanent storage.</p>
+<p>It has five sections, but for novel parsers we are solely interested in <code>data</code> and <code>workflow</code>.</p>
+<ul>
+<li><code>metainfo</code>: internal NOMAD metadata registering who uploaded the data and when is was uploaded. This is handled completely automatically by the NOMAD base.</li>
+<li><code>results</code>: the data indexed and ready to query at full database scale. It is automatically produced from <code>worfklow</code>, <code>data</code>, and <code>run</code>.</li>
+<li><code>workflow</code>: some entries coordinate other entries. This section coordinates the . For more, see <a href="../custom_workflows/">Interfacing complex simulations</a>.</li>
+<li><code>data</code>: the new section detailing all extracted values. It comes with the updated schema presented in <a href="../nomad_simulations/">NOMAD-Simulations schema plugin</a>.</li>
+<li><code>run</code>: the predecessor to <code>data</code>. It should only be targeted by legacy parsers, and has been marked for deprecation.</li>
+</ul>
+</details>
+<details class="info">
+<summary>Communicating via Logs</summary>
+<p>Each entry has an associated log. <!-- Add screenshot GUI? -->
+These communicate info or warnings about the processing, as well as debugging info and (critical) errors for tracing bugs.
+Include the latter when contacting us regarding any processing issues.</p>
+<p>Here, we use the <code>logger</code> object to <code>info</code>rm which parser was called.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="o">...</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">nomad.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">config</span>
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="n">configuration</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">get_plugin_entry_point</span><span class="p">(</span>
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>    <span class="s1">&#39;nomad_parser_vasp.parsers:xml_entry_point&#39;</span>
+<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a><span class="p">)</span>
+<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a>
+<a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a><span class="k">class</span><span class="w"> </span><span class="nc">VasprunXMLParser</span><span class="p">(</span><span class="n">MatchingParser</span><span class="p">):</span>
+<a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">parse</span><span class="p">(</span>
+<a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a>        <span class="bp">self</span><span class="p">,</span> <span class="n">mainfile</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">archive</span><span class="p">:</span> <span class="n">EntryArchive</span><span class="p">,</span> <span class="n">logger</span><span class="p">:</span> <span class="n">BoundLogger</span><span class="p">,</span>
+<a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a>        <span class="n">child_archives</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">EntryArchive</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-7-12" name="__codelineno-7-12" href="#__codelineno-7-12"></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-7-13" name="__codelineno-7-13" href="#__codelineno-7-13"></a>
+<a id="__codelineno-7-14" name="__codelineno-7-14" href="#__codelineno-7-14"></a>    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;VasprunXMLParser.parse&#39;</span><span class="p">,</span> <span class="n">parameter</span><span class="o">=</span><span class="n">configuration</span><span class="o">.</span><span class="n">parameter</span><span class="p">)</span>
+<a id="__codelineno-7-15" name="__codelineno-7-15" href="#__codelineno-7-15"></a>    <span class="o">...</span>
+</code></pre></div>
+</details>
+<h2 id="from-parser-to-nomad">From Parser to NOMAD<a class="headerlink" href="#from-parser-to-nomad" title="Permanent link">&para;</a></h2>
+<p>We conceptualize format conversion as restructuring a <em>hierarchical data tree</em>, formally known as a <em>directed acyclic graph</em>.
+A tree structure always starts at a common node, the <em>root</em>, where it splits of into several branches.
+Each <em>node</em> is a new potential splitting point.
+When a <em>branch</em> ends and no further splitting occurs, we call the node a <em>leaf</em>.</p>
+<!-- Bernadette suggested that not everyone may be familiar with the tree terminology. -->
+
+<p>The restructuring may then be defined in terms of lining up source with target nodes.
+The only missing component then are the mappings themselves.</p>
+<h3 id="via-instantiation">Via Instantiation<a class="headerlink" href="#via-instantiation" title="Permanent link">&para;</a></h3>
+<p>There are two ways of populating the NOMAD schema.
+The most basic one, on which you can always fall back, consists in <em>reconstructing</em> it from the root down to the leaf nodes.
+Given that the new NOMAD Simulations schema is quite shallow, this becomes more so a task in retrieving the section that best matches the semantics.
+The tree representation in the example below could be understood as</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>      Simulation
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>      /       \
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a> Program      ModelSystem
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>  /   \           |
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>name version  AtomicCell
+<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>                  |
+<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a>               positions
+</code></pre></div>
+<p>In the parser code itself, the sections and quantities are both just classes.
+We thus construct a tree of their objects by <em>instantiating</em> them one-by-one.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">nomad.units</span><span class="w"> </span><span class="kn">import</span> <span class="n">ureg</span>
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="o">...</span>
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="k">class</span><span class="w"> </span><span class="nc">VasprunXMLParser</span><span class="p">(</span><span class="n">MatchingParser</span><span class="p">):</span>
+<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">parse</span><span class="p">(</span>
+<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a>        <span class="bp">self</span><span class="p">,</span>
+<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a>        <span class="n">mainfile</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+<a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a>        <span class="n">archive</span><span class="p">:</span> <span class="n">EntryArchive</span><span class="p">,</span>
+<a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a>        <span class="n">logger</span><span class="p">:</span> <span class="n">BoundLogger</span><span class="p">,</span>
+<a id="__codelineno-9-10" name="__codelineno-9-10" href="#__codelineno-9-10"></a>        <span class="n">child_archives</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">EntryArchive</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-9-11" name="__codelineno-9-11" href="#__codelineno-9-11"></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-9-12" name="__codelineno-9-12" href="#__codelineno-9-12"></a>        <span class="n">xml_reader</span> <span class="o">=</span> <span class="n">XMLParser</span><span class="p">(</span><span class="n">mainfile</span><span class="o">=</span><span class="n">mainfile</span><span class="p">)</span>
+<a id="__codelineno-9-13" name="__codelineno-9-13" href="#__codelineno-9-13"></a>
+<a id="__codelineno-9-14" name="__codelineno-9-14" href="#__codelineno-9-14"></a>        <span class="k">def</span><span class="w"> </span><span class="nf">xml_get</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<a id="__codelineno-9-15" name="__codelineno-9-15" href="#__codelineno-9-15"></a>            <span class="k">return</span> <span class="n">xml_reader</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="n">path</span><span class="p">]</span>
+<a id="__codelineno-9-16" name="__codelineno-9-16" href="#__codelineno-9-16"></a>
+<a id="__codelineno-9-17" name="__codelineno-9-17" href="#__codelineno-9-17"></a>        <span class="n">archive</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">Simulation</span><span class="p">(</span>
+<a id="__codelineno-9-18" name="__codelineno-9-18" href="#__codelineno-9-18"></a>            <span class="n">program</span><span class="o">=</span><span class="n">Program</span><span class="p">(</span>
+<a id="__codelineno-9-19" name="__codelineno-9-19" href="#__codelineno-9-19"></a>                <span class="n">name</span><span class="o">=</span><span class="s1">&#39;VASP&#39;</span><span class="p">,</span>
+<a id="__codelineno-9-20" name="__codelineno-9-20" href="#__codelineno-9-20"></a>                <span class="n">version</span><span class="o">=</span><span class="n">xml_get</span><span class="p">(</span><span class="s2">&quot;//generator/i&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span>
+<a id="__codelineno-9-21" name="__codelineno-9-21" href="#__codelineno-9-21"></a>            <span class="p">),</span>
+<a id="__codelineno-9-22" name="__codelineno-9-22" href="#__codelineno-9-22"></a>            <span class="n">model_system</span><span class="o">=</span><span class="n">ModelSystem</span><span class="p">(</span>
+<a id="__codelineno-9-23" name="__codelineno-9-23" href="#__codelineno-9-23"></a>                <span class="n">cell</span><span class="o">=</span><span class="n">AtomicCell</span><span class="p">(</span>
+<a id="__codelineno-9-24" name="__codelineno-9-24" href="#__codelineno-9-24"></a>                    <span class="n">positions</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="n">xml_get</span><span class="p">(</span><span class="s2">&quot;structure/./varray/v&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">angstrom</span><span class="p">,</span>
+<a id="__codelineno-9-25" name="__codelineno-9-25" href="#__codelineno-9-25"></a>                <span class="p">),</span>
+<a id="__codelineno-9-26" name="__codelineno-9-26" href="#__codelineno-9-26"></a>            <span class="p">),</span>
+<a id="__codelineno-9-27" name="__codelineno-9-27" href="#__codelineno-9-27"></a>        <span class="p">)</span>
+</code></pre></div>
+<details class="warning">
+<summary>Data Type Conversion</summary>
+<p>NOMAD strictly enforces <code>Quantity</code> types like <code>np.int32</code>, <code>np.float64</code>, <code>np.complex128</code>, <code>str</code>, etc.
+These do no necessarily include all concepts from the <code>typing</code> or <code>numpy</code> module.
+<code>List</code>, for example, is controlled via the <code>Quantity.shape</code> attribute.</p>
+<p>Note that you should apply the proper type before storing the quantity value, as conversions that lead to loss of precision are returned as errors, e.g. <code>int</code> cannot be readily cast into <code>np.float64</code>.</p>
+</details>
+<p>The final <code>archive.json</code> will look something like the following.
+Obviously, the exact values depend on the file parsed.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="p">{</span>
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="w">  </span><span class="nt">&quot;data&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="w">    </span><span class="nt">&quot;m_def&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;nomad_simulations.general.Simulation&quot;</span><span class="p">,</span>
+<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="w">    </span><span class="nt">&quot;program&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a><span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;VASP&quot;</span><span class="p">,</span>
+<a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a><span class="w">      </span><span class="nt">&quot;version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;5.3.2&quot;</span>
+<a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a><span class="w">    </span><span class="p">},</span>
+<a id="__codelineno-10-8" name="__codelineno-10-8" href="#__codelineno-10-8"></a><span class="w">    </span><span class="nt">&quot;model_system&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<a id="__codelineno-10-9" name="__codelineno-10-9" href="#__codelineno-10-9"></a><span class="w">      </span><span class="p">{</span>
+<a id="__codelineno-10-10" name="__codelineno-10-10" href="#__codelineno-10-10"></a><span class="w">        </span><span class="nt">&quot;datetime&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-07-08T13:25:23.509517+00:00&quot;</span><span class="p">,</span>
+<a id="__codelineno-10-11" name="__codelineno-10-11" href="#__codelineno-10-11"></a><span class="w">        </span><span class="nt">&quot;branch_depth&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<a id="__codelineno-10-12" name="__codelineno-10-12" href="#__codelineno-10-12"></a><span class="w">        </span><span class="nt">&quot;cell&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<a id="__codelineno-10-13" name="__codelineno-10-13" href="#__codelineno-10-13"></a><span class="w">          </span><span class="p">{</span>
+<a id="__codelineno-10-14" name="__codelineno-10-14" href="#__codelineno-10-14"></a><span class="w">            </span><span class="nt">&quot;m_def&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;nomad_simulations.model_system.AtomicCell&quot;</span><span class="p">,</span>
+<a id="__codelineno-10-15" name="__codelineno-10-15" href="#__codelineno-10-15"></a><span class="w">            </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;AtomicCell&quot;</span><span class="p">,</span>
+<a id="__codelineno-10-16" name="__codelineno-10-16" href="#__codelineno-10-16"></a><span class="w">            </span><span class="nt">&quot;positions&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<a id="__codelineno-10-17" name="__codelineno-10-17" href="#__codelineno-10-17"></a><span class="w">              </span><span class="p">[</span>
+<a id="__codelineno-10-18" name="__codelineno-10-18" href="#__codelineno-10-18"></a><span class="w">                </span><span class="mf">0.0</span><span class="p">,</span>
+<a id="__codelineno-10-19" name="__codelineno-10-19" href="#__codelineno-10-19"></a><span class="w">                </span><span class="mf">0.0</span><span class="p">,</span>
+<a id="__codelineno-10-20" name="__codelineno-10-20" href="#__codelineno-10-20"></a><span class="w">                </span><span class="mf">0.0</span>
+<a id="__codelineno-10-21" name="__codelineno-10-21" href="#__codelineno-10-21"></a><span class="w">              </span><span class="p">],</span>
+<a id="__codelineno-10-22" name="__codelineno-10-22" href="#__codelineno-10-22"></a><span class="w">              </span><span class="p">[</span>
+<a id="__codelineno-10-23" name="__codelineno-10-23" href="#__codelineno-10-23"></a><span class="w">                </span><span class="mf">0.500001</span><span class="p">,</span>
+<a id="__codelineno-10-24" name="__codelineno-10-24" href="#__codelineno-10-24"></a><span class="w">                </span><span class="mf">0.500001</span><span class="p">,</span>
+<a id="__codelineno-10-25" name="__codelineno-10-25" href="#__codelineno-10-25"></a><span class="w">                </span><span class="mf">0.500001</span>
+<a id="__codelineno-10-26" name="__codelineno-10-26" href="#__codelineno-10-26"></a><span class="w">              </span><span class="p">]</span>
+<a id="__codelineno-10-27" name="__codelineno-10-27" href="#__codelineno-10-27"></a><span class="w">            </span><span class="p">]</span>
+<a id="__codelineno-10-28" name="__codelineno-10-28" href="#__codelineno-10-28"></a><span class="w">          </span><span class="p">}</span>
+<a id="__codelineno-10-29" name="__codelineno-10-29" href="#__codelineno-10-29"></a><span class="w">        </span><span class="p">]</span>
+<a id="__codelineno-10-30" name="__codelineno-10-30" href="#__codelineno-10-30"></a><span class="w">      </span><span class="p">}</span>
+<a id="__codelineno-10-31" name="__codelineno-10-31" href="#__codelineno-10-31"></a><span class="w">    </span><span class="p">]</span>
+<a id="__codelineno-10-32" name="__codelineno-10-32" href="#__codelineno-10-32"></a><span class="w">  </span><span class="p">},</span>
+<a id="__codelineno-10-33" name="__codelineno-10-33" href="#__codelineno-10-33"></a><span class="w">  </span><span class="nt">&quot;metadata&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-10-34" name="__codelineno-10-34" href="#__codelineno-10-34"></a><span class="w">    </span><span class="nt">&quot;entry_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;vasprun.xml.relax&quot;</span><span class="p">,</span>
+<a id="__codelineno-10-35" name="__codelineno-10-35" href="#__codelineno-10-35"></a><span class="w">    </span><span class="nt">&quot;mainfile&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/home/nathan/Downloads/vasprun.xml.relax&quot;</span><span class="p">,</span>
+<a id="__codelineno-10-36" name="__codelineno-10-36" href="#__codelineno-10-36"></a><span class="w">    </span><span class="nt">&quot;text_search_contents&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<a id="__codelineno-10-37" name="__codelineno-10-37" href="#__codelineno-10-37"></a><span class="w">      </span><span class="s2">&quot;VASP&quot;</span><span class="p">,</span>
+<a id="__codelineno-10-38" name="__codelineno-10-38" href="#__codelineno-10-38"></a><span class="w">      </span><span class="s2">&quot;[]&quot;</span><span class="p">,</span>
+<a id="__codelineno-10-39" name="__codelineno-10-39" href="#__codelineno-10-39"></a><span class="w">      </span><span class="s2">&quot;AtomicCell&quot;</span>
+<a id="__codelineno-10-40" name="__codelineno-10-40" href="#__codelineno-10-40"></a><span class="w">    </span><span class="p">],</span>
+<a id="__codelineno-10-41" name="__codelineno-10-41" href="#__codelineno-10-41"></a><span class="w">    </span><span class="nt">&quot;domain&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;dft&quot;</span><span class="p">,</span>
+<a id="__codelineno-10-42" name="__codelineno-10-42" href="#__codelineno-10-42"></a><span class="w">    </span><span class="nt">&quot;n_quantities&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">21</span><span class="p">,</span>
+<a id="__codelineno-10-43" name="__codelineno-10-43" href="#__codelineno-10-43"></a><span class="w">    </span><span class="nt">&quot;quantities&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<a id="__codelineno-10-44" name="__codelineno-10-44" href="#__codelineno-10-44"></a><span class="w">      </span><span class="err">...</span><span class="p">,</span>
+<a id="__codelineno-10-45" name="__codelineno-10-45" href="#__codelineno-10-45"></a><span class="w">      </span><span class="s2">&quot;results.properties&quot;</span>
+<a id="__codelineno-10-46" name="__codelineno-10-46" href="#__codelineno-10-46"></a><span class="w">    </span><span class="p">],</span>
+<a id="__codelineno-10-47" name="__codelineno-10-47" href="#__codelineno-10-47"></a><span class="w">    </span><span class="nt">&quot;sections&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<a id="__codelineno-10-48" name="__codelineno-10-48" href="#__codelineno-10-48"></a><span class="w">      </span><span class="err">...</span><span class="p">,</span>
+<a id="__codelineno-10-49" name="__codelineno-10-49" href="#__codelineno-10-49"></a><span class="w">      </span><span class="s2">&quot;nomad_simulations.model_system.ModelSystem&quot;</span>
+<a id="__codelineno-10-50" name="__codelineno-10-50" href="#__codelineno-10-50"></a><span class="w">    </span><span class="p">],</span>
+<a id="__codelineno-10-51" name="__codelineno-10-51" href="#__codelineno-10-51"></a><span class="w">    </span><span class="nt">&quot;section_defs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<a id="__codelineno-10-52" name="__codelineno-10-52" href="#__codelineno-10-52"></a><span class="w">      </span><span class="err">...</span><span class="p">,</span>
+<a id="__codelineno-10-53" name="__codelineno-10-53" href="#__codelineno-10-53"></a><span class="w">      </span><span class="p">{</span>
+<a id="__codelineno-10-54" name="__codelineno-10-54" href="#__codelineno-10-54"></a><span class="w">        </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;data.model_system.branch_depth#nomad_simulations.general.Simulation&quot;</span><span class="p">,</span>
+<a id="__codelineno-10-55" name="__codelineno-10-55" href="#__codelineno-10-55"></a><span class="w">        </span><span class="nt">&quot;definition&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;nomad_simulations.model_system.ModelSystem.branch_depth&quot;</span><span class="p">,</span>
+<a id="__codelineno-10-56" name="__codelineno-10-56" href="#__codelineno-10-56"></a><span class="w">        </span><span class="nt">&quot;path_archive&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;data.model_system.0.branch_depth&quot;</span><span class="p">,</span>
+<a id="__codelineno-10-57" name="__codelineno-10-57" href="#__codelineno-10-57"></a><span class="w">        </span><span class="nt">&quot;int_value&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span>
+<a id="__codelineno-10-58" name="__codelineno-10-58" href="#__codelineno-10-58"></a><span class="w">      </span><span class="p">}</span>
+<a id="__codelineno-10-59" name="__codelineno-10-59" href="#__codelineno-10-59"></a><span class="w">    </span><span class="p">]</span>
+<a id="__codelineno-10-60" name="__codelineno-10-60" href="#__codelineno-10-60"></a><span class="w">  </span><span class="p">},</span>
+<a id="__codelineno-10-61" name="__codelineno-10-61" href="#__codelineno-10-61"></a><span class="w">  </span><span class="nt">&quot;results&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-10-62" name="__codelineno-10-62" href="#__codelineno-10-62"></a><span class="w">    </span><span class="nt">&quot;properties&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{},</span>
+<a id="__codelineno-10-63" name="__codelineno-10-63" href="#__codelineno-10-63"></a><span class="w">    </span><span class="nt">&quot;eln&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-10-64" name="__codelineno-10-64" href="#__codelineno-10-64"></a><span class="w">      </span><span class="nt">&quot;sections&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<a id="__codelineno-10-65" name="__codelineno-10-65" href="#__codelineno-10-65"></a><span class="w">        </span><span class="s2">&quot;ModelSystem&quot;</span>
+<a id="__codelineno-10-66" name="__codelineno-10-66" href="#__codelineno-10-66"></a><span class="w">      </span><span class="p">]</span>
+<a id="__codelineno-10-67" name="__codelineno-10-67" href="#__codelineno-10-67"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-10-68" name="__codelineno-10-68" href="#__codelineno-10-68"></a><span class="w">  </span><span class="p">}</span>
+<a id="__codelineno-10-69" name="__codelineno-10-69" href="#__codelineno-10-69"></a><span class="p">}</span>
+</code></pre></div>
+<div class="admonition abstract">
+<p class="admonition-title">Assignment 3.2</p>
+<p><code>AtomicCell</code> should also contain information about the lattice vectors &mdash;reciprocal lattice vectors are derived&mdash; and periodic boundary conditions.
+Add these to the instantiation, knowing that the lattice vectors fall under <code>&lt;structure&gt;&lt;crystal&gt;&lt;varray name="basis" &gt;</code>.
+The boundary conditions, meanwhile, are always periodic in VASP.</p>
+</div>
+<details class="success">
+<summary>Solution 3.2</summary>
+<p>The new <code>ModelSystem().cell</code> attribute now reads as:</p>
+<p><div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="o">...</span>
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="n">cell</span><span class="o">=</span><span class="n">AtomicCell</span><span class="p">(</span>
+<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>    <span class="n">positions</span><span class="o">=</span><span class="n">xml_get</span><span class="p">(</span><span class="s2">&quot;structure/./varray/v&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span>
+<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a>    <span class="n">lattice_vectors</span><span class="o">=</span><span class="n">xml_get</span><span class="p">(</span><span class="s2">&quot;structure//varray/v&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span>
+<a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a>    <span class="n">periodic_boundary_conditions</span><span class="o">=</span><span class="p">[</span><span class="kc">True</span><span class="p">]</span> <span class="o">*</span> <span class="mi">3</span><span class="p">,</span>
+<a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a><span class="p">)</span>
+</code></pre></div>
+<!-- TODO double-check --></p>
+</details>
+<p>This example shows a declarative approach to object instantiation:
+any quantity/subsection listed under a section in the schema can be directly passed to the constructor.
+Or course, the existence of section may be contingent on one and another.</p>
+<p>If no <code>finalpos</code> are extracted &mdash;maybe due to a premature termination&mdash; neither should <code>model_system</code> be populated.
+In this case, it is better to set the section attribute after constructing the main skeleton.</p>
+<details class="note">
+<summary>Updating the Getter</summary>
+<p>Given our modifications, <code>xml_get</code> should now also be in charge of failure signaling.
+Depending on the type expected, we may use <code>None</code> or <code>[]</code>.
+To prevent <code>IndexError</code> when extracting, we also pass the array <code>slice(...)</code> along as an argument.</p>
+</details>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="o">...</span>
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>
+<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a><span class="k">class</span><span class="w"> </span><span class="nc">VasprunXMLParser</span><span class="p">(</span><span class="n">MatchingParser</span><span class="p">):</span>
+<a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">parse</span><span class="p">(</span>
+<a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a>    <span class="o">...</span>
+<a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a>    <span class="p">)</span>
+<a id="__codelineno-12-7" name="__codelineno-12-7" href="#__codelineno-12-7"></a>        <span class="o">...</span>
+<a id="__codelineno-12-8" name="__codelineno-12-8" href="#__codelineno-12-8"></a>        <span class="k">def</span><span class="w"> </span><span class="nf">xml_get</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">slicer</span><span class="o">=</span><span class="nb">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">fallback</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<a id="__codelineno-12-9" name="__codelineno-12-9" href="#__codelineno-12-9"></a>            <span class="k">try</span><span class="p">:</span>
+<a id="__codelineno-12-10" name="__codelineno-12-10" href="#__codelineno-12-10"></a>                <span class="k">return</span> <span class="n">xml_reader</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="n">path</span><span class="p">][</span><span class="n">slicer</span><span class="p">]</span>
+<a id="__codelineno-12-11" name="__codelineno-12-11" href="#__codelineno-12-11"></a>            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+<a id="__codelineno-12-12" name="__codelineno-12-12" href="#__codelineno-12-12"></a>                <span class="k">return</span> <span class="n">fallback</span>
+<a id="__codelineno-12-13" name="__codelineno-12-13" href="#__codelineno-12-13"></a>
+<a id="__codelineno-12-14" name="__codelineno-12-14" href="#__codelineno-12-14"></a>
+<a id="__codelineno-12-15" name="__codelineno-12-15" href="#__codelineno-12-15"></a>        <span class="n">archive</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">Simulation</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+<a id="__codelineno-12-16" name="__codelineno-12-16" href="#__codelineno-12-16"></a>
+<a id="__codelineno-12-17" name="__codelineno-12-17" href="#__codelineno-12-17"></a>        <span class="k">if</span> <span class="p">(</span>
+<a id="__codelineno-12-18" name="__codelineno-12-18" href="#__codelineno-12-18"></a>            <span class="n">positions</span> <span class="o">:=</span> <span class="n">xml_get</span><span class="p">(</span>
+<a id="__codelineno-12-19" name="__codelineno-12-19" href="#__codelineno-12-19"></a>                <span class="s2">&quot;structure/./varray/v&quot;</span><span class="p">,</span>
+<a id="__codelineno-12-20" name="__codelineno-12-20" href="#__codelineno-12-20"></a>                <span class="nb">slice</span><span class="p">(</span><span class="kc">None</span><span class="p">),</span>
+<a id="__codelineno-12-21" name="__codelineno-12-21" href="#__codelineno-12-21"></a>                <span class="n">fallback</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([]),</span>
+<a id="__codelineno-12-22" name="__codelineno-12-22" href="#__codelineno-12-22"></a>            <span class="p">)</span>
+<a id="__codelineno-12-23" name="__codelineno-12-23" href="#__codelineno-12-23"></a>        <span class="p">)</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
+<a id="__codelineno-12-24" name="__codelineno-12-24" href="#__codelineno-12-24"></a>            <span class="n">archive</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">model_system</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+<a id="__codelineno-12-25" name="__codelineno-12-25" href="#__codelineno-12-25"></a>                <span class="n">ModelSystem</span><span class="p">(</span>
+<a id="__codelineno-12-26" name="__codelineno-12-26" href="#__codelineno-12-26"></a>                    <span class="n">cell</span><span class="o">=</span><span class="p">[</span><span class="n">AtomicCell</span><span class="p">(</span><span class="n">positions</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="n">positions</span><span class="p">)</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">angstrom</span><span class="p">)]</span>
+<a id="__codelineno-12-27" name="__codelineno-12-27" href="#__codelineno-12-27"></a>                <span class="p">)</span>
+<a id="__codelineno-12-28" name="__codelineno-12-28" href="#__codelineno-12-28"></a>            <span class="p">)</span>
+</code></pre></div>
+<p>Be mindful of the distinction between single/repeating sections, as they determine the interface, i.e. assignment/appending.
+NOMAD will raise errors like <code>Exception has occurred: TypeError - Subsection model_method repeats, but no list was given</code>.</p>
+<p>Another strategy is <em>success short-circuiting</em>, where code cycles through several trials until it encounters the first success.
+An real-world use case is how VASP uses different tags to distinguish density functionals at varying rungs on Jacob's Ladder (that require other routines), e.g. <code>LSDA</code>, <code>GGA</code>, <code>METAGGA</code>.
+PBE (<code>GGA</code> rung) is the defaults fall-back.</p>
+<p>Since all NOMAD sections are convertible to <code>dict</code>, one can generate a <code>get</code> chain trying out the least likely examples up until the default value (<code>PE</code> in this case).</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="o">...</span>
+<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>
+<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a><span class="k">class</span><span class="w"> </span><span class="nc">VasprunXMLParser</span><span class="p">(</span><span class="n">MatchingParser</span><span class="p">):</span>
+<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">parse</span><span class="p">(</span>
+<a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a>    <span class="o">...</span>
+<a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a>    <span class="p">)</span>
+<a id="__codelineno-13-7" name="__codelineno-13-7" href="#__codelineno-13-7"></a>        <span class="o">...</span>
+<a id="__codelineno-13-8" name="__codelineno-13-8" href="#__codelineno-13-8"></a>
+<a id="__codelineno-13-9" name="__codelineno-13-9" href="#__codelineno-13-9"></a>        <span class="n">archive</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">Simulation</span><span class="p">(</span>
+<a id="__codelineno-13-10" name="__codelineno-13-10" href="#__codelineno-13-10"></a>            <span class="n">model_method</span><span class="o">=</span><span class="p">[</span>
+<a id="__codelineno-13-11" name="__codelineno-13-11" href="#__codelineno-13-11"></a>                <span class="n">DFT</span><span class="p">(</span>
+<a id="__codelineno-13-12" name="__codelineno-13-12" href="#__codelineno-13-12"></a>                    <span class="n">xc_functionals</span><span class="o">=</span><span class="p">[</span>
+<a id="__codelineno-13-13" name="__codelineno-13-13" href="#__codelineno-13-13"></a>                        <span class="n">XCFunctional</span><span class="p">(</span>
+<a id="__codelineno-13-14" name="__codelineno-13-14" href="#__codelineno-13-14"></a>                            <span class="n">libxc_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">convert_xc</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+<a id="__codelineno-13-15" name="__codelineno-13-15" href="#__codelineno-13-15"></a>                                <span class="n">xml_get</span><span class="p">(</span>
+<a id="__codelineno-13-16" name="__codelineno-13-16" href="#__codelineno-13-16"></a>                                    <span class="s2">&quot;///separator/i&quot;</span>
+<a id="__codelineno-13-17" name="__codelineno-13-17" href="#__codelineno-13-17"></a>                                <span class="p">)[</span><span class="mi">0</span><span class="p">],</span>
+<a id="__codelineno-13-18" name="__codelineno-13-18" href="#__codelineno-13-18"></a>                                <span class="p">{},</span>
+<a id="__codelineno-13-19" name="__codelineno-13-19" href="#__codelineno-13-19"></a>                            <span class="p">)</span>
+<a id="__codelineno-13-20" name="__codelineno-13-20" href="#__codelineno-13-20"></a>                            <span class="o">.</span><span class="n">get</span><span class="p">(</span>
+<a id="__codelineno-13-21" name="__codelineno-13-21" href="#__codelineno-13-21"></a>                                <span class="n">xml_get</span><span class="p">(</span>
+<a id="__codelineno-13-22" name="__codelineno-13-22" href="#__codelineno-13-22"></a>                                    <span class="s2">&quot;///separator/i&quot;</span>
+<a id="__codelineno-13-23" name="__codelineno-13-23" href="#__codelineno-13-23"></a>                                <span class="p">)[</span><span class="mi">0</span><span class="p">],</span>
+<a id="__codelineno-13-24" name="__codelineno-13-24" href="#__codelineno-13-24"></a>                                <span class="p">{},</span>
+<a id="__codelineno-13-25" name="__codelineno-13-25" href="#__codelineno-13-25"></a>                            <span class="p">)</span>
+<a id="__codelineno-13-26" name="__codelineno-13-26" href="#__codelineno-13-26"></a>                            <span class="o">.</span><span class="n">get</span><span class="p">(</span>
+<a id="__codelineno-13-27" name="__codelineno-13-27" href="#__codelineno-13-27"></a>                                <span class="n">xml_get</span><span class="p">(</span>
+<a id="__codelineno-13-28" name="__codelineno-13-28" href="#__codelineno-13-28"></a>                                    <span class="s2">&quot;///separator/i&quot;</span>
+<a id="__codelineno-13-29" name="__codelineno-13-29" href="#__codelineno-13-29"></a>                                <span class="p">)[</span><span class="mi">0</span><span class="p">],</span>
+<a id="__codelineno-13-30" name="__codelineno-13-30" href="#__codelineno-13-30"></a>                                <span class="s1">&#39;PE&#39;</span><span class="p">,</span>
+<a id="__codelineno-13-31" name="__codelineno-13-31" href="#__codelineno-13-31"></a>                            <span class="p">),</span>
+<a id="__codelineno-13-32" name="__codelineno-13-32" href="#__codelineno-13-32"></a>                        <span class="p">),</span>
+<a id="__codelineno-13-33" name="__codelineno-13-33" href="#__codelineno-13-33"></a>                    <span class="p">],</span>
+<a id="__codelineno-13-34" name="__codelineno-13-34" href="#__codelineno-13-34"></a>                <span class="p">),</span>
+<a id="__codelineno-13-35" name="__codelineno-13-35" href="#__codelineno-13-35"></a>            <span class="p">],</span>
+<a id="__codelineno-13-36" name="__codelineno-13-36" href="#__codelineno-13-36"></a>        <span class="p">)</span>
+</code></pre></div>
+<p>Lastly, if at any point you require a derived property for your parser logic, you can <code>normalize()</code> the section and extract it.
+Just ensure to pass through the necessary information at the instantiation.
+The NOMAD base will anyhow invoke normalization, so do not feel responsible for normalizing the entire archive.</p>
+<details class="warning">
+<summary>The Sense and Nonsense of Readers</summary>
+<p>In the examples above we fixated on the <code>XMLParser</code>, which really is more of a "reader", as it does not interface with NOMAD base directly.
+Instead, its only purpose is to make the file data accessible to Python.</p>
+<p>As such, a pragmatic attitude dictates that if you have more affinity for another reader, e.g. <code>lxml</code>, <code>BeautifulSoup</code>, <code>h5py</code> (demonstrated in the <a href="../schema_plugins/">Schema Plugin</a> part), etc.
+Just mind the dependencies.
+Indeed, <code>XMLParser</code> itself is based on <code>ElementTree</code>, and just extends the reading into <code>dict</code>.
+Feel free to similarly add logic to your own readers above the parsing class.
+This sums up the legacy approach.</p>
+<p>Note that the alternative approach shown in <a href="#mapping-annotations-on-the-schema-side">Mapping Annotations on the Schema side</a> does require specific NOMAD base converters for interacting with the NOMAD schema.</p>
+</details>
+<h3 id="via-mapping">Via Mapping<a class="headerlink" href="#via-mapping" title="Permanent link">&para;</a></h3>
+<p><strong>DISCLAIMER: the code and functionalities covered in this section are still under construction and only serve as an illustration of the underlying concepts. Stay tuned for updates.</strong></p>
+<p>The second option is to have the instantiation run automatically.
+In that case, the mapping is added directly to our schema as an <em>annotation</em>.
+Leveraging this enhanced schema requires some new readers, like <code>mapping_parser.XMLParser</code> for the XML side and <code>MetainfoParser</code> for the schema side.
+The mapping is thus relegated to <code>schema_packages/vasp_schema.py</code>, leaving <code>parsers/xml_parser.py</code> as:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">structlog.stdlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">BoundLogger</span>
+<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">nomad.datamodel.datamodel</span><span class="w"> </span><span class="kn">import</span> <span class="n">EntryArchive</span>
+<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a><span class="kn">from</span><span class="w"> </span><span class="nn">nomad.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">config</span>
+<a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a><span class="kn">from</span><span class="w"> </span><span class="nn">nomad.parsing</span><span class="w"> </span><span class="kn">import</span> <span class="n">MatchingParser</span>
+<a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a><span class="kn">from</span><span class="w"> </span><span class="nn">nomad.parsing.file_parser.mapping_parser</span><span class="w"> </span><span class="kn">import</span> <span class="n">MetainfoParser</span><span class="p">,</span> <span class="n">XMLParser</span>
+<a id="__codelineno-14-6" name="__codelineno-14-6" href="#__codelineno-14-6"></a><span class="kn">from</span><span class="w"> </span><span class="nn">nomad_parser_vasp.schema_packages.vasp_schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">Simulation</span>
+<a id="__codelineno-14-7" name="__codelineno-14-7" href="#__codelineno-14-7"></a>
+<a id="__codelineno-14-8" name="__codelineno-14-8" href="#__codelineno-14-8"></a><span class="n">configuration</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">get_plugin_entry_point</span><span class="p">(</span>
+<a id="__codelineno-14-9" name="__codelineno-14-9" href="#__codelineno-14-9"></a>    <span class="s1">&#39;nomad_parser_vasp.parsers:xml_entry_point&#39;</span>
+<a id="__codelineno-14-10" name="__codelineno-14-10" href="#__codelineno-14-10"></a><span class="p">)</span>
+<a id="__codelineno-14-11" name="__codelineno-14-11" href="#__codelineno-14-11"></a>
+<a id="__codelineno-14-12" name="__codelineno-14-12" href="#__codelineno-14-12"></a><span class="k">class</span><span class="w"> </span><span class="nc">VasprunXMLParser</span><span class="p">(</span><span class="n">MatchingParser</span><span class="p">):</span>
+<a id="__codelineno-14-13" name="__codelineno-14-13" href="#__codelineno-14-13"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">parse</span><span class="p">(</span>
+<a id="__codelineno-14-14" name="__codelineno-14-14" href="#__codelineno-14-14"></a>        <span class="bp">self</span><span class="p">,</span> <span class="n">mainfile</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">archive</span><span class="p">:</span> <span class="n">EntryArchive</span><span class="p">,</span> <span class="n">logger</span><span class="p">:</span> <span class="n">BoundLogger</span><span class="p">,</span>
+<a id="__codelineno-14-15" name="__codelineno-14-15" href="#__codelineno-14-15"></a>        <span class="n">child_archives</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">EntryArchive</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-14-16" name="__codelineno-14-16" href="#__codelineno-14-16"></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-14-17" name="__codelineno-14-17" href="#__codelineno-14-17"></a>        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;VasprunXMLParser.parse&#39;</span><span class="p">,</span> <span class="n">parameter</span><span class="o">=</span><span class="n">configuration</span><span class="o">.</span><span class="n">parameter</span><span class="p">)</span>
+<a id="__codelineno-14-18" name="__codelineno-14-18" href="#__codelineno-14-18"></a>        <span class="n">data_parser</span> <span class="o">=</span> <span class="n">MetainfoParser</span><span class="p">(</span><span class="n">annotation_key</span><span class="o">=</span><span class="s1">&#39;xml&#39;</span><span class="p">,</span> <span class="n">data_object</span><span class="o">=</span><span class="n">Simulation</span><span class="p">())</span>
+<a id="__codelineno-14-19" name="__codelineno-14-19" href="#__codelineno-14-19"></a>        <span class="n">XMLParser</span><span class="p">(</span><span class="n">filepath</span><span class="o">=</span><span class="n">mainfile</span><span class="p">)</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span><span class="n">data_parser</span><span class="p">)</span>
+<a id="__codelineno-14-20" name="__codelineno-14-20" href="#__codelineno-14-20"></a>        <span class="n">archive</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">data_parser</span><span class="o">.</span><span class="n">data_object</span>
+</code></pre></div>
+<p>Look at the power of this technique: this is the full parser!
+We only need to provide the root object, i.e. <code>Simulation</code>, from which to start the instantiation procedure.</p>
+<h3 id="mapping-annotations-on-the-schema-side">Mapping Annotations on the Schema side<a class="headerlink" href="#mapping-annotations-on-the-schema-side" title="Permanent link">&para;</a></h3>
+<p><strong>DISCLAIMER: the code and functionalities covered in this section are still under construction and only serve as an illustration of the underlying concepts. Stay tuned for updates.</strong></p>
+<p>So how do the annotations to the schema look like?
+Firstly, only attributes of <code>ArchiveSection</code>, i.e. <code>Quantity</code> (i.e. leaf nodes) or <code>SubSection</code> (i.e. branching nodes), have to be annotated.
+Adding annotations is as simple as extending a dictionary: <code>&lt;section_name&gt;.&lt;attribute_name&gt;.m_annotations[&lt;tag_name&gt;] = MappingAnnotationModel(...)</code>.</p>
+<p>The overall strategy is thus to annotate <code>path</code> mappings starting from <code>Simulation</code> and run over each <code>SubSection</code> up until reaching the corresponding <code>Quantity</code>.
+The most important part is for the target/NOMAD path to be fully traceable:
+any disconnections in a <code>path</code> will cut it out of the <code>archive</code>.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">nomad_simulations.schema_packages.general</span><span class="w"> </span><span class="kn">import</span> <span class="n">Simulation</span><span class="p">,</span> <span class="n">Program</span>
+<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a><span class="n">Simulation</span><span class="o">.</span><span class="n">m_def</span><span class="o">.</span><span class="n">m_annotations</span><span class="p">[</span><span class="s1">&#39;xml&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">MappingAnnotationModel</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="s1">&#39;modeling&#39;</span><span class="p">)</span>
+<a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a><span class="n">Simulation</span><span class="o">.</span><span class="n">program</span><span class="o">.</span><span class="n">m_annotations</span><span class="p">[</span><span class="s1">&#39;xml&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">MappingAnnotationModel</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="s1">&#39;.generator&#39;</span><span class="p">)</span>
+<a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a><span class="n">Program</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">m_annotations</span><span class="p">[</span><span class="s1">&#39;xml&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">MappingAnnotationModel</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="s1">&#39;.i&#39;</span><span class="p">)</span>
+</code></pre></div>
+<p>Note how you can trace a continuous path down to <code>simulation.program.name</code>.</p>
+<!-- The advantage of annotating all in one place with keys, is that multiple mappings, from e.g. `.xml`, `hdf5`, become comparable at a glance. -->
+
+<h2 id="from-text-to-hierarchies">From Text to Hierarchies<a class="headerlink" href="#from-text-to-hierarchies" title="Permanent link">&para;</a></h2>
+<p>When dealing with plain text, step 2 proceeds in two stages: reading in the file contents and making the <code>str</code> data more actionable in Python.
+To this end, we construct an intermediate tree format where we will map into the schema from.</p>
+<p>The tactic here is <em>weave</em> two classes, <code>TextParser</code> and <code>Quantity</code>, both from <code>text_parser.py</code>, in with each other.
+Always start with <code>TextParser</code> and use <code>Quantity.sub_parser</code> to go one level deeper.
+To obtain finally obtain the tree as a Python <code>dict</code>, apply <code>TextParser.to_dict()</code> to the root node.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="n">txt_reader</span> <span class="o">=</span> <span class="n">TextParser</span><span class="p">(</span>                <span class="c1"># root node</span>
+<a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a>    <span class="n">quantities</span> <span class="o">=</span> <span class="p">[</span>                      <span class="c1"># level 1</span>
+<a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a>        <span class="n">Quantity</span><span class="p">(</span><span class="o">...</span><span class="p">),</span>
+<a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a>        <span class="n">Quantity</span><span class="p">(</span><span class="o">...</span><span class="p">),</span>
+<a id="__codelineno-16-5" name="__codelineno-16-5" href="#__codelineno-16-5"></a>        <span class="n">Quantity</span><span class="p">(</span>
+<a id="__codelineno-16-6" name="__codelineno-16-6" href="#__codelineno-16-6"></a>            <span class="o">...</span><span class="p">,</span>
+<a id="__codelineno-16-7" name="__codelineno-16-7" href="#__codelineno-16-7"></a>            <span class="n">sub_parser</span> <span class="o">=</span> <span class="n">TextParser</span><span class="p">(</span>
+<a id="__codelineno-16-8" name="__codelineno-16-8" href="#__codelineno-16-8"></a>                <span class="n">quantities</span> <span class="o">=</span> <span class="p">[</span>          <span class="c1"># level 2</span>
+<a id="__codelineno-16-9" name="__codelineno-16-9" href="#__codelineno-16-9"></a>                    <span class="n">Quantity</span><span class="p">(</span><span class="o">...</span><span class="p">),</span>
+<a id="__codelineno-16-10" name="__codelineno-16-10" href="#__codelineno-16-10"></a>                <span class="p">]</span>
+<a id="__codelineno-16-11" name="__codelineno-16-11" href="#__codelineno-16-11"></a>            <span class="p">)</span>
+<a id="__codelineno-16-12" name="__codelineno-16-12" href="#__codelineno-16-12"></a>        <span class="p">),</span>
+<a id="__codelineno-16-13" name="__codelineno-16-13" href="#__codelineno-16-13"></a>    <span class="p">]</span>
+<a id="__codelineno-16-14" name="__codelineno-16-14" href="#__codelineno-16-14"></a><span class="p">)</span>
+</code></pre></div>
+<p>Note that the regex patterns should always contain <em>match groups</em>, i.e. <code>()</code>, else no text is extracted.
+This is especially important for blocks, where the typical regex pattern has the form <code>r'&lt;re_header&gt;(?[\s\S]+)&lt;re_footer&gt;'</code> to match everything between the block header and footer.</p>
+<details class="note">
+<summary>Dissecting Tables</summary>
+<p>The typical approach to processing text tables is to match, in order:</p>
+<ol>
+<li>the table and extract (at least) the body.</li>
+<li>a standard line.</li>
+<li>the relevant column. <!-- TODO explore tools for when column semantics is tied to its index --></li>
+</ol>
+<p>Ensure that you toggle the <code>Quantity.repeats: Union[bool, int]</code> option to obtain a list of matches.
+&lt;!-- TODO how to extract as a matrix immediately (no dict keys) -- &gt;</p>
+</details>
+<p>The main concern is how to leverage the additional freedom of a third format.
+Our foremost advice is to:</p>
+<ol>
+<li>follow the order in which the data normally appears.</li>
+<li>use as similar as possible node names as in the file. If none are present, fall back on the NOMAD schema names.</li>
+<li>systematically break down blocks of text via the weaving technique.</li>
+<li>use the same node names when multiple versions exist. Maximize the common nodes and overall keep the alternatives as close as possible together.</li>
+</ol>
+<!-- Handling contingent values is more so reserved for step 3, mapping. -->
+<!-- TODO add dynamic units example -->
+
+<details class="info">
+<summary>Semantic Patterns</summary>
+<p>Modern text parsers come equipped with several common patterns to expedite the construction of complex patterns.
+Examples include <code>re_float</code> covering decimals and scientific notation, separators like <code>re_blank_line</code> or <code>re_eol</code>, and <code>re_non_greedy</code> for matching whole chunks of text, as shown above.
+The <code>capture(pattern)</code> function applies the match groups.</p>
+</details>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+        
+          
+          <a href="../nomad_simulations/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Part 2 - NOMAD-Simulations">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                Part 2 - NOMAD-Simulations
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../schema_plugins/" class="md-footer__link md-footer__link--next" aria-label="Next: Part 4 - Schema Plugins">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                Part 4 - Schema Plugins
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.instant", "navigation.footer"], "search": "../assets/javascripts/workers/search.7a47a382.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": 0.1}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.e71a0d61.min.js"></script>
+      
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
+      
+        <script src="https://unpkg.com/cytoscape@3.19.1/dist/cytoscape.min.js"></script>
+      
+        <script src="../assets/custom.js"></script>
+      
+        <script src="../javascripts/katex.js"></script>
+      
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.7/katex.min.js"></script>
+      
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.7/contrib/auto-render.min.js"></script>
+      
+    
+  </body>
+</html>
